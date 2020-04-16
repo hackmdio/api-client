@@ -1,9 +1,21 @@
 import cheerio from 'cheerio'
 import * as fs from 'fs-extra'
+import {homedir} from 'os'
+import * as path from 'path'
 import nodeFetch from 'node-fetch'
 import tough = require('tough-cookie')
 import FileCookieStore from 'tough-cookie-filestore'
 import * as url from 'url'
+
+import { defaults } from './utils'
+
+const defaultCookiePath = path.join(homedir(), '.hackmd', 'cookies.json')
+
+const defaultConfig = {
+  cookiePath: defaultCookiePath,
+  serverUrl: 'https://hackmd.io',
+  enterprise: true
+}
 
 interface APIOptions {
   serverUrl: string
@@ -39,8 +51,8 @@ class API {
   private readonly enterprise: boolean
   private readonly _fetch: nodeFetchType
 
-  constructor(config: APIOptions) {
-    const {serverUrl, cookiePath, enterprise} = config
+  constructor(config: Partial<APIOptions> = {}) {
+    const {serverUrl, cookiePath, enterprise} = defaults(config, defaultConfig)
 
     fs.ensureFileSync(cookiePath)
 
