@@ -29,7 +29,7 @@
   version "0.0.0"
   resolved "https://registry.yarnpkg.com/@types/tough-cookie-filestore/-/tough-cookie-filestore-0.0.0.tgz#3d53077d7a688a3f2ee6b4f31a848d09eaec9aba"
 
-"@types/tough-cookie@^3.0.0":
+"@types/tough-cookie@^2.3.7":
   version "2.3.7"
   resolved "https://registry.yarnpkg.com/@types/tough-cookie/-/tough-cookie-2.3.7.tgz#979434b5900f9d710f5d4e15c466cadb8e9fdc47"
 

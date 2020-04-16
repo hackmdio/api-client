@@ -1,6 +1,6 @@
 {
   "name": "@hackmd/api",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "HackMD/CodiMD Node.js API Client",
   "main": "dist/index.js",
   "declaration": "./dist/index.d.ts",
