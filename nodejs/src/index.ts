@@ -140,7 +140,7 @@ class API {
     }
   }
 
-  async export(noteId: string, type: ExportType, output: string) {
+  private async exportRes(noteId: string, type: ExportType) {
     let res: Response
     switch (type) {
     case ExportType.PDF:
@@ -157,21 +157,19 @@ class API {
       res = await this.fetch(`${this.serverUrl}/${noteId}/download`)
     }
 
-    return this.downloadFile(res, output)
+    return res
   }
 
-  private async downloadFile(res: any, output: string) {
-    const fileStream = fs.createWriteStream(output)
+  async exportString(noteId: string, type: ExportType) {
+    const res = await this.exportRes(noteId, type)
 
-    await new Promise((resolve, reject) => {
-      res.body.pipe(fileStream)
-      res.body.on('error', (err: any) => {
-        reject(err)
-      })
-      fileStream.on('finish', function () {
-        resolve()
-      })
-    })
+    return res.text()
+  }
+
+  async exportStream (noteId: string, type: ExportType) {
+    const res = await this.exportRes(noteId, type)
+
+    return res.body
   }
 
   get fetch() {
