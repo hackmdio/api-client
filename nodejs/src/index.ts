@@ -98,8 +98,12 @@ class API {
   }
 
   async isLogin() {
-    const response = await this.fetch(`${this.serverUrl}/me`)
-    return response.status === 200
+    try {
+      const data = await this.getMe()
+      return data.status === 'ok'
+    } catch (err) {
+      return false
+    }
   }
 
   async getMe() {
