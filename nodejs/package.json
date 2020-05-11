@@ -6,6 +6,7 @@
   "declaration": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc -d",
+    "watch": "tsc -w",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
