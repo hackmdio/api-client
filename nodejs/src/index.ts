@@ -53,7 +53,7 @@ export type HistoryItem = {
  */
 class API {
   public readonly serverUrl: string
-  private readonly enterprise: boolean
+  public readonly enterprise: boolean
   private readonly _fetch: nodeFetchType
 
   constructor(config: Partial<APIOptions> = {}) {
@@ -179,6 +179,17 @@ class API {
     const res = await this.exportRes(noteId, type)
 
     return res.body
+  }
+
+  async getTeams () {
+    let data
+    try {
+      data = await this.getMe()
+    } catch (err) {
+      return []
+    }
+  
+    return data.teams || []
   }
 
   get fetch() {
