@@ -9,6 +9,11 @@ import * as url from 'url'
 
 import { defaults } from './utils'
 
+let version = ''
+try {
+  version = require('../package.json').version
+} catch (err) {}
+
 const defaultCookiePath = path.join(homedir(), '.hackmd', 'cookies.json')
 
 const defaultConfig = {
@@ -107,12 +112,12 @@ class API {
   }
 
   async getMe() {
-    const response = await this.fetch(`${this.serverUrl}/me`)
+    const response = await this.fetch(`${this.serverUrl}/me`, this.defaultFetchOptions)
     return response.json()
   }
 
   async getHistory(): Promise<{ history: HistoryItem[] }> {
-    const response = await this.fetch(`${this.serverUrl}/history`)
+    const response = await this.fetch(`${this.serverUrl}/history`, this.defaultFetchOptions)
     return response.json()
   }
 
@@ -131,9 +136,9 @@ class API {
       response = await this.fetch(`${this.serverUrl}/new`, {
         method: 'POST',
         body,
-        headers: {
+        headers:  await this.wrapHeaders({
           'Content-Type': contentType
-        }
+        })
       })
     }
 
@@ -148,17 +153,17 @@ class API {
     let res: Response
     switch (type) {
     case ExportType.PDF:
-      res = await this.fetch(`${this.serverUrl}/${noteId}/pdf`)
+      res = await this.fetch(`${this.serverUrl}/${noteId}/pdf`, this.defaultFetchOptions)
       break
     case ExportType.HTML:
-      res = await this.fetch(`${this.serverUrl}/s/${noteId}`)
+      res = await this.fetch(`${this.serverUrl}/s/${noteId}`, this.defaultFetchOptions)
       break
     case ExportType.SLIDE:
-      res = await this.fetch(`${this.serverUrl}/${noteId}/slide`)
+      res = await this.fetch(`${this.serverUrl}/${noteId}/slide`, this.defaultFetchOptions)
       break
     case ExportType.MD:
     default:
-      res = await this.fetch(`${this.serverUrl}/${noteId}/download`)
+      res = await this.fetch(`${this.serverUrl}/${noteId}/download`, this.defaultFetchOptions)
     }
 
     return res
@@ -184,15 +189,27 @@ class API {
     return url.parse(this.serverUrl).host
   }
 
+  get defaultFetchOptions () {
+    return {
+      headers: {
+        'User-Agent': `HackMD API Client ${version} Node.js`
+      }
+    }
+  }
+
   private async wrapHeaders(headers: any) {
     if (this.enterprise) {
       const csrf = await this.loadCSRFToken()
       return {
         ...headers,
+        'User-Agent': `HackMD API Client ${version} Node.js`,
         'X-XSRF-Token': csrf
       }
     } else {
-      return headers
+      return {
+        ...headers,
+        'User-Agent': `HackMD API Client ${version} Node.js`
+      }
     }
   }
 
