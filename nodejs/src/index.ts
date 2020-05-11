@@ -48,6 +48,10 @@ export type HistoryItem = {
   tags: string[]
 }
 
+export type NewNoteOption = {
+  team: string
+}
+
 /**
  * codimd API Client
  */
@@ -121,10 +125,17 @@ class API {
     return response.json()
   }
 
-  async newNote(body: string) {
+  async newNote(body: string, options?: NewNoteOption) {
     let response
     if (this.enterprise) {
-      response = await this.fetch(`${this.serverUrl}/new`, {
+      let newNoteUrl
+      if (options?.team) {
+        newNoteUrl =  `${this.serverUrl}/team/${options.team}/new`
+      } else {
+        newNoteUrl = `${this.serverUrl}/new`
+      }
+
+      response = await this.fetch(newNoteUrl, {
         method: 'POST',
         body: encodeFormComponent({content: body}),
         headers: await this.wrapHeaders({
