@@ -74,26 +74,23 @@ class API {
   }
 
   async login(email: string, password: string) {
-    const response = await this.fetch(`${this.serverUrl}/login`, {
+    await this.fetch(`${this.serverUrl}/login`, {
       method: 'post',
       body: encodeFormComponent({email, password}),
       headers: await this.wrapHeaders({
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
       })
     })
-
-    return response.status === 200
   }
 
   async loginLdap(username: string, password: string) {
-    const response = await this.fetch(`${this.serverUrl}/auth/ldap`, {
+    await this.fetch(`${this.serverUrl}/auth/ldap`, {
       method: 'post',
       body: encodeFormComponent({username, password}),
       headers: await this.wrapHeaders({
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
       })
     })
-    return response.status === 200
   }
 
   async logout() {
@@ -199,7 +196,7 @@ class API {
     } catch (err) {
       return []
     }
-  
+
     return data.teams || []
   }
 
