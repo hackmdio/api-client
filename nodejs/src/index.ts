@@ -69,12 +69,12 @@ class API {
     const fetch: nodeFetchType = require('fetch-cookie')(nodeFetch, new tough.CookieJar(jar as any))
 
     this._fetch = fetch
-    this.serverUrl = serverUrl
+    this.serverUrl = url.parse(serverUrl).href
     this.enterprise = enterprise
   }
 
   async login(email: string, password: string) {
-    await this.fetch(`${this.serverUrl}/login`, {
+    await this.fetch(url.resolve(this.serverUrl, 'login'), {
       method: 'post',
       body: encodeFormComponent({email, password}),
       headers: await this.wrapHeaders({
@@ -84,7 +84,7 @@ class API {
   }
 
   async loginLdap(username: string, password: string) {
-    await this.fetch(`${this.serverUrl}/auth/ldap`, {
+    await this.fetch(url.resolve(this.serverUrl, 'auth/ldap'), {
       method: 'post',
       body: encodeFormComponent({username, password}),
       headers: await this.wrapHeaders({
@@ -94,7 +94,7 @@ class API {
   }
 
   async logout() {
-    const response = await this.fetch(`${this.serverUrl}/logout`, {
+    const response = await this.fetch(url.resolve(this.serverUrl, 'logout'), {
       method: this.enterprise ? 'POST' : 'GET',
       headers: await this.wrapHeaders({
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
@@ -113,12 +113,12 @@ class API {
   }
 
   async getMe() {
-    const response = await this.fetch(`${this.serverUrl}/me`, this.defaultFetchOptions)
+    const response = await this.fetch(url.resolve(this.serverUrl, 'me'), this.defaultFetchOptions)
     return response.json()
   }
 
   async getHistory(): Promise<{ history: HistoryItem[] }> {
-    const response = await this.fetch(`${this.serverUrl}/history`, this.defaultFetchOptions)
+    const response = await this.fetch(url.resolve(this.serverUrl, 'history'), this.defaultFetchOptions)
     return response.json()
   }
 
@@ -127,9 +127,9 @@ class API {
     if (this.enterprise) {
       let newNoteUrl
       if (options?.team) {
-        newNoteUrl =  `${this.serverUrl}/team/${options.team}/new`
+        newNoteUrl =  url.resolve(this.serverUrl, `team/${options.team}/new`)
       } else {
-        newNoteUrl = `${this.serverUrl}/new`
+        newNoteUrl = url.resolve(this.serverUrl, 'new')
       }
 
       response = await this.fetch(newNoteUrl, {
@@ -141,7 +141,7 @@ class API {
       })
     } else {
       const contentType = 'text/markdown;charset=UTF-8'
-      response = await this.fetch(`${this.serverUrl}/new`, {
+      response = await this.fetch(url.resolve(this.serverUrl, 'new'), {
         method: 'POST',
         body,
         headers:  await this.wrapHeaders({
@@ -161,17 +161,17 @@ class API {
     let res: Response
     switch (type) {
     case ExportType.PDF:
-      res = await this.fetch(`${this.serverUrl}/${noteId}/pdf`, this.defaultFetchOptions)
+      res = await this.fetch(url.resolve(this.serverUrl, `${noteId}/pdf`), this.defaultFetchOptions)
       break
     case ExportType.HTML:
-      res = await this.fetch(`${this.serverUrl}/s/${noteId}`, this.defaultFetchOptions)
+      res = await this.fetch(url.resolve(this.serverUrl, `s/${noteId}`), this.defaultFetchOptions)
       break
     case ExportType.SLIDE:
-      res = await this.fetch(`${this.serverUrl}/${noteId}/slide`, this.defaultFetchOptions)
+      res = await this.fetch(url.resolve(this.serverUrl, `${noteId}/slide`), this.defaultFetchOptions)
       break
     case ExportType.MD:
     default:
-      res = await this.fetch(`${this.serverUrl}/${noteId}/download`, this.defaultFetchOptions)
+      res = await this.fetch(url.resolve(this.serverUrl, `${noteId}/download`), this.defaultFetchOptions)
     }
 
     return res
@@ -233,7 +233,7 @@ class API {
   }
 
   private async loadCSRFToken() {
-    const html = await this.fetch(`${this.serverUrl}`).then(r => r.text())
+    const html = await this.fetch(this.serverUrl).then(r => r.text())
     const $ = cheerio.load(html)
 
     return $('meta[name="csrf-token"]').attr('content') || ''
