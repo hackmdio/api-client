@@ -1,6 +1,6 @@
 import cheerio from 'cheerio'
 import * as fs from 'fs-extra'
-import {homedir} from 'os'
+import { homedir } from 'os'
 import * as path from 'path'
 import nodeFetch from 'node-fetch'
 import tough = require('tough-cookie')
@@ -12,7 +12,7 @@ import { defaults } from './utils'
 let version = ''
 try {
   version = require('../package.json').version
-} catch (err) {}
+} catch (err) { }
 
 const defaultCookiePath = path.join(homedir(), '.hackmd', 'cookies.json')
 
@@ -48,6 +48,15 @@ export type HistoryItem = {
   tags: string[]
 }
 
+export type myNotesItem = {
+  id: string
+  text: string
+  tags: string[]
+  createAt: number | string
+  lastchangeAt: number | string
+  shortId: string
+}
+
 export type NewNoteOption = {
   team: string
 }
@@ -61,7 +70,7 @@ class API {
   private readonly _fetch: nodeFetchType
 
   constructor(config: Partial<APIOptions> = {}) {
-    const {serverUrl, cookiePath, enterprise} = defaults(config, defaultConfig)
+    const { serverUrl, cookiePath, enterprise } = defaults(config, defaultConfig)
 
     fs.ensureFileSync(cookiePath)
 
@@ -76,7 +85,7 @@ class API {
   async login(email: string, password: string) {
     await this.fetch(url.resolve(this.serverUrl, 'login'), {
       method: 'post',
-      body: encodeFormComponent({email, password}),
+      body: encodeFormComponent({ email, password }),
       headers: await this.wrapHeaders({
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
       })
@@ -86,7 +95,7 @@ class API {
   async loginLdap(username: string, password: string) {
     await this.fetch(url.resolve(this.serverUrl, 'auth/ldap'), {
       method: 'post',
-      body: encodeFormComponent({username, password}),
+      body: encodeFormComponent({ username, password }),
       headers: await this.wrapHeaders({
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
       })
@@ -122,19 +131,34 @@ class API {
     return response.json()
   }
 
+  async getMyNotes(): Promise<{ history: HistoryItem[] }> {
+    let response
+    if (this.enterprise) {
+      response = await this.fetch(url.resolve(this.serverUrl, '/_api/overview'), this.defaultFetchOptions)
+    } else {
+      response = await this.fetch(url.resolve(this.serverUrl, 'history'), this.defaultFetchOptions)
+    }
+
+    if (response.status === 200) {
+      return response.json()
+    } else {
+      throw new Error('List My notes failed')
+    }
+  }
+
   async newNote(body: string, options?: NewNoteOption) {
     let response
     if (this.enterprise) {
       let newNoteUrl
       if (options?.team) {
-        newNoteUrl =  url.resolve(this.serverUrl, `team/${options.team}/new`)
+        newNoteUrl = url.resolve(this.serverUrl, `team/${options.team}/new`)
       } else {
         newNoteUrl = url.resolve(this.serverUrl, 'new')
       }
 
       response = await this.fetch(newNoteUrl, {
         method: 'POST',
-        body: encodeFormComponent({content: body}),
+        body: encodeFormComponent({ content: body }),
         headers: await this.wrapHeaders({
           'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
         })
@@ -144,7 +168,7 @@ class API {
       response = await this.fetch(url.resolve(this.serverUrl, 'new'), {
         method: 'POST',
         body,
-        headers:  await this.wrapHeaders({
+        headers: await this.wrapHeaders({
           'Content-Type': contentType
         })
       })
@@ -160,18 +184,18 @@ class API {
   private async exportRes(noteId: string, type: ExportType) {
     let res: Response
     switch (type) {
-    case ExportType.PDF:
-      res = await this.fetch(url.resolve(this.serverUrl, `${noteId}/pdf`), this.defaultFetchOptions)
-      break
-    case ExportType.HTML:
-      res = await this.fetch(url.resolve(this.serverUrl, `s/${noteId}`), this.defaultFetchOptions)
-      break
-    case ExportType.SLIDE:
-      res = await this.fetch(url.resolve(this.serverUrl, `${noteId}/slide`), this.defaultFetchOptions)
-      break
-    case ExportType.MD:
-    default:
-      res = await this.fetch(url.resolve(this.serverUrl, `${noteId}/download`), this.defaultFetchOptions)
+      case ExportType.PDF:
+        res = await this.fetch(url.resolve(this.serverUrl, `${noteId}/pdf`), this.defaultFetchOptions)
+        break
+      case ExportType.HTML:
+        res = await this.fetch(url.resolve(this.serverUrl, `s/${noteId}`), this.defaultFetchOptions)
+        break
+      case ExportType.SLIDE:
+        res = await this.fetch(url.resolve(this.serverUrl, `${noteId}/slide`), this.defaultFetchOptions)
+        break
+      case ExportType.MD:
+      default:
+        res = await this.fetch(url.resolve(this.serverUrl, `${noteId}/download`), this.defaultFetchOptions)
     }
 
     return res
@@ -183,13 +207,13 @@ class API {
     return res.text()
   }
 
-  async exportStream (noteId: string, type: ExportType) {
+  async exportStream(noteId: string, type: ExportType) {
     const res = await this.exportRes(noteId, type)
 
     return res.body
   }
 
-  async getTeams () {
+  async getTeams() {
     let data
     try {
       data = await this.getMe()
@@ -208,7 +232,7 @@ class API {
     return url.parse(this.serverUrl).host
   }
 
-  get defaultFetchOptions () {
+  get defaultFetchOptions() {
     return {
       headers: {
         'User-Agent': `HackMD API Client ${version} Node.js`
