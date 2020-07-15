@@ -1,0 +1,42 @@
+{
+  "name": "@hackmd/api",
+  "version": "1.1.1",
+  "description": "HackMD/CodiMD Node.js API Client",
+  "main": "dist/index.js",
+  "declaration": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -d",
+    "watch": "tsc -w",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "HackMD",
+    "API Client"
+  ],
+  "files": [
+    "dist/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/cheerio": "^0.22.17",
+    "@types/fs-extra": "^8.1.0",
+    "@types/node": "^13.11.1",
+    "@types/node-fetch": "^2.5.6",
+    "@types/tough-cookie": "^2.3.7",
+    "@types/tough-cookie-filestore": "^0.0.0",
+    "ts-node": "^8.8.2",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "fetch-cookie": "^0.8.0",
+    "fs-extra": "^9.0.0",
+    "node-fetch": "^2.6.0",
+    "tough-cookie": "^3.0.0",
+    "tough-cookie-filestore": "^0.0.1",
+    "tslib": "^1.11.1"
+  }
+}

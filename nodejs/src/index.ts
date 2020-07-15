@@ -131,12 +131,12 @@ class API {
     return response.json()
   }
 
-  async getMyNotes(): Promise<{ history: HistoryItem[] }> {
+  async getMyNotes(): Promise<{ myNotes: myNotesItem[] }> {
     let response
     if (this.enterprise) {
       response = await this.fetch(url.resolve(this.serverUrl, '/_api/overview'), this.defaultFetchOptions)
     } else {
-      response = await this.fetch(url.resolve(this.serverUrl, 'history'), this.defaultFetchOptions)
+      response = await this.fetch(url.resolve(this.serverUrl, 'api/notes/myNotes'), this.defaultFetchOptions)
     }
 
     if (response.status === 200) {
