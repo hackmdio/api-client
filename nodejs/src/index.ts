@@ -134,7 +134,7 @@ class API {
   async getMyNotes(): Promise<{ myNotes: myNotesItem[] }> {
     let response
     if (this.enterprise) {
-      response = await this.fetch(url.resolve(this.serverUrl, '/_api/overview'), this.defaultFetchOptions)
+      response = await this.fetch(url.resolve(this.serverUrl, 'api/overview'), this.defaultFetchOptions)
     } else {
       response = await this.fetch(url.resolve(this.serverUrl, 'api/notes/myNotes'), this.defaultFetchOptions)
     }
