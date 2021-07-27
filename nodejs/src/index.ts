@@ -156,6 +156,25 @@ class API {
       throw new Error('Create note failed')
     }
   }
+  
+  async listNotes () {
+    // https://hackmd.io/api/overview?v=1627369059523
+    if (this.enterprise) {
+      const response = await this.fetch(url.resolve(this.serverUrl, 'api/overview'), this.defaultFetchOptions)
+
+      return response.json()
+    } else {
+      throw new Error('Not support')
+    }
+  }
+
+  async listTeamNotes (teamPath: string) {
+    if (this.enterprise) {
+      return this.fetch(url.resolve(this.serverUrl, `api/overview/team/${teamPath}`), this.defaultFetchOptions).then(res => res.json())
+    } else {
+      throw new Error('Not support')
+    }
+  }
 
   private async exportRes(noteId: string, type: ExportType) {
     let res: Response
