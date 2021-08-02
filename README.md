@@ -47,12 +47,16 @@ api.login('your account', 'your password').then(() => {
 
 `notice: There are not all the functions. I just write the functions which I am interested in`
 
-- constructor(config: [APIOptions](#APIOptions))
-- login(email: string, password: string): Promise<void> - method to login
-- logout(): Promise<void> - method to logout
-- newNote(body: string, options?: [NewNoteOption](#NewNoteOption)): Promise<void> - method to add a new note
+- `constructor(config?: APIOptions)`
+  - config: optional, [APIOptions](#APIOptions)
+- `login(email: string, password: string): Promise<void>` - method to login
+  - email: string
+  - password: string
+- `logout(): Promise<void>` - method to logout
+- `newNote(body: string, options?: NewNoteOption): Promise<void>` - method to add a new note
   - body: string - the content you want to add in the new note, for example: `# api test`
-- exportString(noteId: string, type: ExportType): Promise<string> = method to export a note
+  - options: optional, [NewNoteOption](#NewNoteOption)
+- `exportString(noteId: string, type: ExportType): Promise<string>` = method to export a note
   - noteId: string - the id in the url. If your url of the example note is `https://hackmd.io/XXXOOO`, your noteId is `XXXOOO`
   - type: [ExportType](#ExportType) 
 
