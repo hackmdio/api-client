@@ -56,7 +56,7 @@ api.login('your account', 'your password').then(() => {
 - `newNote(body: string, options?: NewNoteOption): Promise<void>` - method to add a new note
   - body: string - the content you want to add in the new note, for example: `# api test`
   - options: optional, [NewNoteOption](#NewNoteOption)
-- `exportString(noteId: string, type: ExportType): Promise<string>` = method to export a note
+- `exportString(noteId: string, type: ExportType): Promise<string>` - method to export a note
   - noteId: string - the id in the url. If your url of the example note is `https://hackmd.io/XXXOOO`, your noteId is `XXXOOO`
   - type: [ExportType](#ExportType) 
 
