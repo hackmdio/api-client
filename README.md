@@ -37,7 +37,7 @@ const api = new API()
 api.login('your account', 'your password').then(() => {
   api.exportString('your note id', ExportType.MD).then((res) => {
       api.newNote(res)
-    })
+  })
 })
 ```
 
