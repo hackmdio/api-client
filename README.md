@@ -35,8 +35,8 @@ const { default: API, ExportType } = require('@hackmd/api')
 const api = new API()
 
 api.login('your account', 'your password').then(() => {
-  api.exportString(process.env.EXAMPLE_NOTE, ExportType.MD).then((res) => {
-      api.newNote(ejs.render(res))
+  api.exportString('your note id', ExportType.MD).then((res) => {
+      api.newNote(res)
     })
 })
 ```
