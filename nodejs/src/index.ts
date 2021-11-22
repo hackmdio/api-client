@@ -124,19 +124,18 @@ class API {
   }
 
   async newNote(body: string, options?: NewNoteOption) {
+    let newNoteUrl: url.URL
+    if (this.enterprise && options?.team) {
+      newNoteUrl =  new url.URL(url.resolve(this.serverUrl, `team/${options.team}/new`))
+    } else {
+      newNoteUrl = new url.URL(url.resolve(this.serverUrl, 'new'))
+    }
+    if (options?.title) {
+      newNoteUrl.searchParams.append("title", options?.title);
+    }
+
     let response
     if (this.enterprise) {
-      let newNoteUrl: url.URL
-      if (options?.team) {
-        newNoteUrl =  new url.URL(url.resolve(this.serverUrl, `team/${options.team}/new`))
-      } else {
-        newNoteUrl = new url.URL(url.resolve(this.serverUrl, 'new'))
-      }
-
-      if (options?.title) {
-        newNoteUrl.searchParams.append("title", options?.title);
-      }
-      
       response = await this.fetch(newNoteUrl.toString(), {
         method: 'POST',
         body: encodeFormComponent({content: body}),
@@ -146,7 +145,7 @@ class API {
       })
     } else {
       const contentType = 'text/markdown;charset=UTF-8'
-      response = await this.fetch(url.resolve(this.serverUrl, 'new'), {
+      response = await this.fetch(newNoteUrl.toString(), {
         method: 'POST',
         body,
         headers:  await this.wrapHeaders({
