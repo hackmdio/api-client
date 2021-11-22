@@ -50,6 +50,7 @@ export type HistoryItem = {
 
 export type NewNoteOption = {
   team: string
+  title: string
 }
 
 /**
@@ -125,14 +126,18 @@ class API {
   async newNote(body: string, options?: NewNoteOption) {
     let response
     if (this.enterprise) {
-      let newNoteUrl
+      let newNoteUrl: url.URL
       if (options?.team) {
-        newNoteUrl =  url.resolve(this.serverUrl, `team/${options.team}/new`)
+        newNoteUrl =  new url.URL(url.resolve(this.serverUrl, `team/${options.team}/new`))
       } else {
-        newNoteUrl = url.resolve(this.serverUrl, 'new')
+        newNoteUrl = new url.URL(url.resolve(this.serverUrl, 'new'))
       }
 
-      response = await this.fetch(newNoteUrl, {
+      if (options?.title) {
+        newNoteUrl.searchParams.append("title", options?.title);
+      }
+      
+      response = await this.fetch(newNoteUrl.toString(), {
         method: 'POST',
         body: encodeFormComponent({content: body}),
         headers: await this.wrapHeaders({
