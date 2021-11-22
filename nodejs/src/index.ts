@@ -49,7 +49,7 @@ export type HistoryItem = {
 }
 
 export type NewNoteOption = {
-  team: string
+  team?: string
   title: string
 }
 
