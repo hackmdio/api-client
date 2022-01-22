@@ -34,7 +34,7 @@
     "cheerio": "^1.0.0-rc.3",
     "fetch-cookie": "^0.8.0",
     "fs-extra": "^9.0.0",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^3.1.1",
     "tough-cookie": "^3.0.0",
     "tough-cookie-filestore": "^0.0.1",
     "tslib": "^1.11.1"
