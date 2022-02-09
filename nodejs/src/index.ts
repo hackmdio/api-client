@@ -1,25 +1,21 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios'
-import { User } from './type'
+import { User, Note, Team, CreateNoteOptions, NotePermissionRole, CommentPermissionType } from './type'
 
 export class API {
   public axios: AxiosInstance
   constructor(accessToken: string) {
     this.axios = axios.create({
-      baseURL: "http://localhost:3000/v1/api",
+      baseURL: "http://localhost:3000/v1",
       headers:{
-        "Content-Type": "application.json",
+        "Content-Type": "application/json",
       }
     })
+
     this.axios.interceptors.request.use(
       (config: AxiosRequestConfig) =>{
-        if (!config.headers) {
-          config.headers = {};
-        }
-
         if (accessToken) {
-          config.headers.Authorization = `Bearer ${accessToken}`;
+          config.headers!.Authorization = `Bearer ${accessToken}`;
         }
-
         return config
       },
       (err: AxiosError) => {
@@ -29,13 +25,76 @@ export class API {
   }
 
   getMe = async () => {
-    const { data } = await this.axios.get<User>("/me")
+    const { data } = await this.axios.get<User>("me")
     return data
   }
-}
 
-const api = new API("60WUTLO5DIHIOHCIY9TO0QEDVATU55XBTE7JJJBX9UTG49M7Y1")
-api.getMe()
+  getHistory = async () => {
+    const { data } = await this.axios.get<Note[]>("history")
+    return data
+  }
+
+  getNoteList = async () => {
+    const { data } = await this.axios.get<Note[]>("notes")
+    return data
+  }
+
+  getNote = async (noteId: string) => {
+    try {
+      const { data } = await this.axios.get<Note>(`notes/${noteId}`)
+      return data
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  createNote = async (options: CreateNoteOptions) => {
+    const { data } = await this.axios.post<Note>("notes", options)
+    return data
+  }
+
+  updateNoteContent =async (noteId: string, content?: string) => {
+    const { data } = await this.axios.patch<string>(`notes/${noteId}`, { content })
+    return data
+  }
+
+  deleteNote = async (noteId: string) => {
+    try {
+      const { data } = await this.axios.delete<void>(`notes/${noteId}`)
+      return data
+    } catch(e) {
+    }
+  }
+
+  getTeams = async () => {
+    const { data } = await this.axios.get<Team[]>("teams")
+    return data
+  }
+
+  getTeamNotes = async (teamPath: string) => {
+    const {data} = await this.axios.get<Note[]>(`teams/${teamPath}/notes`)
+    return data
+  }
+
+  createTeamNote = async (teamPath: string, options: CreateNoteOptions) => {
+    const { data } = await this.axios.post<Note>(`teams/${teamPath}/notes`, options)
+    return data
+  }
+  
+  updateTeamNoteContent =async (teamPath: string, noteId: string, content?: string) => {
+    const { data } = await this.axios.patch<string>(`notes/${noteId}`, { content })
+    return data
+  }
+
+  deleteTeamNote = async (teamPath: string, noteId: string) => {
+    try {
+      const { data } = await this.axios.delete<void>(`teams/${teamPath}/notes/${noteId}`)
+      console.log(data)
+      return data
+    } catch(e) {
+    }
+  }
+}
 
 
 

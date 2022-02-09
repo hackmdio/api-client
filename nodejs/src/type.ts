@@ -10,6 +10,23 @@ export enum NotePublishType {
   BOOK = 'book'
 }
 
+export enum CommentPermissionType {
+  DISABLED = 'disabled',
+  FORBIDDEN = 'forbidden',
+  OWNERS = 'owners',
+  SIGNED_IN_USERS = 'signed_in_users',
+  EVERYONE = 'everyone'
+}
+
+export type CreateNoteOptions = {
+  title?: string
+  content?: string
+  readPermission?: NotePermissionRole,
+  writePermission?: NotePermissionRole,
+  commentPermission?: CommentPermissionType
+}
+  
+
 export interface Team {
   id: string
   ownerId: string
