@@ -2,10 +2,11 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios'
 import { User, Note, Team, CreateNoteOptions, NotePermissionRole, CommentPermissionType } from './type'
 
 export class API {
-  public axios: AxiosInstance
-  constructor(accessToken: string) {
+  private axios: AxiosInstance
+
+  constructor(public hackmdAPIEndpointURL: string, readonly accessToken: string) {
     this.axios = axios.create({
-      baseURL: "http://localhost:3000/v1",
+      baseURL: this.hackmdAPIEndpointURL,
       headers:{
         "Content-Type": "application/json",
       }
@@ -14,11 +15,12 @@ export class API {
     this.axios.interceptors.request.use(
       (config: AxiosRequestConfig) =>{
         if (accessToken) {
-          config.headers!.Authorization = `Bearer ${accessToken}`;
+          config.headers!.Authorization = `Bearer ${this.accessToken}`;
         }
         return config
       },
       (err: AxiosError) => {
+        console.log('request error')
         return Promise.reject(err)
       }
     )
@@ -50,6 +52,7 @@ export class API {
 
   createNote = async (options: CreateNoteOptions) => {
     const { data } = await this.axios.post<Note>("notes", options)
+    console.log(data)
     return data
   }
 
@@ -82,7 +85,7 @@ export class API {
   }
   
   updateTeamNoteContent =async (teamPath: string, noteId: string, content?: string) => {
-    const { data } = await this.axios.patch<string>(`notes/${noteId}`, { content })
+    const { data } = await this.axios.patch<string>(`teams/${teamPath}/notes/${noteId}`, { content })
     return data
   }
 
@@ -95,7 +98,4 @@ export class API {
     }
   }
 }
-
-
-
 
