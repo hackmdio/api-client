@@ -1,12 +1,17 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios'
-import { User, Note, Team, CreateNoteOptions, NotePermissionRole, CommentPermissionType } from './type'
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosError, AxiosResponse } from 'axios'
+import { User, Note, Team, CreateNoteOptions } from './type'
+import * as HackMDErrors from './error'
 
 export class API {
   private axios: AxiosInstance
 
-  constructor(public hackmdAPIEndpointURL: string, readonly accessToken: string) {
+  constructor(public hackmdAPIEndpointURL:string, readonly accessToken: string) {
+    if (!accessToken) {
+      throw new HackMDErrors.MissingRequiredArgument('Missing access token when creating HackMD client')
+    }
+    
     this.axios = axios.create({
-      baseURL: this.hackmdAPIEndpointURL,
+      baseURL: hackmdAPIEndpointURL,
       headers:{
         "Content-Type": "application/json",
       }
@@ -14,14 +19,36 @@ export class API {
 
     this.axios.interceptors.request.use(
       (config: AxiosRequestConfig) =>{
-        if (accessToken) {
-          config.headers!.Authorization = `Bearer ${this.accessToken}`;
-        }
+        config.headers!.Authorization = `Bearer ${accessToken}`;
         return config
       },
       (err: AxiosError) => {
-        console.log('request error')
         return Promise.reject(err)
+      }
+    )
+
+    this.axios.interceptors.response.use(
+      (response: AxiosResponse) => {
+        return response
+      },
+      async (err: AxiosError) => {
+        if (!err.response) {
+          return Promise.reject(err);
+        }
+
+        if (err.response.status >= 500) {
+          throw new HackMDErrors.HttpResponseError(
+            `HackMD internal error (${err.response.status} ${err.response.statusText})`,
+            err.response.status,
+            err.response.statusText,
+          )
+        } else {
+          throw new HackMDErrors.HttpResponseError(
+            `Received an error response (${err.response.status} ${err.response.statusText}) from HackMD`,
+            err.response.status,
+            err.response.statusText,
+          )
+        }
       }
     )
   }
@@ -42,17 +69,12 @@ export class API {
   }
 
   getNote = async (noteId: string) => {
-    try {
-      const { data } = await this.axios.get<Note>(`notes/${noteId}`)
-      return data
-    } catch (e) {
-      console.log(e)
-    }
+    const { data } = await this.axios.get<Note>(`notes/${noteId}`)
+    return data
   }
 
   createNote = async (options: CreateNoteOptions) => {
     const { data } = await this.axios.post<Note>("notes", options)
-    console.log(data)
     return data
   }
 
@@ -62,11 +84,8 @@ export class API {
   }
 
   deleteNote = async (noteId: string) => {
-    try {
-      const { data } = await this.axios.delete<void>(`notes/${noteId}`)
-      return data
-    } catch(e) {
-    }
+    const { data } = await this.axios.delete<void>(`notes/${noteId}`)
+    return data
   }
 
   getTeams = async () => {
@@ -90,12 +109,11 @@ export class API {
   }
 
   deleteTeamNote = async (teamPath: string, noteId: string) => {
-    try {
-      const { data } = await this.axios.delete<void>(`teams/${teamPath}/notes/${noteId}`)
-      console.log(data)
-      return data
-    } catch(e) {
-    }
+    const { data } = await this.axios.delete<void>(`teams/${teamPath}/notes/${noteId}`)
+    return data
   }
 }
 
+process.on('unhandledRejection', error => {
+  console.log('unhandledRejection', error)
+})
