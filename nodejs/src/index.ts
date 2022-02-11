@@ -37,7 +37,7 @@ export class API {
         }
 
         if (err.response.status >= 500) {
-          throw new HackMDErrors.HttpResponseError(
+          throw new HackMDErrors.InternalServerError(
             `HackMD internal error (${err.response.status} ${err.response.statusText})`,
             err.response.status,
             err.response.statusText,
