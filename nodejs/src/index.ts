@@ -113,7 +113,3 @@ export class API {
     return data
   }
 }
-
-process.on('unhandledRejection', error => {
-  console.log('unhandledRejection', error)
-})
