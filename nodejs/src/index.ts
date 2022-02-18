@@ -5,7 +5,7 @@ import * as HackMDErrors from './error'
 export class API {
   private axios: AxiosInstance
 
-  constructor(public hackmdAPIEndpointURL:string, readonly accessToken: string) {
+  constructor(readonly accessToken: string, public hackmdAPIEndpointURL: string = "https://api.hackmd.io/v1") {
     if (!accessToken) {
       throw new HackMDErrors.MissingRequiredArgument('Missing access token when creating HackMD client')
     }
