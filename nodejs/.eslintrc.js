@@ -11,7 +11,8 @@ module.exports = {
         "semi": ["warn", "never"],
         "@typescript-eslint/no-non-null-assertion": "off",
         "keyword-spacing": ["warn", {"before": true, "after": true}],
-        "space-infix-ops": "warn"
+        "space-infix-ops": "warn",
+        "space-before-function-paren": "warn"
     },
     "parserOptions": {
       "project": [

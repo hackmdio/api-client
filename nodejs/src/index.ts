@@ -5,7 +5,7 @@ import * as HackMDErrors from './error'
 export class API {
   private axios: AxiosInstance
 
-  constructor(readonly accessToken: string, public hackmdAPIEndpointURL: string = "https://api.hackmd.io/v1") {
+  constructor (readonly accessToken: string, public hackmdAPIEndpointURL: string = "https://api.hackmd.io/v1") {
     if (!accessToken) {
       throw new HackMDErrors.MissingRequiredArgument('Missing access token when creating HackMD client')
     }
@@ -53,62 +53,62 @@ export class API {
     )
   }
 
-  getMe = async () => {
+  async getMe () {
     const { data } = await this.axios.get<User>("me")
     return data
   }
 
-  getHistory = async () => {
+  async getHistory () {
     const { data } = await this.axios.get<Note[]>("history")
     return data
   }
 
-  getNoteList = async () => {
+  async getNoteList () {
     const { data } = await this.axios.get<Note[]>("notes")
     return data
   }
 
-  getNote = async (noteId: string) => {
+  async getNote (noteId: string) {
     const { data } = await this.axios.get<Note>(`notes/${noteId}`)
     return data
   }
 
-  createNote = async (options: CreateNoteOptions) => {
+  async createNote (options: CreateNoteOptions) {
     const { data } = await this.axios.post<Note>("notes", options)
     return data
   }
 
-  updateNoteContent = async (noteId: string, content?: string) => {
+  async updateNoteContent (noteId: string, content?: string) {
     const { data } = await this.axios.patch<string>(`notes/${noteId}`, { content })
     return data
   }
 
-  deleteNote = async (noteId: string) => {
+  async deleteNote (noteId: string) {
     const { data } = await this.axios.delete<void>(`notes/${noteId}`)
     return data
   }
 
-  getTeams = async () => {
+  async getTeams () {
     const { data } = await this.axios.get<Team[]>("teams")
     return data
   }
 
-  getTeamNotes = async (teamPath: string) => {
+  async getTeamNotes (teamPath: string) {
     const {data} = await this.axios.get<Note[]>(`teams/${teamPath}/notes`)
     return data
   }
 
-  createTeamNote = async (teamPath: string, options: CreateNoteOptions) => {
+  async createTeamNote (teamPath: string, options: CreateNoteOptions) {
     const { data } = await this.axios.post<Note>(`teams/${teamPath}/notes`, options)
     return data
   }
 
-  updateTeamNoteContent = async (teamPath: string, noteId: string, content?: string) => {
+  async updateTeamNoteContent (teamPath: string, noteId: string, content?: string) {
     const { data } = await this.axios.patch<string>(`teams/${teamPath}/notes/${noteId}`, { content })
     return data
   }
 
-  deleteTeamNote = async (teamPath: string, noteId: string) => {
+  async deleteTeamNote (teamPath: string, noteId: string) {
     const { data } = await this.axios.delete<void>(`teams/${teamPath}/notes/${noteId}`)
     return data
   }

@@ -1,5 +1,5 @@
 class HackMDError extends Error {
-  constructor(message: string) {
+  constructor (message: string) {
     super(message)
     Object.setPrototypeOf(this, new.target.prototype)
   }
@@ -7,7 +7,7 @@ class HackMDError extends Error {
 
 
 class HttpResponseError extends HackMDError {
-  public constructor(
+  public constructor (
     message: string,
     readonly code: number,
     readonly statusText: string,
