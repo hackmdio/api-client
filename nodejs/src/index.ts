@@ -9,7 +9,7 @@ export class API {
     if (!accessToken) {
       throw new HackMDErrors.MissingRequiredArgument('Missing access token when creating HackMD client')
     }
-    
+
     this.axios = axios.create({
       baseURL: hackmdAPIEndpointURL,
       headers:{
@@ -19,7 +19,7 @@ export class API {
 
     this.axios.interceptors.request.use(
       (config: AxiosRequestConfig) =>{
-        config.headers!.Authorization = `Bearer ${accessToken}`;
+        config.headers!.Authorization = `Bearer ${accessToken}`
         return config
       },
       (err: AxiosError) => {
@@ -33,7 +33,7 @@ export class API {
       },
       async (err: AxiosError) => {
         if (!err.response) {
-          return Promise.reject(err);
+          return Promise.reject(err)
         }
 
         if (err.response.status >= 500) {
@@ -102,7 +102,7 @@ export class API {
     const { data } = await this.axios.post<Note>(`teams/${teamPath}/notes`, options)
     return data
   }
-  
+
   updateTeamNoteContent =async (teamPath: string, noteId: string, content?: string) => {
     const { data } = await this.axios.patch<string>(`teams/${teamPath}/notes/${noteId}`, { content })
     return data

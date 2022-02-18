@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc -d",
     "watch": "tsc -w",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "lint": "eslint src --fix --ext .ts"
   },
   "keywords": [
     "HackMD",
@@ -22,11 +23,16 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^13.11.1",
+    "eslint": "^8.9.0",
+    "eslint-plugin-typescript": "^0.14.0",
     "ts-node": "^8.8.2",
-    "typescript": "^3.8.3"
+    "typescript": "^3.8.3",
+    "typescript-eslint-parser": "^22.0.0"
   },
   "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.12.0",
     "axios": "^0.25.0",
+    "path": "^0.12.7",
     "tslib": "^1.11.1"
   }
 }

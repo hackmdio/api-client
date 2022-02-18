@@ -25,7 +25,6 @@ export type CreateNoteOptions = {
   writePermission?: NotePermissionRole,
   commentPermission?: CommentPermissionType
 }
-  
 
 export interface Team {
   id: string

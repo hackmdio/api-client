@@ -1,7 +1,7 @@
 class HackMDError extends Error {
-  constructor(...args: any) {
-    super(...args);
-    Object.setPrototypeOf(this, new.target.prototype);
+  constructor(message: string) {
+    super(message)
+    Object.setPrototypeOf(this, new.target.prototype)
   }
 }
 
@@ -12,7 +12,7 @@ class HttpResponseError extends HackMDError {
     readonly code: number,
     readonly statusText: string,
   ) {
-    super(message);
+    super(message)
   }
 }
 
