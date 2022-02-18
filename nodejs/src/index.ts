@@ -78,7 +78,7 @@ export class API {
     return data
   }
 
-  updateNoteContent =async (noteId: string, content?: string) => {
+  updateNoteContent = async (noteId: string, content?: string) => {
     const { data } = await this.axios.patch<string>(`notes/${noteId}`, { content })
     return data
   }
@@ -103,7 +103,7 @@ export class API {
     return data
   }
 
-  updateTeamNoteContent =async (teamPath: string, noteId: string, content?: string) => {
+  updateTeamNoteContent = async (teamPath: string, noteId: string, content?: string) => {
     const { data } = await this.axios.patch<string>(`teams/${teamPath}/notes/${noteId}`, { content })
     return data
   }

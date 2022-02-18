@@ -7,9 +7,11 @@ module.exports = {
         "plugin:@typescript-eslint/recommended"
     ],
     "rules": {
-        "no-trailing-spaces": [1, { "skipBlankLines": false }],
-        "semi": [1, "never"],
-        '@typescript-eslint/no-non-null-assertion': 'off'
+        "no-trailing-spaces": ["warn", { "skipBlankLines": false }],
+        "semi": ["warn", "never"],
+        "@typescript-eslint/no-non-null-assertion": "off",
+        "keyword-spacing": ["warn", {"before": true, "after": true}],
+        "space-infix-ops": "warn"
     },
     "parserOptions": {
       "project": [
