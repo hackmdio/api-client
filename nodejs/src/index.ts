@@ -2,7 +2,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosError, AxiosResponse } f
 import { User, Note, Team, CreateNoteOptions } from './type'
 import * as HackMDErrors from './error'
 
-export class API {
+export default class API {
   private axios: AxiosInstance
 
   constructor (readonly accessToken: string, public hackmdAPIEndpointURL: string = "https://api.hackmd.io/v1") {
