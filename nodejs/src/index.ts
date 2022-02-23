@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError, AxiosResponse } from 'axios'
-import { User, Note, Team, CreateNoteOptions } from './type'
+import { User, Note, Team, CreateNoteOptions, GetMe, GetUserHistory, GetUserNotes, GetUserNote, CreateUserNote, GetUserTeams, GetTeamNotes, CreateTeamNote, DeleteUserNote, DeleteTeamNote, UpdateUserNote, SingleNote, UpdateTeamNote } from './type'
 import * as HackMDErrors from './error'
 
 export default class API {
@@ -53,63 +53,59 @@ export default class API {
     )
   }
 
-  async getMe () {
+  async getMe (): Promise<GetMe> {
     const { data } = await this.axios.get<User>("me")
     return data
   }
 
-  async getHistory () {
+  async getHistory (): Promise<GetUserHistory> {
     const { data } = await this.axios.get<Note[]>("history")
     return data
   }
 
-  async getNoteList () {
+  async getNoteList (): Promise<GetUserNotes> {
     const { data } = await this.axios.get<Note[]>("notes")
     return data
   }
 
-  async getNote (noteId: string) {
-    const { data } = await this.axios.get<Note>(`notes/${noteId}`)
+  async getNote (noteId: string): Promise<GetUserNote> {
+    const { data } = await this.axios.get<SingleNote>(`notes/${noteId}`)
     return data
   }
 
-  async createNote (options: CreateNoteOptions) {
-    const { data } = await this.axios.post<Note>("notes", options)
+  async createNote (options: CreateNoteOptions): Promise<CreateUserNote> {
+    const { data } = await this.axios.post<SingleNote>("notes", options)
     return data
   }
 
-  async updateNoteContent (noteId: string, content?: string) {
-    const { data } = await this.axios.patch<string>(`notes/${noteId}`, { content })
-    return data
+  async updateNoteContent (noteId: string, content?: string): Promise<UpdateUserNote> {
+   await this.axios.patch<AxiosResponse>(`notes/${noteId}`, { content })
   }
 
-  async deleteNote (noteId: string) {
-    const { data } = await this.axios.delete<void>(`notes/${noteId}`)
-    return data
+  async deleteNote (noteId: string): Promise<DeleteUserNote> {
+    await this.axios.delete<AxiosResponse>(`notes/${noteId}`)
   }
 
-  async getTeams () {
+  async getTeams (): Promise<GetUserTeams> {
     const { data } = await this.axios.get<Team[]>("teams")
     return data
   }
 
-  async getTeamNotes (teamPath: string) {
-    const {data} = await this.axios.get<Note[]>(`teams/${teamPath}/notes`)
+  async getTeamNotes (teamPath: string): Promise<GetTeamNotes> {
+    const { data } = await this.axios.get<Note[]>(`teams/${teamPath}/notes`)
     return data
   }
 
-  async createTeamNote (teamPath: string, options: CreateNoteOptions) {
-    const { data } = await this.axios.post<Note>(`teams/${teamPath}/notes`, options)
+  async createTeamNote (teamPath: string, options: CreateNoteOptions): Promise<CreateTeamNote> {
+    const { data } = await this.axios.post<SingleNote>(`teams/${teamPath}/notes`, options)
     return data
   }
 
-  async updateTeamNoteContent (teamPath: string, noteId: string, content?: string) {
-    const { data } = await this.axios.patch<string>(`teams/${teamPath}/notes/${noteId}`, { content })
-    return data
+  async updateTeamNoteContent (teamPath: string, noteId: string, content?: string): Promise<UpdateTeamNote> {
+    await this.axios.patch<AxiosResponse>(`teams/${teamPath}/notes/${noteId}`, { content })
   }
 
-  async deleteTeamNote (teamPath: string, noteId: string) {
-    const { data } = await this.axios.delete<void>(`teams/${teamPath}/notes/${noteId}`)
-    return data
+  async deleteTeamNote (teamPath: string, noteId: string): Promise<DeleteTeamNote> {
+    await this.axios.delete<AxiosResponse>(`teams/${teamPath}/notes/${noteId}`)
   }
 }

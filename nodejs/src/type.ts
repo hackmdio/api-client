@@ -26,7 +26,7 @@ export type CreateNoteOptions = {
   commentPermission?: CommentPermissionType
 }
 
-export interface Team {
+export type Team = {
   id: string
   ownerId: string
   name: string
@@ -38,7 +38,7 @@ export interface Team {
   createdAt: Date
 }
 
-export interface User {
+export type User = {
   id: string
   email: string | null
   name: string
@@ -47,7 +47,7 @@ export interface User {
   teams: Team[]
 }
 
-export interface SimpleUserProfile {
+export type SimpleUserProfile = {
   name: string,
   userPath: string
   photo: string
@@ -61,10 +61,9 @@ export enum NotePermissionRole {
   GUEST = 'guest'
 }
 
-export interface Note {
+export type Note = {
   id: string
   title: string
-  content: string
   tags: string[]
   lastChangedAt: string
   createdAt: string
@@ -78,30 +77,31 @@ export interface Note {
 
   readPermission: NotePermissionRole
   writePermission: NotePermissionRole
+
 }
 
-export interface SingleNote extends Note {
+export type SingleNote = Note & {
   content: string
 }
 
+// User
 export type GetMe = User
 
+// User notes
 export type GetUserNotes = Note[]
 export type GetUserNote = SingleNote
-export type CreateUserNote = SingleNote
-export type UpdateUserNote = SingleNote
-
-// !Use status code to indicate wether the request is successful or not
-// export type DeleteUserNote = Note
-
 export type GetUserHistory = Note[]
+export type CreateUserNote = SingleNote
+export type UpdateUserNote = void
+export type DeleteUserNote = void
 
+// Teams
 export type GetUserTeams = Team[]
 
+// Team notes
 export type GetTeamNotes = Note[]
 export type CreateTeamNote = SingleNote
-export type UpdateTeamNote = SingleNote
+export type UpdateTeamNote = void
+export type DeleteTeamNote = void
 
 
-// !Use status code to indicate wether the request is successful or not
-// export type DeleteTeamNote = Note
