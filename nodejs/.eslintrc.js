@@ -19,5 +19,8 @@ module.exports = {
       "project": [
         path.resolve(__dirname, "tsconfig.json")
       ]
-    }
+    },
+    "ignorePatterns": [
+      ".eslintrc.js"
+    ],
 }
