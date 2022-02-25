@@ -1,7 +1,7 @@
 {
   "name": "@hackmd/api",
   "version": "2.0.0-pre1",
-  "description": "HackMD/CodiMD Node.js API Client",
+  "description": "HackMD Node.js API Client",
   "main": "dist/index.js",
   "declaration": "./dist/index.d.ts",
   "scripts": {
@@ -19,8 +19,12 @@
     "README.md",
     "LICENSE"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": {
+    "name": "HackMD",
+    "email": "support@hackmd.io",
+    "url": "https://hackmd.io"
+  },
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^13.11.1",
     "eslint": "^8.9.0",
