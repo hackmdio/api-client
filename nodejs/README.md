@@ -10,6 +10,10 @@ You can sign up for an account at [hackmd.io](https://hackmd.io/), and then crea
 
 For bugs and feature requests, please open an issue or pull request on [GitHub](https://github.com/hackmdio/api-client).
 
+## **v2.0.0 Update Note**
+
+`v2.0.0` is a completely rewrite and is incompatible with `v1.x.x`. But the best of all, it does not require Node.JS runtime anymore, which means you can use it in a browser. We recommend you to upgrade to `v2.0.0` if you are using the old one.
+
 ## Installation
 
 ```bash
