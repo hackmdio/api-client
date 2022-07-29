@@ -82,6 +82,10 @@ export default class API {
    await this.axios.patch<AxiosResponse>(`notes/${noteId}`, { content })
   }
 
+  async updateNote (noteId: string, options: Pick<SingleNote, 'content' | 'readPermission' | 'writePermission'>): Promise<AxiosResponse> {
+    return await this.axios.patch<AxiosResponse>(`notes/${noteId}`, options)
+  }
+
   async deleteNote (noteId: string): Promise<DeleteUserNote> {
     await this.axios.delete<AxiosResponse>(`notes/${noteId}`)
   }
@@ -103,6 +107,10 @@ export default class API {
 
   async updateTeamNoteContent (teamPath: string, noteId: string, content?: string): Promise<UpdateTeamNote> {
     await this.axios.patch<AxiosResponse>(`teams/${teamPath}/notes/${noteId}`, { content })
+  }
+
+  async updateTeamNote (teamPath: string, noteId: string, options: Pick<SingleNote, 'content' | 'readPermission' | 'writePermission'>): Promise<AxiosResponse> {
+    return await this.axios.patch<AxiosResponse>(`teams/${teamPath}/notes/${noteId}`, options)
   }
 
   async deleteTeamNote (teamPath: string, noteId: string): Promise<DeleteTeamNote> {
