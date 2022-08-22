@@ -23,7 +23,8 @@ export type CreateNoteOptions = {
   content?: string
   readPermission?: NotePermissionRole,
   writePermission?: NotePermissionRole,
-  commentPermission?: CommentPermissionType
+  commentPermission?: CommentPermissionType,
+  permalink?: string
 }
 
 export type Team = {
@@ -74,10 +75,10 @@ export type Note = {
   teamPath: string | null
   permalink: string | null
   shortId: string
+  publishLink: string
 
   readPermission: NotePermissionRole
   writePermission: NotePermissionRole
-
 }
 
 export type SingleNote = Note & {
