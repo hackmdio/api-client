@@ -23,7 +23,8 @@ export type CreateNoteOptions = {
   content?: string
   readPermission?: NotePermissionRole,
   writePermission?: NotePermissionRole,
-  commentPermission?: CommentPermissionType
+  commentPermission?: CommentPermissionType,
+  permalink?: string
 }
 
 export type Team = {
