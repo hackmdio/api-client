@@ -75,10 +75,10 @@ export type Note = {
   teamPath: string | null
   permalink: string | null
   shortId: string
+  publishLink: string
 
   readPermission: NotePermissionRole
   writePermission: NotePermissionRole
-
 }
 
 export type SingleNote = Note & {
