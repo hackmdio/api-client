@@ -82,7 +82,7 @@ export default class API {
    await this.axios.patch<AxiosResponse>(`notes/${noteId}`, { content })
   }
 
-  async updateNote (noteId: string, options: Pick<SingleNote, 'content' | 'readPermission' | 'writePermission'>): Promise<AxiosResponse> {
+  async updateNote (noteId: string, options: Pick<SingleNote, 'content' | 'readPermission' | 'writePermission' | 'permalink'>): Promise<AxiosResponse> {
     return await this.axios.patch<AxiosResponse>(`notes/${noteId}`, options)
   }
 
@@ -109,7 +109,7 @@ export default class API {
     await this.axios.patch<AxiosResponse>(`teams/${teamPath}/notes/${noteId}`, { content })
   }
 
-  async updateTeamNote (teamPath: string, noteId: string, options: Pick<SingleNote, 'content' | 'readPermission' | 'writePermission'>): Promise<AxiosResponse> {
+  async updateTeamNote (teamPath: string, noteId: string, options: Pick<SingleNote, 'content' | 'readPermission' | 'writePermission' | 'permalink'>): Promise<AxiosResponse> {
     return await this.axios.patch<AxiosResponse>(`teams/${teamPath}/notes/${noteId}`, options)
   }
 
