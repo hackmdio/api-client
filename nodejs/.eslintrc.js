@@ -1,6 +1,7 @@
 const path = require('path')
 
-module.exports = {
+/** @type {import('eslint').Linter.Config} */
+const config = {
     "parser": "@typescript-eslint/parser",
     "extends": [
         "eslint:recommended",
@@ -17,10 +18,13 @@ module.exports = {
     },
     "parserOptions": {
       "project": [
-        path.resolve(__dirname, "tsconfig.json")
+        path.resolve(__dirname, "tsconfig.json"),
+        path.resolve(__dirname, "tsconfig.eslint.json")
       ]
     },
     "ignorePatterns": [
       ".eslintrc.js"
     ],
 }
+
+module.exports = config
