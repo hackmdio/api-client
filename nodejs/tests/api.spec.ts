@@ -1,19 +1,20 @@
-// import { startServer, stopServer } from './server'
+import { server } from './mock'
 import { API } from '../src'
 
-// let address: Awaited<ReturnType<typeof startServer>>
 let client: API
 
-beforeAll(async () => {
-  // address = await startServer()
+beforeAll(() => {
+  client = new API(process.env.HACKMD_ACCESS_TOKEN!)
 
-  client = new API(process.env.HACKMD_ACCESS_TOKEN!, 'http://localhost:3000/api/openAPI/v1/')
-
-  // console.log(address)
+  return server.listen()
 })
 
-afterAll(async () => {
-  // await stopServer()
+afterEach(() => {
+  server.resetHandlers()
+})
+
+afterAll(() => {
+  return server.close()
 })
 
 test('getMe', async () => {
@@ -27,4 +28,9 @@ test('getMe unwrapped', async () => {
   const response = await client.getMe()
 
   expect(typeof response).toBe('object')
+  expect(response).toHaveProperty('id')
+  expect(response).toHaveProperty('name')
+  expect(response).toHaveProperty('email')
+  expect(response).toHaveProperty('userPath')
+  expect(response).toHaveProperty('photo')
 })
