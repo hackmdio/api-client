@@ -19,7 +19,6 @@ const config = {
     "parserOptions": {
       "project": [
         path.resolve(__dirname, "tsconfig.json"),
-        path.resolve(__dirname, "tsconfig.eslint.json")
       ]
     },
     "ignorePatterns": [
