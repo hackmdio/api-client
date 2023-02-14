@@ -1,17 +1,30 @@
-import { startServer, stopServer } from './server'
+// import { startServer, stopServer } from './server'
+import { API } from '../src'
 
-let address: Awaited<ReturnType<typeof startServer>>
+// let address: Awaited<ReturnType<typeof startServer>>
+let client: API
 
 beforeAll(async () => {
-  address = await startServer()
+  // address = await startServer()
 
-  console.log(address)
+  client = new API(process.env.HACKMD_ACCESS_TOKEN!, 'http://localhost:3000/api/openAPI/v1/')
+
+  // console.log(address)
 })
 
 afterAll(async () => {
-  await stopServer()
+  // await stopServer()
 })
 
-test('it should respond with a 200 status code', async () => {
-  expect(200).toBe(200)
+test('getMe', async () => {
+  const response = await client.getMe({ unwrapData: false })
+
+  expect(response).toHaveProperty('status', 200)
+  expect(response).toHaveProperty('headers')
+})
+
+test('getMe unwrapped', async () => {
+  const response = await client.getMe()
+
+  expect(typeof response).toBe('object')
 })

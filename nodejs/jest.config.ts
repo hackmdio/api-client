@@ -5,6 +5,7 @@ const customJestConfig: JestConfigWithTsJest = {
   testEnvironment: "node",
   transformIgnorePatterns: ["<rootDir>/node_modules/"],
   extensionsToTreatAsEsm: [".ts"],
+  setupFiles: ["dotenv/config"],
 }
 
 export default customJestConfig
