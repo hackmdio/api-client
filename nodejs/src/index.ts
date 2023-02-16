@@ -1,8 +1,18 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError, AxiosResponse } from 'axios'
-import { User, Note, Team, CreateNoteOptions, GetMe, GetUserHistory, GetUserNotes, GetUserNote, CreateUserNote, GetUserTeams, GetTeamNotes, CreateTeamNote, DeleteUserNote, DeleteTeamNote, UpdateUserNote, SingleNote, UpdateTeamNote } from './type'
+import { CreateNoteOptions, GetMe, GetUserHistory, GetUserNotes, GetUserNote, CreateUserNote, GetUserTeams, GetTeamNotes, CreateTeamNote, SingleNote } from './type'
 import * as HackMDErrors from './error'
 
-export default class API {
+export type RequestOptions = {
+  unwrapData?: boolean
+}
+
+const defaultOption: RequestOptions = {
+  unwrapData: true,
+}
+
+type OptionReturnType<Opt, T> = Opt extends { unwrapData: false } ? AxiosResponse<T> : Opt extends { unwrapData: true } ? T : T
+
+export class API {
   private axios: AxiosInstance
 
   constructor (readonly accessToken: string, public hackmdAPIEndpointURL: string = "https://api.hackmd.io/v1") {
@@ -53,67 +63,69 @@ export default class API {
     )
   }
 
-  async getMe (): Promise<GetMe> {
-    const { data } = await this.axios.get<User>("me")
-    return data
+  async getMe<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetMe>> {
+    return this.unwrapData(this.axios.get<GetMe>("me"), options.unwrapData) as unknown as OptionReturnType<Opt, GetMe>
   }
 
-  async getHistory (): Promise<GetUserHistory> {
-    const { data } = await this.axios.get<Note[]>("history")
-    return data
+  async getHistory<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserHistory>> {
+    return this.unwrapData(this.axios.get<GetUserHistory>("history"), options.unwrapData) as unknown as OptionReturnType<Opt, GetUserHistory>
   }
 
-  async getNoteList (): Promise<GetUserNotes> {
-    const { data } = await this.axios.get<Note[]>("notes")
-    return data
+  async getNoteList<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserNotes>> {
+    return this.unwrapData(this.axios.get<GetUserNotes>("notes"), options.unwrapData) as unknown as OptionReturnType<Opt, GetUserNotes>
   }
 
-  async getNote (noteId: string): Promise<GetUserNote> {
-    const { data } = await this.axios.get<SingleNote>(`notes/${noteId}`)
-    return data
+  async getNote<Opt extends RequestOptions> (noteId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserNote>> {
+    return this.unwrapData(this.axios.get<GetUserNote>(`notes/${noteId}`), options.unwrapData) as unknown as OptionReturnType<Opt, GetUserNote>
   }
 
-  async createNote (options: CreateNoteOptions): Promise<CreateUserNote> {
-    const { data } = await this.axios.post<SingleNote>("notes", options)
-    return data
+  async createNote<Opt extends RequestOptions> (payload: CreateNoteOptions, options = defaultOption as Opt): Promise<OptionReturnType<Opt, CreateUserNote>> {
+    return this.unwrapData(this.axios.post<CreateUserNote>("notes", payload), options.unwrapData) as unknown as OptionReturnType<Opt, CreateUserNote>
   }
 
-  async updateNoteContent (noteId: string, content?: string): Promise<UpdateUserNote> {
-   await this.axios.patch<AxiosResponse>(`notes/${noteId}`, { content })
+  async updateNoteContent<Opt extends RequestOptions> (noteId: string, content?: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, SingleNote>> {
+    return this.unwrapData(this.axios.patch<SingleNote>(`notes/${noteId}`, { content }), options.unwrapData) as unknown as OptionReturnType<Opt, SingleNote>
   }
 
-  async updateNote (noteId: string, options: Partial<Pick<SingleNote, 'content' | 'readPermission' | 'writePermission' | 'permalink'>>): Promise<AxiosResponse> {
-    return await this.axios.patch<AxiosResponse>(`notes/${noteId}`, options)
+  async updateNote<Opt extends RequestOptions> (noteId: string, payload: Partial<Pick<SingleNote, 'content' | 'readPermission' | 'writePermission' | 'permalink'>>, options = defaultOption as Opt): Promise<OptionReturnType<Opt, SingleNote>> {
+    return this.unwrapData(this.axios.patch<SingleNote>(`notes/${noteId}`, payload), options.unwrapData) as unknown as OptionReturnType<Opt, SingleNote>
   }
 
-  async deleteNote (noteId: string): Promise<DeleteUserNote> {
-    await this.axios.delete<AxiosResponse>(`notes/${noteId}`)
+  async deleteNote<Opt extends RequestOptions> (noteId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, SingleNote>> {
+    return this.unwrapData(this.axios.delete<SingleNote>(`notes/${noteId}`), options.unwrapData) as unknown as OptionReturnType<Opt, SingleNote>
   }
 
-  async getTeams (): Promise<GetUserTeams> {
-    const { data } = await this.axios.get<Team[]>("teams")
-    return data
+  async getTeams<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserTeams>> {
+    return this.unwrapData(this.axios.get<GetUserTeams>("teams"), options.unwrapData) as unknown as OptionReturnType<Opt, GetUserTeams>
   }
 
-  async getTeamNotes (teamPath: string): Promise<GetTeamNotes> {
-    const { data } = await this.axios.get<Note[]>(`teams/${teamPath}/notes`)
-    return data
+  async getTeamNotes<Opt extends RequestOptions> (teamPath: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetTeamNotes>> {
+    return this.unwrapData(this.axios.get<GetTeamNotes>(`teams/${teamPath}/notes`), options.unwrapData) as unknown as OptionReturnType<Opt, GetTeamNotes>
   }
 
-  async createTeamNote (teamPath: string, options: CreateNoteOptions): Promise<CreateTeamNote> {
-    const { data } = await this.axios.post<SingleNote>(`teams/${teamPath}/notes`, options)
-    return data
+  async createTeamNote<Opt extends RequestOptions> (teamPath: string, payload: CreateNoteOptions, options = defaultOption as Opt): Promise<OptionReturnType<Opt, CreateTeamNote>> {
+    return this.unwrapData(this.axios.post<CreateTeamNote>(`teams/${teamPath}/notes`, payload), options.unwrapData) as unknown as OptionReturnType<Opt, CreateTeamNote>
   }
 
-  async updateTeamNoteContent (teamPath: string, noteId: string, content?: string): Promise<UpdateTeamNote> {
-    await this.axios.patch<AxiosResponse>(`teams/${teamPath}/notes/${noteId}`, { content })
+  async updateTeamNoteContent (teamPath: string, noteId: string, content?: string): Promise<AxiosResponse> {
+    return this.axios.patch<AxiosResponse>(`teams/${teamPath}/notes/${noteId}`, { content })
   }
 
   async updateTeamNote (teamPath: string, noteId: string, options: Partial<Pick<SingleNote, 'content' | 'readPermission' | 'writePermission' | 'permalink'>>): Promise<AxiosResponse> {
-    return await this.axios.patch<AxiosResponse>(`teams/${teamPath}/notes/${noteId}`, options)
+    return this.axios.patch<AxiosResponse>(`teams/${teamPath}/notes/${noteId}`, options)
   }
 
-  async deleteTeamNote (teamPath: string, noteId: string): Promise<DeleteTeamNote> {
-    await this.axios.delete<AxiosResponse>(`teams/${teamPath}/notes/${noteId}`)
+  async deleteTeamNote (teamPath: string, noteId: string): Promise<AxiosResponse> {
+    return this.axios.delete<AxiosResponse>(`teams/${teamPath}/notes/${noteId}`)
+  }
+
+  private unwrapData<T> (reqP: Promise<AxiosResponse<T>>, unwrap = true) {
+    if (unwrap) {
+      return reqP.then(response => response.data)
+    } else {
+      return reqP
+    }
   }
 }
+
+export default API
