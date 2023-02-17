@@ -18,11 +18,23 @@ class HttpResponseError extends HackMDError {
 
 class MissingRequiredArgument extends HackMDError {}
 class InternalServerError extends HttpResponseError {}
-
+class TooManyRequestsError extends HttpResponseError {
+  public constructor (
+    message: string,
+    readonly code: number,
+    readonly statusText: string,
+    readonly userLimit: number,
+    readonly userRemaining: number,
+    readonly resetAfter?: number,
+  ) {
+    super(message, code, statusText)
+  }
+}
 
 export {
   HackMDError,
   HttpResponseError,
   MissingRequiredArgument,
-  InternalServerError
+  InternalServerError,
+  TooManyRequestsError,
 }
