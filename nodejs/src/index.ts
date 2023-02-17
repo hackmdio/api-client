@@ -62,8 +62,8 @@ export class API {
               `Too many requests (${err.response.status} ${err.response.statusText})`,
               err.response.status,
               err.response.statusText,
-              parseInt(err.response.headers['x-ratelimit-limit'], 10),
-              parseInt(err.response.headers['x-ratelimit-remaining'], 10),
+              parseInt(err.response.headers['x-ratelimit-userlimit'], 10),
+              parseInt(err.response.headers['x-ratelimit-userremaining'], 10),
               parseInt(err.response.headers['x-ratelimit-userreset'], 10),
             )
           } else  {
