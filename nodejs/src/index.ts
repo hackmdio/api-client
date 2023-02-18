@@ -12,10 +12,14 @@ const defaultOption: RequestOptions = {
 
 type OptionReturnType<Opt, T> = Opt extends { unwrapData: false } ? AxiosResponse<T> : Opt extends { unwrapData: true } ? T : T
 
+export type APIClientOptions = {
+  wrapResponseErrors: boolean
+}
+
 export class API {
   private axios: AxiosInstance
 
-  constructor (readonly accessToken: string, public hackmdAPIEndpointURL: string = "https://api.hackmd.io/v1") {
+  constructor (readonly accessToken: string, public hackmdAPIEndpointURL: string = "https://api.hackmd.io/v1", public options: APIClientOptions = { wrapResponseErrors: true }) {
     if (!accessToken) {
       throw new HackMDErrors.MissingRequiredArgument('Missing access token when creating HackMD client')
     }
@@ -37,30 +41,41 @@ export class API {
       }
     )
 
-    this.axios.interceptors.response.use(
-      (response: AxiosResponse) => {
-        return response
-      },
-      async (err: AxiosError) => {
-        if (!err.response) {
-          return Promise.reject(err)
-        }
+    if (options.wrapResponseErrors) {
+      this.axios.interceptors.response.use(
+        (response: AxiosResponse) => {
+          return response
+        },
+        async (err: AxiosError) => {
+          if (!err.response) {
+            return Promise.reject(err)
+          }
 
-        if (err.response.status >= 500) {
-          throw new HackMDErrors.InternalServerError(
-            `HackMD internal error (${err.response.status} ${err.response.statusText})`,
-            err.response.status,
-            err.response.statusText,
-          )
-        } else {
-          throw new HackMDErrors.HttpResponseError(
-            `Received an error response (${err.response.status} ${err.response.statusText}) from HackMD`,
-            err.response.status,
-            err.response.statusText,
-          )
+          if (err.response.status >= 500) {
+            throw new HackMDErrors.InternalServerError(
+              `HackMD internal error (${err.response.status} ${err.response.statusText})`,
+              err.response.status,
+              err.response.statusText,
+            )
+          } else if (err.response.status === 429) {
+            throw new HackMDErrors.TooManyRequestsError(
+              `Too many requests (${err.response.status} ${err.response.statusText})`,
+              err.response.status,
+              err.response.statusText,
+              parseInt(err.response.headers['x-ratelimit-userlimit'], 10),
+              parseInt(err.response.headers['x-ratelimit-userremaining'], 10),
+              parseInt(err.response.headers['x-ratelimit-userreset'], 10),
+            )
+          } else  {
+            throw new HackMDErrors.HttpResponseError(
+              `Received an error response (${err.response.status} ${err.response.statusText}) from HackMD`,
+              err.response.status,
+              err.response.statusText,
+            )
+          }
         }
-      }
-    )
+      )
+    }
   }
 
   async getMe<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetMe>> {
