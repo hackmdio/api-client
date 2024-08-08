@@ -28,7 +28,8 @@ export class API {
       baseURL: hackmdAPIEndpointURL,
       headers:{
         "Content-Type": "application/json",
-      }
+      },
+      timeout: 30000, // Increased timeout for low bandwidth
     })
 
     this.axios.interceptors.request.use(
@@ -71,13 +72,48 @@ export class API {
               `Received an error response (${err.response.status} ${err.response.statusText}) from HackMD`,
               err.response.status,
               err.response.statusText,
-            )
+            );
           }
         }
-      )
+      );
     }
+    this.createRetryInterceptor(this.axios, 3); // Add retry interceptor with maxRetries = 3
   }
 
+   // Utility functions for exponential backoff and retry logic
+   private exponentialBackoff(retries: number): number {
+    return Math.pow(2, retries) * 100; // Exponential backoff with base delay of 100ms
+  }
+
+  private isRetryableError(error: AxiosError): boolean {
+    // Retry on network errors, 5xx errors, and rate limiting (429)
+    return (
+      !error.response ||
+      (error.response.status >= 500 && error.response.status < 600) ||
+      error.response.status === 429
+    );
+  }
+
+  // Create retry interceptor function
+  private createRetryInterceptor(axiosInstance: AxiosInstance, maxRetries: number): void {
+    let retryCount = 0;
+
+    axiosInstance.interceptors.response.use(
+      response => response,
+      async error => {
+        if (retryCount < maxRetries && this.isRetryableError(error)) {
+          retryCount++;
+          const delay = this.exponentialBackoff(retryCount);
+          console.warn(`Retrying request... attempt #${retryCount} after delay of ${delay}ms`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return axiosInstance(error.config);
+        }
+
+        retryCount = 0; // Reset retry count after a successful request
+        return Promise.reject(error);
+      }
+    );
+  }
   async getMe<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetMe>> {
     return this.unwrapData(this.axios.get<GetMe>("me"), options.unwrapData) as unknown as OptionReturnType<Opt, GetMe>
   }
