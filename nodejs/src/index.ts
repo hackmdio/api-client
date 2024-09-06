@@ -13,13 +13,29 @@ const defaultOption: RequestOptions = {
 type OptionReturnType<Opt, T> = Opt extends { unwrapData: false } ? AxiosResponse<T> : Opt extends { unwrapData: true } ? T : T
 
 export type APIClientOptions = {
-  wrapResponseErrors: boolean
+  wrapResponseErrors: boolean;
+  timeout?: number;
+  retryConfig?: {
+    maxRetries: number;
+    baseDelay: number;
+  };
 }
 
 export class API {
   private axios: AxiosInstance
 
-  constructor (readonly accessToken: string, public hackmdAPIEndpointURL: string = "https://api.hackmd.io/v1", public options: APIClientOptions = { wrapResponseErrors: true }) {
+  constructor (
+    readonly accessToken: string,
+    public hackmdAPIEndpointURL: string = "https://api.hackmd.io/v1",
+    public options: APIClientOptions = {
+      wrapResponseErrors: true,
+      timeout: 30000,
+      retryConfig: {
+        maxRetries: 3,
+        baseDelay: 100,
+      },
+    }
+  ) {
     if (!accessToken) {
       throw new HackMDErrors.MissingRequiredArgument('Missing access token when creating HackMD client')
     }
@@ -29,7 +45,7 @@ export class API {
       headers:{
         "Content-Type": "application/json",
       },
-      timeout: 30000, // Increased timeout for low bandwidth
+      timeout: options.timeout
     })
 
     this.axios.interceptors.request.use(
@@ -77,16 +93,16 @@ export class API {
         }
       );
     }
-    this.createRetryInterceptor(this.axios, 3); // Add retry interceptor with maxRetries = 3
+    if (options.retryConfig) {
+      this.createRetryInterceptor(this.axios, options.retryConfig.maxRetries, options.retryConfig.baseDelay);
+    }
   }
 
-   // Utility functions for exponential backoff and retry logic
-   private exponentialBackoff(retries: number): number {
-    return Math.pow(2, retries) * 100; // Exponential backoff with base delay of 100ms
+  private exponentialBackoff(retries: number, baseDelay: number): number {
+    return Math.pow(2, retries) * baseDelay;
   }
 
   private isRetryableError(error: AxiosError): boolean {
-    // Retry on network errors, 5xx errors, and rate limiting (429)
     return (
       !error.response ||
       (error.response.status >= 500 && error.response.status < 600) ||
@@ -94,22 +110,25 @@ export class API {
     );
   }
 
-  // Create retry interceptor function
-  private createRetryInterceptor(axiosInstance: AxiosInstance, maxRetries: number): void {
+  private createRetryInterceptor(axiosInstance: AxiosInstance, maxRetries: number, baseDelay: number): void {
     let retryCount = 0;
 
     axiosInstance.interceptors.response.use(
       response => response,
       async error => {
         if (retryCount < maxRetries && this.isRetryableError(error)) {
-          retryCount++;
-          const delay = this.exponentialBackoff(retryCount);
-          console.warn(`Retrying request... attempt #${retryCount} after delay of ${delay}ms`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-          return axiosInstance(error.config);
+          const remainingCredits = parseInt(error.response?.headers['x-ratelimit-userremaining'], 10);
+          
+          if (isNaN(remainingCredits) || remainingCredits > 0) {
+            retryCount++;
+            const delay = this.exponentialBackoff(retryCount, baseDelay);
+            console.warn(`Retrying request... attempt #${retryCount} after delay of ${delay}ms`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return axiosInstance(error.config);
+          }
         }
 
-        retryCount = 0; // Reset retry count after a successful request
+        retryCount = 0; // Reset retry count after a successful request or when not retrying
         return Promise.reject(error);
       }
     );
