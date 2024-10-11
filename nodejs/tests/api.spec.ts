@@ -43,7 +43,7 @@ test('should throw axios error object if set wrapResponseErrors to false', async
   })
 
   server.use(
-    rest.get('https://api.hackmd.io/v1/me', (req, res, ctx) => {
+    rest.get('https://api.hackmd.io/v1/me', (req: any, res: (arg0: any) => any, ctx: { status: (arg0: number) => any }) => {
       return res(ctx.status(429))
     }),
   )
