@@ -1,6 +1,6 @@
 import { server } from './mock'
 import { API } from '../src'
-import { rest } from 'msw'
+import { http, HttpResponse } from 'msw'
 import { TooManyRequestsError } from '../src/error'
 
 let client: API
@@ -45,9 +45,11 @@ test('should throw axios error object if set wrapResponseErrors to false', async
   })
 
   server.use(
-    rest.get('https://api.hackmd.io/v1/me', (req: any, res: (arg0: any) => any, ctx: { status: (arg0: number) => any }) => {
-      return res(ctx.status(429))
-    }),
+    http.get('https://api.hackmd.io/v1/me', () => {
+      return new HttpResponse(null, {
+        status: 429
+      })
+    })
   )
 
   try {
@@ -66,18 +68,21 @@ test('should throw HackMD error object', async () => {
   })
 
   server.use(
-    rest.get('https://api.hackmd.io/v1/me', (req, res, ctx) => {
-      return res(
-        ctx.status(429),
-        ctx.set({
-          'X-RateLimit-UserLimit': '100',
-          'x-RateLimit-UserRemaining': '0',
-          'x-RateLimit-UserReset': String(
-            new Date().getTime() + 1000 * 60 * 60 * 24,
-          ),
-        }),
+    http.get('https://api.hackmd.io/v1/me', () => {
+      return HttpResponse.json(
+        {},
+        {
+          status: 429,
+          headers: {
+            'X-RateLimit-UserLimit': '100',
+            'x-RateLimit-UserRemaining': '0',
+            'x-RateLimit-UserReset': String(
+              new Date().getTime() + 1000 * 60 * 60 * 24,
+            ),
+          },
+        }
       )
-    }),
+    })
   )
 
   try {
