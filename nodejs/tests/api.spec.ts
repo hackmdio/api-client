@@ -16,7 +16,9 @@ afterEach(() => {
 })
 
 afterAll(() => {
-  return server.close()
+  server.close()
+  // Add explicit cleanup to ensure Jest exits properly
+  return new Promise(resolve => setTimeout(resolve, 100))
 })
 
 test('getMe', async () => {
@@ -56,7 +58,13 @@ test('should throw axios error object if set wrapResponseErrors to false', async
   }
 })
 
-test.only('should throw HackMD error object', async () => {
+test('should throw HackMD error object', async () => {
+  // Create a client with retry disabled to avoid conflicts with error handling test
+  const clientWithoutRetry = new API(process.env.HACKMD_ACCESS_TOKEN!, undefined, {
+    wrapResponseErrors: true,
+    retryConfig: undefined // Disable retry logic for this test
+  })
+
   server.use(
     rest.get('https://api.hackmd.io/v1/me', (req, res, ctx) => {
       return res(
@@ -73,12 +81,11 @@ test.only('should throw HackMD error object', async () => {
   )
 
   try {
-    await client.getMe()
+    await clientWithoutRetry.getMe()
+    // If we get here, the test should fail because an error wasn't thrown
+    expect('no error thrown').toBe('error should have been thrown')
   } catch (error: any) {
     expect(error).toBeInstanceOf(TooManyRequestsError)
-
-    console.log(JSON.stringify(error))
-
     expect(error).toHaveProperty('code', 429)
     expect(error).toHaveProperty('statusText', 'Too Many Requests')
     expect(error).toHaveProperty('userLimit', 100)
