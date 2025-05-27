@@ -1,0 +1,85 @@
+name: Pre-release to NPM
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  pre-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'npm'
+          cache-dependency-path: nodejs/package-lock.json
+
+      - name: Install dependencies
+        working-directory: nodejs
+        run: npm ci
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Generate pre-release version
+        working-directory: nodejs
+        run: |
+          # Get current version from package.json
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          
+          # Get short commit hash
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          
+          # Get current timestamp
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          
+          # Create pre-release version: current-version-beta.timestamp.sha
+          PRE_RELEASE_VERSION="${CURRENT_VERSION}-beta.${TIMESTAMP}.${SHORT_SHA}"
+          
+          echo "Pre-release version: $PRE_RELEASE_VERSION"
+          echo "PRE_RELEASE_VERSION=$PRE_RELEASE_VERSION" >> $GITHUB_ENV
+          
+          # Update package.json with pre-release version
+          npm version $PRE_RELEASE_VERSION --no-git-tag-version
+
+      - name: Build
+        working-directory: nodejs
+        run: npm run build
+
+      - name: Publish pre-release to NPM
+        working-directory: nodejs
+        run: npm publish --tag beta --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub pre-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v${{ env.PRE_RELEASE_VERSION }}" \
+            --title "Pre-release v${{ env.PRE_RELEASE_VERSION }}" \
+            --notes "🚀 **Pre-release from develop branch**
+
+          This is an automated pre-release build from the develop branch.
+
+          **Changes:**
+          - Commit: ${{ github.sha }}
+          - Branch: ${{ github.ref_name }}
+
+          **Installation:**
+          \`\`\`bash
+          npm install @hackmd/api@beta
+          \`\`\`
+
+          **Note:** This is a pre-release version and may contain unstable features." \
+            --prerelease 
