@@ -4,12 +4,20 @@ This is an example project demonstrating the usage of the HackMD API client.
 
 ## Setup
 
-1. First, install the dependencies:
+1. First, build the HackMD API package:
+```bash
+cd ../../nodejs
+npm install
+npm run build
+cd ../examples/nodejs
+```
+
+2. Install the example dependencies:
 ```bash
 npm install
 ```
 
-2. Set up your HackMD access token using one of these methods:
+3. Set up your HackMD access token using one of these methods:
 
    a. Set it as an environment variable:
    ```bash
