@@ -1,9 +1,7 @@
-import { rest } from 'msw'
+import { http, HttpResponse } from 'msw'
 
 export const handlers = [
-  rest.get('/posts', (req, res, ctx) => {
-    return res(
-      ctx.json(null),
-    )
+  http.get('/posts', () => {
+    return HttpResponse.json(null)
   }),
 ]

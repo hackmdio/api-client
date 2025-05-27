@@ -22,7 +22,7 @@ const config = {
       ]
     },
     "ignorePatterns": [
-      ".eslintrc.js"
+      ".eslintrc.cjs"
     ],
 }
 
