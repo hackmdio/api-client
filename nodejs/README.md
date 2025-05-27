@@ -22,14 +22,53 @@ npm install @hackmd/api --save
 
 ## Example
 
+### ES Modules (ESM)
+
 ```javascript
+// Default import
 import HackMDAPI from '@hackmd/api'
+
+// Or named import
+import { API } from '@hackmd/api'
 
 const client = new HackMDAPI('YOUR_ACCESS_TOKEN' /* required */, 'https://api.hackmd.io/v1' /* optional */)
 
 client.getMe().then(me => {
   console.log(me.email)
 })
+```
+
+### CommonJS
+
+```javascript
+// Default import
+const HackMDAPI = require('@hackmd/api').default
+
+// Or named import
+const { API } = require('@hackmd/api')
+
+const client = new HackMDAPI('YOUR_ACCESS_TOKEN', 'https://api.hackmd.io/v1')
+
+client.getMe().then(me => {
+  console.log(me.email)
+})
+```
+
+### Legacy Import Support
+
+For backward compatibility, the package also supports legacy import paths:
+
+```javascript
+// ESM
+import HackMDAPI from '@hackmd/api/dist'
+import { API } from '@hackmd/api/dist'
+
+// CommonJS
+const HackMDAPI = require('@hackmd/api/dist').default
+const { API } = require('@hackmd/api/dist')
+
+// Direct file imports
+import { API } from '@hackmd/api/dist/index.js'
 ```
 
 ## Advanced Features
