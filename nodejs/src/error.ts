@@ -1,12 +1,11 @@
-class HackMDError extends Error {
+export class HackMDError extends Error {
   constructor (message: string) {
     super(message)
     Object.setPrototypeOf(this, new.target.prototype)
   }
 }
 
-
-class HttpResponseError extends HackMDError {
+export class HttpResponseError extends HackMDError {
   public constructor (
     message: string,
     readonly code: number,
@@ -16,9 +15,9 @@ class HttpResponseError extends HackMDError {
   }
 }
 
-class MissingRequiredArgument extends HackMDError {}
-class InternalServerError extends HttpResponseError {}
-class TooManyRequestsError extends HttpResponseError {
+export class MissingRequiredArgument extends HackMDError {}
+export class InternalServerError extends HttpResponseError {}
+export class TooManyRequestsError extends HttpResponseError {
   public constructor (
     message: string,
     readonly code: number,
@@ -29,12 +28,4 @@ class TooManyRequestsError extends HttpResponseError {
   ) {
     super(message, code, statusText)
   }
-}
-
-export {
-  HackMDError,
-  HttpResponseError,
-  MissingRequiredArgument,
-  InternalServerError,
-  TooManyRequestsError,
 }
