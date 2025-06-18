@@ -1,0 +1,14 @@
+{
+  "name": "hackmd-api-example",
+  "version": "1.0.0",
+  "description": "Example usage of HackMD API client",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@hackmd/api": "file:../../nodejs",
+    "dotenv": "^16.4.5"
+  }
+} 
