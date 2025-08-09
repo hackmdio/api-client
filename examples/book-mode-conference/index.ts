@@ -319,6 +319,57 @@ ${bookContent}
 // MAIN EXECUTION LOGIC
 // ==========================================
 
+// Simple reusable progress manager
+type ProgressState = {
+  completedSessions: string[]
+  sessionNotes: Record<string, string>
+  mainBookCreated?: boolean
+  mainBookUrl?: string
+  startedAt?: string
+  completedAt?: string
+}
+
+function createProgressManager(progressFilePath: string) {
+  const resolvedPath = path.resolve(progressFilePath)
+
+  function load(): ProgressState | null {
+    if (!fs.existsSync(resolvedPath)) return null
+    try {
+      const data = JSON.parse(fs.readFileSync(resolvedPath, 'utf8'))
+      return data
+    } catch (e: any) {
+      console.warn(`⚠️  Failed to load progress: ${e.message}`)
+      return null
+    }
+  }
+
+  function initFresh(): ProgressState {
+    if (fs.existsSync(resolvedPath)) {
+      try { fs.unlinkSync(resolvedPath) } catch {}
+    }
+    return {
+      completedSessions: [],
+      sessionNotes: {},
+      startedAt: new Date().toISOString(),
+    }
+  }
+
+  function save(progress: ProgressState) {
+    try { fs.writeFileSync(resolvedPath, JSON.stringify(progress, null, 2)) } catch {}
+  }
+
+  function isSessionDone(id: string, p: ProgressState) {
+    return p.completedSessions.includes(id)
+  }
+
+  function markSessionDone(id: string, noteUrl: string, p: ProgressState) {
+    if (!p.completedSessions.includes(id)) p.completedSessions.push(id)
+    p.sessionNotes[id] = noteUrl
+  }
+
+  return { load, initFresh, save, isSessionDone, markSessionDone, progressFilePath: resolvedPath }
+}
+
 /**
  * Main function that orchestrates the entire book mode note creation process
  */
@@ -340,9 +391,32 @@ async function main(): Promise<void> {
   const sessionList = loadAndProcessSessions()
   console.log(`Processing ${sessionList.length} sessions...`)
 
+  // Progress/resume support
+  const pm = createProgressManager(path.join(__dirname, 'progress.json'))
+  const RESUME_MODE = process.env.RESUME_MODE === 'true' || process.argv.includes('--resume')
+  let progress: ProgressState | null = null
+  if (RESUME_MODE) {
+    progress = pm.load()
+    if (!progress) {
+      console.error('No progress.json found. Start without --resume to create it.')
+      process.exit(1)
+    }
+    console.log(`🔄 Resume mode: ${progress.completedSessions.length} sessions already created`)
+  } else {
+    progress = pm.initFresh()
+    console.log('🚀 Fresh run: progress initialized')
+  }
+
   // Create individual session notes
   console.log('\n=== Creating Individual Session Notes ===')
   for (let data of sessionList) {
+    if (pm.isSessionDone(data.id, progress!)) {
+      // restore URL
+      if (progress!.sessionNotes[data.id]) data.noteUrl = progress!.sessionNotes[data.id].replace(`${getHackMDHost()}/`, '')
+      console.log(`⏭️  Skip existing: ${data.title}`)
+      continue
+    }
+
     const noteContent = generateSessionNoteContent(data)
     
     const noteData = {
@@ -355,6 +429,8 @@ async function main(): Promise<void> {
     try {
       const note = await api.createTeamNote(TEAM_PATH, noteData)
       data.noteUrl = note.shortId
+      pm.markSessionDone(data.id, `${getHackMDHost()}/${note.shortId}`, progress!)
+      pm.save(progress!)
       console.log(`✓ Created note for: ${data.title}`)
     } catch (error: any) {
       console.error(`✗ Failed to create note for ${data.title}:`, error.message)
@@ -395,6 +471,12 @@ async function main(): Promise<void> {
     console.log(`✓ Book URL: ${hackmdHost}/${mainBook.shortId}`)
     console.log('\n🎉 Book mode conference notes created successfully!')
     console.log(`📚 Main book contains links to ${sessionUrls.length} session notes`)
+    if (progress) {
+      progress.mainBookCreated = true
+      progress.mainBookUrl = `${hackmdHost}/${mainBook.shortId}`
+      progress.completedAt = new Date().toISOString()
+      pm.save(progress)
+    }
   } catch (error: any) {
     console.error('✗ Failed to create main book:', error.message)
   }
