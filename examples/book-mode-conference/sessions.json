@@ -1,7 +1,7 @@
 [
   {
     "id": "session-001",
-    "title": "Welcome to DevOpsDays",
+    "title": "Opening Keynote: The Future of Technology",
     "speaker": [
       {
         "speaker": {
@@ -12,7 +12,7 @@
     "session_type": "keynote",
     "started_at": "2025-03-15T09:00:00Z",
     "finished_at": "2025-03-15T09:30:00Z",
-    "tags": ["welcome", "keynote"],
+    "tags": ["keynote", "future", "technology"],
     "classroom": {
       "tw_name": "主舞台",
       "en_name": "Main Stage"
@@ -22,7 +22,7 @@
   },
   {
     "id": "session-002",
-    "title": "Introduction to CI/CD",
+    "title": "Advanced Cloud Architecture",
     "speaker": [
       {
         "speaker": {
@@ -33,7 +33,7 @@
     "session_type": "talk",
     "started_at": "2025-03-15T10:00:00Z",
     "finished_at": "2025-03-15T10:45:00Z",
-    "tags": ["ci", "cd", "automation"],
+    "tags": ["cloud", "architecture", "scalability"],
     "classroom": {
       "tw_name": "A會議室",
       "en_name": "Room A"
@@ -43,7 +43,7 @@
   },
   {
     "id": "session-003",
-    "title": "Advanced Kubernetes Operations",
+    "title": "Machine Learning in Production",
     "speaker": [
       {
         "speaker": {
@@ -59,7 +59,7 @@
     "session_type": "workshop",
     "started_at": "2025-03-15T11:00:00Z",
     "finished_at": "2025-03-15T12:00:00Z",
-    "tags": ["kubernetes", "containers", "orchestration"],
+    "tags": ["ml", "ai", "production"],
     "classroom": {
       "tw_name": "B會議室",
       "en_name": "Room B"
@@ -69,7 +69,7 @@
   },
   {
     "id": "session-004",
-    "title": "DevOps Culture and Practices",
+    "title": "Microservices Design Patterns",
     "speaker": [
       {
         "speaker": {
@@ -80,7 +80,7 @@
     "session_type": "talk",
     "started_at": "2025-03-15T14:00:00Z",
     "finished_at": "2025-03-15T14:45:00Z",
-    "tags": ["culture", "practices", "team"],
+    "tags": ["microservices", "design", "patterns"],
     "classroom": {
       "tw_name": "主舞台",
       "en_name": "Main Stage"
@@ -90,7 +90,7 @@
   },
   {
     "id": "session-005",
-    "title": "監控與可觀測性",
+    "title": "資料科學實務應用",
     "speaker": [
       {
         "speaker": {
@@ -101,7 +101,7 @@
     "session_type": "talk",
     "started_at": "2025-03-16T09:30:00Z",
     "finished_at": "2025-03-16T10:15:00Z",
-    "tags": ["monitoring", "observability"],
+    "tags": ["data-science", "analytics"],
     "classroom": {
       "tw_name": "A會議室",
       "en_name": "Room A"
@@ -111,7 +111,7 @@
   },
   {
     "id": "session-006",
-    "title": "Security in DevOps Pipeline",
+    "title": "Cybersecurity Best Practices",
     "speaker": [
       {
         "speaker": {
@@ -122,7 +122,7 @@
     "session_type": "workshop",
     "started_at": "2025-03-16T10:30:00Z",
     "finished_at": "2025-03-16T12:00:00Z",
-    "tags": ["security", "devsecops", "pipeline"],
+    "tags": ["security", "cybersecurity", "best-practices"],
     "classroom": {
       "tw_name": "C會議室",
       "en_name": "Room C"
