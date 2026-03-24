@@ -85,6 +85,8 @@ export type SingleNote = Note & {
   content: string
 }
 
+export type UpdateNoteOptions = Partial<Pick<SingleNote, 'content' | 'title' | 'tags' | 'readPermission' | 'writePermission' | 'permalink'>>
+
 // User
 export type GetMe = User
 
@@ -104,5 +106,4 @@ export type GetTeamNotes = Note[]
 export type CreateTeamNote = SingleNote
 export type UpdateTeamNote = void
 export type DeleteTeamNote = void
-
 
