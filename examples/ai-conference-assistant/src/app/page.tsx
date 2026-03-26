@@ -47,6 +47,10 @@ export default function Home() {
           sessionData={sessionDataRef}
           onSessionDataChange={setSessionData}
           onGenerated={setGeneratedData}
+          onChatReset={() => {
+            setGeneratedData(null)
+            setPreviewPage(null)
+          }}
           onCreateNotes={() => setShowProgress(true)}
           onPreviewPage={setPreviewPage}
           generatedData={generatedData}

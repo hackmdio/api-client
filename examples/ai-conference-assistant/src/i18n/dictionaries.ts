@@ -62,6 +62,10 @@ export const en = {
     placeholderWithFile: 'Message… (Shift+Enter for new line, Enter to send)',
     placeholderNoFile: 'Upload session data or ask anything… (Shift+Enter for new line)',
     invalidJson: 'Invalid JSON file. Please upload a valid JSON file.',
+    startOver: 'Start over',
+    startOverTitle: 'Clear chat and preview (uploaded session file is kept)',
+    startOverConfirm:
+      'Clear this conversation and the preview? Your uploaded session file will stay loaded.',
   },
   preview: {
     empty: 'No preview yet.',
@@ -156,6 +160,9 @@ export const zhTW: Messages = {
     placeholderWithFile: '輸入訊息…（Shift+Enter 換行，Enter 送出）',
     placeholderNoFile: '上傳場次資料或任意提問…（Shift+Enter 換行）',
     invalidJson: '不是有效的 JSON 檔案，請上傳正確的 JSON。',
+    startOver: '重新開始',
+    startOverTitle: '清除對話與預覽（已上傳的場次檔會保留）',
+    startOverConfirm: '要清除對話與右側預覽嗎？已上傳的場次檔會保留。',
   },
   preview: {
     empty: '尚無預覽。',

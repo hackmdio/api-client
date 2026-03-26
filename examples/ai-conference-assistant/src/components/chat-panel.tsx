@@ -36,6 +36,8 @@ interface ChatPanelProps {
   sessionData: MutableRefObject<string>
   onSessionDataChange: (data: string) => void
   onGenerated: (data: GeneratedData) => void
+  /** Clear preview in parent when user resets the chat. */
+  onChatReset: () => void
   onCreateNotes: () => void
   onPreviewPage: (page: { title: string; content: string }) => void
   generatedData: GeneratedData | null
@@ -48,6 +50,7 @@ export function ChatPanel({
   sessionData,
   onSessionDataChange,
   onGenerated,
+  onChatReset,
   onCreateNotes,
   onPreviewPage,
   generatedData,
@@ -98,7 +101,7 @@ export function ChatPanel({
     })
   }, [config.apiKey, config.apiEndpoint, config.teamPath, prepareSendMessagesRequest])
 
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, sendMessage, status, error, setMessages, stop, clearError } = useChat({
     transport,
   })
 
@@ -184,6 +187,21 @@ export function ChatPanel({
     }
   }
 
+  const canStartOver = messages.length > 0 || generatedData !== null
+
+  function handleStartOver() {
+    if (!canStartOver) return
+    if (!window.confirm(t('chat.startOverConfirm'))) return
+    if (status === 'submitted' || status === 'streaming') {
+      stop()
+    }
+    clearError()
+    setMessages([])
+    previewAppliedRef.current = null
+    setInputValue('')
+    onChatReset()
+  }
+
   return (
     <div className="flex h-full flex-col bg-zinc-50/80 dark:bg-zinc-950/50">
       {/* Header */}
@@ -197,6 +215,16 @@ export function ChatPanel({
           </span>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          {canStartOver && (
+            <button
+              type="button"
+              onClick={handleStartOver}
+              title={t('chat.startOverTitle')}
+              className="rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800 sm:px-3 sm:text-sm"
+            >
+              {t('chat.startOver')}
+            </button>
+          )}
           <AppSettingsBar className="hidden sm:inline-flex" />
           {generatedData && (
             <button
@@ -213,7 +241,17 @@ export function ChatPanel({
           )}
         </div>
       </div>
-      <div className="flex justify-end border-b border-zinc-200/60 px-4 py-2 dark:border-zinc-800 sm:hidden">
+      <div className="flex justify-end gap-2 border-b border-zinc-200/60 px-4 py-2 dark:border-zinc-800 sm:hidden">
+        {canStartOver && (
+          <button
+            type="button"
+            onClick={handleStartOver}
+            title={t('chat.startOverTitle')}
+            className="rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+          >
+            {t('chat.startOver')}
+          </button>
+        )}
         <AppSettingsBar />
       </div>
 
