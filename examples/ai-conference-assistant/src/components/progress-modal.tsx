@@ -223,7 +223,7 @@ export function ProgressModal({ config, generatedData, onClose }: ProgressModalP
               <button
                 type="button"
                 onClick={startCreation}
-                className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 font-medium text-white shadow-md transition hover:from-emerald-500 hover:to-teal-500"
+                className="rounded-xl bg-emerald-600 px-6 py-3 font-medium text-white shadow-sm transition hover:bg-emerald-500"
               >
                 🚀 {t('progress.startButton')}
               </button>

@@ -100,7 +100,7 @@ export function PreviewPanel({
             type="button"
             onClick={onCreateNotes}
             disabled={!previewConfirmed}
-            className="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 py-3 text-sm font-medium text-white shadow-md shadow-emerald-600/20 transition hover:from-emerald-500 hover:to-teal-500 disabled:cursor-not-allowed disabled:opacity-50 dark:shadow-emerald-900/30"
+            className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {t('preview.createButton', { count: generatedData.pages.length + 1 })}
           </button>

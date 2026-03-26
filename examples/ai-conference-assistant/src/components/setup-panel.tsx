@@ -48,19 +48,15 @@ export function SetupPanel({ onConfigured }: SetupPanelProps) {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-sky-50 via-white to-indigo-100 dark:from-zinc-950 dark:via-zinc-900 dark:to-indigo-950">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(56,189,248,0.12),_transparent_55%)] dark:bg-[radial-gradient(ellipse_at_top,_rgba(59,130,246,0.12),_transparent_55%)]" />
-      <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-indigo-400/15 blur-3xl dark:bg-indigo-500/10" />
-      <div className="pointer-events-none absolute -bottom-20 -left-16 h-64 w-64 rounded-full bg-sky-300/20 blur-3xl dark:bg-sky-500/10" />
-
+    <div className="relative min-h-screen bg-zinc-50 dark:bg-zinc-950">
       <div className="absolute right-4 top-4 z-10 sm:right-6 sm:top-6">
         <AppSettingsBar />
       </div>
 
       <div className="relative flex min-h-screen items-center justify-center p-4">
-        <div className="w-full max-w-lg rounded-2xl border border-zinc-200/80 bg-white/90 p-8 shadow-xl shadow-zinc-900/5 backdrop-blur dark:border-zinc-700/80 dark:bg-zinc-900/85 dark:shadow-black/40">
+        <div className="w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-700 dark:bg-zinc-900">
           <div className="mb-8 text-center">
-            <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-indigo-600 text-2xl shadow-lg shadow-indigo-500/25">
+            <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-100 text-2xl dark:border-zinc-600 dark:bg-zinc-800">
               📚
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-3xl">
@@ -149,7 +145,7 @@ export function SetupPanel({ onConfigured }: SetupPanelProps) {
             <button
               type="submit"
               disabled={verifying || !apiKey}
-              className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-3 font-medium text-white shadow-md shadow-blue-600/25 transition hover:from-blue-500 hover:to-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 dark:shadow-indigo-900/40"
+              className="w-full rounded-xl bg-blue-600 py-3 font-medium text-white shadow-sm transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-blue-600 dark:hover:bg-blue-500"
             >
               {verifying ? t('common.verifying') : t('setup.start')}
             </button>

@@ -1,12 +1,23 @@
 'use client'
 
 import { useTheme } from 'next-themes'
+import { useSyncExternalStore } from 'react'
 import type { Locale } from '@/i18n/dictionaries'
 import { useI18n } from '@/i18n/context'
+
+/** True only after client hydration so theme toggle active styles match server HTML (next-themes is undefined on server). */
+function useHydrated() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  )
+}
 
 export function AppSettingsBar({ className = '' }: { className?: string }) {
   const { locale, setLocale, t } = useI18n()
   const { theme, setTheme } = useTheme()
+  const hydrated = useHydrated()
 
   return (
     <div
@@ -21,7 +32,7 @@ export function AppSettingsBar({ className = '' }: { className?: string }) {
             type="button"
             onClick={() => setTheme(key)}
             className={`rounded-md px-2 py-1 text-xs font-medium transition ${
-              theme === key
+              hydrated && theme === key
                 ? 'bg-white text-zinc-900 shadow dark:bg-zinc-700 dark:text-zinc-100'
                 : 'text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'
             }`}

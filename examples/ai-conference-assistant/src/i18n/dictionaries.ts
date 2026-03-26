@@ -64,13 +64,11 @@ export const en = {
     invalidJson: 'Invalid JSON file. Please upload a valid JSON file.',
   },
   preview: {
-    empty:
-      'After the assistant runs generate_preview_pages, homepage and session pages appear here. Session data is analyzed with session_jq on the server — nothing huge is pasted in chat.',
-    panelTitle: 'Preview (book mode)',
+    empty: 'No preview yet.',
+    panelTitle: 'Preview',
     homepage: 'Homepage',
     morePages: '+{count} more',
-    confirmLabel:
-      'I confirm this preview matches what I want on HackMD. Real notes are created only after I click the button below.',
+    confirmLabel: 'I confirm this preview before creating notes on HackMD.',
     createButton: 'Create {count} notes on HackMD',
   },
   progress: {
@@ -160,13 +158,11 @@ export const zhTW: Messages = {
     invalidJson: '不是有效的 JSON 檔案，請上傳正確的 JSON。',
   },
   preview: {
-    empty:
-      '助理執行 generate_preview_pages 後，首頁與各場次頁會顯示在此。場次資料在伺服器上以 session_jq 分析 — 不會在聊天貼一大段 JSON。',
-    panelTitle: '預覽（書籍模式）',
+    empty: '尚無預覽。',
+    panelTitle: '預覽',
     homepage: '首頁',
     morePages: '另有 {count} 頁',
-    confirmLabel:
-      '我確認此預覽符合我要在 HackMD 上建立的內容。只有在我按下下方按鈕後才會真正建立筆記。',
+    confirmLabel: '確認此預覽後，再在 HackMD 建立筆記。',
     createButton: '在 HackMD 建立 {count} 則筆記',
   },
   progress: {

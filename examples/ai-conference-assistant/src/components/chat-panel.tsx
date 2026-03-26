@@ -206,7 +206,7 @@ export function ChatPanel({
               title={
                 previewConfirmed ? t('chat.createNotesTitle') : t('chat.createNotesDisabledTitle')
               }
-              className="rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-3 py-2 text-xs font-medium text-white shadow-sm transition hover:from-emerald-500 hover:to-teal-500 disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 sm:text-sm"
+              className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 sm:text-sm"
             >
               🚀 {t('chat.createNotes', { count: generatedData.pages.length + 1 })}
             </button>
@@ -426,7 +426,7 @@ export function ChatPanel({
           <button
             type="submit"
             disabled={isLoading || !inputValue.trim()}
-            className="shrink-0 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 font-medium text-white shadow-sm transition hover:from-blue-500 hover:to-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 sm:px-6"
+            className="shrink-0 rounded-xl bg-blue-600 px-4 py-2.5 font-medium text-white shadow-sm transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50 sm:px-6"
           >
             {t('common.send')}
           </button>
