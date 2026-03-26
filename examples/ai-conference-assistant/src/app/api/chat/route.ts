@@ -1,9 +1,8 @@
 /**
  * AI Chat API Route
  *
- * Handles streaming chat with the AI agent. The agent has access to tools
- * for reading HackMD notes, querying session data, and generating pages.
- * Note creation is handled separately via /api/create-notes.
+ * Session JSON is passed only into tool context (session_jq, generate_preview_pages),
+ * not embedded in the system prompt. The model analyzes shape via session_jq first.
  */
 
 import { convertToModelMessages, createGateway, streamText, stepCountIs, type UIMessage } from 'ai'
@@ -11,49 +10,32 @@ import { createTools } from '@/lib/tools'
 
 export const maxDuration = 60
 
-const SYSTEM_PROMPT = `You are a HackMD Conference Note Assistant (共筆小幫手). You help users create book-mode collaborative note systems for conferences.
+const SYSTEM_PROMPT = `You are a HackMD Conference Note Assistant (共筆小幫手). You help users design book-mode collaborative note systems for conferences.
 
-## Your Capabilities
-You have tools to:
-1. **hackmd_get_me** — Verify API credentials and discover available teams
-2. **hackmd_get_note** — Read existing notes for reference/templates
-3. **hackmd_get_team_notes** — List notes in a team workspace
-4. **jq_query** — Analyze session data efficiently (counts, grouping, field extraction)
-5. **generate_pages** — Generate all conference note pages for preview
+## Tools (read the descriptions carefully)
+1. **hackmd_get_me** — Verify API credentials and list teams
+2. **hackmd_get_note** / **hackmd_get_team_notes** — Optional reference notes
+3. **session_jq** — Query the **uploaded** session JSON on the server (jq-like). **Always use this first** to understand schema: \`length\` → \`keys\` → \`first 3\` or \`map\` a few fields. Never ask the user to paste full session JSON.
+4. **generate_preview_pages** — Build **preview markdown only** (homepage + session pages) from server-side session data. You pass conference name, team path, options — **not** raw JSON. After preview, the user confirms in the UI; **you do not create HackMD notes**.
 
-## Workflow
-1. First, if the user hasn't verified their setup, call hackmd_get_me to check credentials
-2. Ask about conference name and preferences. **Only** if there is no \`<session_data>\` block in your instructions for this request, ask them to upload session JSON in the UI. If \`<session_data>\` is present, session data is already loaded — do not ask for upload or paste.
-3. Use jq_query to analyze the session data shape and summarize it for the user
-4. If user mentions a reference note, fetch it with hackmd_get_note
-5. Use generate_pages to create all pages, show preview
-6. User confirms → they click "Create Notes" button in the UI
+## Staged workflow
+1. If needed, **hackmd_get_me** to align team path with the user.
+2. If the app has session data loaded, **session_jq** repeatedly until you understand fields (types, time fields, rooms, speakers).
+3. Ask only for **conference name**, **announcement embed**, exclusions, or template preferences — not for raw JSON.
+4. Call **generate_preview_pages** when ready. The right panel shows markdown preview.
+5. Real HackMD creation happens **only** when the user confirms the preview in the UI and starts creation — not via chat tools.
 
-## When session data is already provided
-If this request includes an \`<session_data>\` section below, the user has already uploaded sessions in the app. **Do not** ask them to upload or paste JSON again. Start with jq_query or answer their question using that data.
+## Rules
+- Do not ask users to paste or upload JSON in chat if the app already loaded a file (they use 📁 in the composer).
+- Prefer short tool outputs; summarize shape in natural language.
+- Respond in the user’s language (Chinese or English).
+- Be concise.
 
-## Important Notes
-- Always use jq_query first to understand data shape before generating pages — this saves tokens
-- When showing previews, show the homepage and 1-2 sample session pages
-- The actual note creation is handled by the frontend UI with progress tracking
-- Respond in the same language the user uses (Chinese or English)
-- Be concise but helpful
-
-## Session Data Format
-The expected session data format follows the conference session JSON pattern:
+## Reference: typical session object shape (for your mental model — actual fields vary)
 \`\`\`json
-{
-  "id": "session-001",
-  "title": "Talk Title",
-  "speaker": [{ "speaker": { "public_name": "Name" } }],
-  "session_type": "talk",
-  "started_at": "2025-03-15T09:00:00Z",
-  "finished_at": "2025-03-15T09:30:00Z",
-  "tags": ["tag1"],
-  "classroom": { "tw_name": "教室A", "en_name": "Room A" }
-}
+{ "id": 1, "title": "…", "session_type": "talk", "started_at": "…", "speaker": [], "classroom": { "tw_name": "…" } }
 \`\`\`
-But you should use jq_query to discover the actual shape of uploaded data and adapt accordingly.`
+`
 
 export async function POST(req: Request) {
   const body = await req.json()
@@ -64,7 +46,6 @@ export async function POST(req: Request) {
       apiEndpoint: string
       teamPath: string
     }
-    /** Raw session JSON; sent out-of-band so the chat UI does not embed huge payloads. */
     sessionDataJson?: string
   }
 
@@ -88,20 +69,29 @@ export async function POST(req: Request) {
     )
   }
 
-  const tools = createTools(config.apiKey, config.apiEndpoint)
+  const trimmedSession = sessionDataJson?.trim()
+  let sessionMeta = ''
+  if (trimmedSession) {
+    try {
+      const parsed = JSON.parse(trimmedSession) as unknown
+      const n = Array.isArray(parsed) ? parsed.length : 0
+      sessionMeta = `\n\n## Session file in app\n${n} session record(s) are loaded on the server for **session_jq** / **generate_preview_pages** only. Raw JSON is **not** included in this prompt.`
+    } catch {
+      sessionMeta =
+        '\n\n## Session file in app\nA session file is loaded (parse warning). Use **session_jq** to inspect.'
+    }
+  } else {
+    sessionMeta =
+      '\n\n## Session file\nNo session file is loaded yet. Ask the user to upload **sessions.json** via 📁 in the chat composer before analysis or preview.'
+  }
+
+  const tools = createTools(config.apiKey, config.apiEndpoint, {
+    sessionDataJson: trimmedSession || null,
+  })
   const uiMessages = Array.isArray(messages) ? messages : []
   const modelMessages = await convertToModelMessages(uiMessages, { tools })
 
-  let system = SYSTEM_PROMPT
-  if (sessionDataJson?.trim()) {
-    try {
-      const parsed = JSON.parse(sessionDataJson) as unknown
-      const n = Array.isArray(parsed) ? parsed.length : 0
-      system += `\n\n## Uploaded session data (${n} sessions) — attached by the app on every request while a file is loaded\n**You must not ask the user to upload or paste session JSON** — it is already in \`<session_data>\`. Use jq_query on this JSON. Use generate_pages with sessionsJson from this data when generating pages.\n\n<session_data>\n${sessionDataJson}\n</session_data>`
-    } catch {
-      system += `\n\n## Uploaded session data — attached by the app; do not ask for upload/paste\n<session_data>\n${sessionDataJson}\n</session_data>`
-    }
-  }
+  const system = SYSTEM_PROMPT + sessionMeta
 
   const gateway = createGateway({
     apiKey: aiGatewayApiKey,
@@ -113,8 +103,10 @@ export async function POST(req: Request) {
     system,
     messages: modelMessages,
     tools,
-    stopWhen: stepCountIs(10),
+    stopWhen: stepCountIs(15),
   })
 
-  return result.toTextStreamResponse()
+  // `toTextStreamResponse()` strips non-text events — tool calls/results never reach the client,
+  // so preview stays blank. UI message stream is required for tool parts in `useChat`.
+  return result.toUIMessageStreamResponse()
 }

@@ -1,25 +1,30 @@
 /**
  * AI SDK tool definitions for the conference assistant agent.
  *
- * Tools available to the AI:
- * - hackmd_get_me: Verify credentials & get user info
- * - hackmd_get_note: Fetch a note's content (for reference/templates)
- * - hackmd_get_team_notes: List team notes
- * - jq_query: Token-efficient JSON data analysis
- * - preview_pages: Return generated markdown for preview
+ * Session JSON stays server-side: **session_jq** and **generate_preview_pages** read the
+ * uploaded file from tool context — the model never pastes full JSON into chat.
  */
 
 import { tool } from 'ai'
 import { z } from 'zod'
 import { createHackMDApi } from './create-hackmd-api'
 
+export interface SessionToolsOptions {
+  /** Uploaded sessions JSON; only available to tools, not injected into the system prompt. */
+  sessionDataJson?: string | null
+}
+
 /**
  * Create all read-only tools the AI agent can use during conversation.
- * Write tools (createTeamNote) are NOT exposed to the AI — note creation
- * is handled by a dedicated server action with progress tracking.
+ * HackMD note **creation** is not a tool — it runs from the UI after explicit confirmation.
  */
-export function createTools(apiKey: string, apiEndpoint: string) {
+export function createTools(
+  apiKey: string,
+  apiEndpoint: string,
+  options?: SessionToolsOptions,
+) {
   const client = createHackMDApi(apiKey, apiEndpoint)
+  const sessionJson = options?.sessionDataJson?.trim() ?? ''
 
   return {
     hackmd_get_me: tool({
@@ -76,55 +81,74 @@ export function createTools(apiKey: string, apiEndpoint: string) {
       },
     }),
 
-    jq_query: tool({
-      description: `Analyze JSON session data using jq-like queries. This is token-efficient — use it to understand data shape, count items, filter, group, and extract fields without sending the full data to the conversation. 
+    session_jq: tool({
+      description: `Run a jq-like query on the **uploaded session JSON** stored on the server. Do not paste raw session JSON in chat — use this tool to explore the data. **Always analyze first** before generating previews: start with \`length\`, then \`keys\`, then \`first 3\` or \`map\` a few fields.
 
 Supported operations:
 - "length" — count items
-- "keys" — get field names from first item
-- "unique <field>" — unique values of a field
-- "group_by <field>" — group and count by field
-- "select <field> <op> <value>" — filter items (ops: ==, !=, contains)
-- "map <field1> <field2> ..." — extract specific fields
-- "first [n]" — first n items (default 1)
-- "sort_by <field> [desc]" — sort items
-- "flat_map <field>" — flatten nested arrays by field`,
+- "keys" — field names from first item (+ sample)
+- "unique <field>" — unique values
+- "group_by <field>" — group counts
+- "select <field> <op> <value>" — filter (==, !=, contains)
+- "map <field1> <field2> ..." — project fields
+- "first [n]" — first n items
+- "sort_by <field> [desc]" — sort
+- "flat_map <field>" — flatten nested arrays`,
       inputSchema: z.object({
-        query: z.string().describe('The jq-like query to run on the session data'),
-        data: z.string().describe('The JSON data to query (stringified)'),
+        query: z.string().describe('jq-like query string'),
       }),
-      execute: async ({ query, data }) => {
-        return executeJqQuery(query, data)
+      execute: async ({ query }) => {
+        if (!sessionJson) {
+          return {
+            error:
+              'No session file loaded. Ask the user to upload sessions.json using the paperclip control in the chat composer.',
+          }
+        }
+        return executeJqQuery(query, sessionJson)
       },
     }),
 
-    generate_pages: tool({
-      description: `Generate all conference note pages (homepage + individual session pages) based on the session data and configuration. Call this when you have enough information from the user about: conference name, team path, session data format, desired page template, and any customizations.
-
-Returns the generated markdown for preview. The user can then confirm to actually create the notes via HackMD API.`,
+    generate_preview_pages: tool({
+      description: `Build **preview-only** markdown (book-mode style homepage + session pages) from the uploaded session data. Uses server-side JSON — you do not pass sessionsJson. Call after session_jq shows the shape and the user confirmed conference name / preferences. Does **not** create HackMD notes; the user reviews the preview in the UI, confirms, then starts real creation from the preview panel.`,
       inputSchema: z.object({
-        conferenceName: z.string().describe('Conference name (e.g. "COSCUP 2026")'),
-        teamPath: z.string().describe('HackMD team path'),
-        sessionsJson: z.string().describe('The full sessions JSON data as a string'),
-        announcementNote: z.string().optional().describe('HackMD announcement note to embed (e.g. "@team/note-id")'),
-        excludeTypes: z.array(z.string()).optional().describe('Session titles to exclude (e.g. ["Break", "Lunch"])'),
-        pageTemplate: z.string().optional().describe('Custom page template. Use {title}, {time}, {room}, {announcement}, {tags} as placeholders.'),
-        webDomain: z.string().optional().describe('HackMD web domain for links (default: https://hackmd.io)'),
+        conferenceName: z.string().describe('Conference display name'),
+        teamPath: z.string().describe('HackMD team path (from app setup or user)'),
+        announcementNote: z
+          .string()
+          .optional()
+          .describe('HackMD announcement embed (e.g. "@team/note-id")'),
+        excludeTypes: z
+          .array(z.string())
+          .optional()
+          .describe('Session titles/types to skip, e.g. Break, Lunch'),
+        pageTemplate: z
+          .string()
+          .optional()
+          .describe('Optional markdown template with {title}, {time}, {room}, {announcement}, {tags}, {speakers}, …'),
+        webDomain: z.string().optional().describe('For links in copy; creation uses app web domain'),
       }),
       execute: async ({
         conferenceName,
-        sessionsJson,
         announcementNote,
         excludeTypes,
         pageTemplate,
       }) => {
-        return generateAllPages({
-          conferenceName,
-          sessionsJson,
-          announcementNote: announcementNote || '',
-          excludeTypes: excludeTypes || [],
-          pageTemplate,
-        })
+        if (!sessionJson) {
+          return {
+            error:
+              'No session file loaded. Ask the user to upload sessions.json before generating a preview.',
+          }
+        }
+        return {
+          ...generateAllPages({
+            conferenceName,
+            sessionsJson: sessionJson,
+            announcementNote: announcementNote || '',
+            excludeTypes: excludeTypes || [],
+            pageTemplate,
+          }),
+          preview: true as const,
+        }
       },
     }),
   }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useChat } from '@ai-sdk/react'
-import { TextStreamChatTransport } from 'ai'
+import { DefaultChatTransport } from 'ai'
 import {
   useState,
   useRef,
@@ -13,6 +13,21 @@ import {
 } from 'react'
 import type { AppConfig, GeneratedData } from '@/app/page'
 
+/** AI SDK v6 tool parts use `tool-${name}` or `dynamic-tool` + `toolName`; states are `output-available`, not `result`. */
+function getToolPartName(part: { type: string; toolName?: string }): string {
+  if (part.type === 'dynamic-tool' && typeof part.toolName === 'string') {
+    return part.toolName
+  }
+  if (part.type.startsWith('tool-')) {
+    return part.type.slice('tool-'.length)
+  }
+  return ''
+}
+
+function isToolPart(part: { type: string }): boolean {
+  return part.type.startsWith('tool-') || part.type === 'dynamic-tool'
+}
+
 interface ChatPanelProps {
   config: AppConfig
   sessionData: MutableRefObject<string>
@@ -21,6 +36,8 @@ interface ChatPanelProps {
   onCreateNotes: () => void
   onPreviewPage: (page: { title: string; content: string }) => void
   generatedData: GeneratedData | null
+  /** Required before HackMD creation (mobile / narrow layout). */
+  previewConfirmed: boolean
 }
 
 export function ChatPanel({
@@ -31,6 +48,7 @@ export function ChatPanel({
   onCreateNotes,
   onPreviewPage,
   generatedData,
+  previewConfirmed,
 }: ChatPanelProps) {
   const [fileUploaded, setFileUploaded] = useState(false)
   /** Set when a file parses successfully; avoids JSON.parse on ref before parent syncs sessionDataRef. */
@@ -47,7 +65,7 @@ export function ChatPanel({
 
   const transport = useMemo(
     () =>
-      new TextStreamChatTransport({
+      new DefaultChatTransport({
         api: '/api/chat',
         body: {
           config: {
@@ -64,7 +82,7 @@ export function ChatPanel({
           }
           const json =
             localSessionJsonRef.current.trim() || sessionData.current.trim()
-          // Include on every send while a file is loaded so the model keeps <session_data> in context.
+          // Server injects session JSON into tools only (session_jq / generate_preview_pages), not the system prompt.
           if (fileUploadedRef.current && json) {
             merged.sessionDataJson = json
           }
@@ -84,6 +102,42 @@ export function ChatPanel({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  /** Sync preview when tool output lands (covers render + stream edge cases). */
+  const previewAppliedRef = useRef<string | null>(null)
+  useEffect(() => {
+    for (const m of messages) {
+      if (m.role !== 'assistant') continue
+      for (const part of m.parts ?? []) {
+        if (!isToolPart(part as { type: string })) continue
+        const p = part as {
+          type: string
+          toolName?: string
+          state?: string
+          output?: unknown
+          errorText?: string
+          toolCallId?: string
+        }
+        if (
+          p.output === undefined ||
+          (p.state !== 'output-available' && p.state !== 'result')
+        )
+          continue
+        if (getToolPartName(p) !== 'generate_preview_pages') continue
+        const key = `${m.id}:${p.toolCallId ?? 'no-id'}`
+        if (previewAppliedRef.current === key) continue
+        const result = p.output as {
+          homepage?: { title: string; content: string }
+          pages?: Array<{ sessionId: string; title: string; content: string }>
+          error?: string
+        }
+        if (result.error || !result.homepage || !result.pages) continue
+        previewAppliedRef.current = key
+        onGenerated(result as GeneratedData)
+        break
+      }
+    }
+  }, [messages, onGenerated])
 
   function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -137,8 +191,15 @@ export function ChatPanel({
         <div className="flex items-center gap-2">
           {generatedData && (
             <button
+              type="button"
               onClick={onCreateNotes}
-              className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition"
+              disabled={!previewConfirmed}
+              title={
+                previewConfirmed
+                  ? 'Create notes on HackMD'
+                  : 'Confirm preview in the preview column first'
+              }
+              className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               🚀 Create {generatedData.pages.length + 1} Notes
             </button>
@@ -187,12 +248,23 @@ export function ChatPanel({
               }`}
             >
               {message.parts?.map((part, i) => {
-                // Tool parts have type like 'tool-hackmd_get_me', 'tool-generate_pages', etc.
-                if (part.type.startsWith('tool-')) {
-                  const toolPart = part as { type: string; state: string; toolCallId: string; output?: unknown; title?: string }
-                  const toolName = part.type.replace('tool-', '')
+                if (isToolPart(part as { type: string })) {
+                  const toolPart = part as {
+                    type: string
+                    toolName?: string
+                    state?: string
+                    toolCallId?: string
+                    output?: unknown
+                    errorText?: string
+                    title?: string
+                  }
+                  const toolName = getToolPartName(toolPart)
 
-                  if (toolPart.state === 'call' || toolPart.state === 'input-streaming') {
+                  if (
+                    toolPart.state === 'input-streaming' ||
+                    toolPart.state === 'input-available' ||
+                    toolPart.state === 'approval-requested'
+                  ) {
                     return (
                       <div key={i} className="text-xs text-gray-400 italic my-1">
                         🔧 Calling {toolName}...
@@ -200,20 +272,34 @@ export function ChatPanel({
                     )
                   }
 
-                  if (toolPart.state === 'result') {
-                    // For generate_pages, show a compact summary with preview button
-                    if (toolName === 'generate_pages' && toolPart.output) {
+                  if (toolPart.state === 'output-error') {
+                    return (
+                      <div key={i} className="my-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-800">
+                        {toolName}: {toolPart.errorText ?? 'Tool error'}
+                      </div>
+                    )
+                  }
+
+                  if (
+                    (toolPart.state === 'output-available' ||
+                      (toolPart as { state?: string }).state === 'result') &&
+                    toolPart.output !== undefined
+                  ) {
+                    if (toolName === 'generate_preview_pages') {
                       const result = toolPart.output as {
                         homepage?: { title: string; content: string }
                         pages?: Array<{ sessionId: string; title: string; content: string }>
                         summary?: string
+                        error?: string
+                        preview?: boolean
                       }
 
-                      // Capture generated data for preview panel
-                      if (result.homepage && result.pages) {
-                        queueMicrotask(() => {
-                          onGenerated(result as GeneratedData)
-                        })
+                      if (result.error) {
+                        return (
+                          <div key={i} className="my-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900">
+                            {result.error}
+                          </div>
+                        )
                       }
 
                       return (
@@ -222,22 +308,27 @@ export function ChatPanel({
                           className="my-2 p-3 bg-green-50 border border-green-200 rounded-lg text-sm"
                         >
                           <p className="font-medium text-green-800">
-                            ✅ {result.summary || 'Pages generated'}
+                            ✅ Preview: {result.summary || 'Pages ready — check the preview panel'}
+                          </p>
+                          <p className="text-xs text-green-700 mt-1">
+                            Confirm the preview there, then use Create to publish to HackMD.
                           </p>
                           {result.homepage && (
                             <button
+                              type="button"
                               onClick={() => onPreviewPage(result.homepage!)}
                               className="mt-1 text-xs text-green-600 hover:underline"
                             >
-                              Preview homepage →
+                              Open homepage in preview →
                             </button>
                           )}
                           {result.pages && result.pages.length > 0 && (
                             <button
+                              type="button"
                               onClick={() => onPreviewPage(result.pages![0])}
                               className="mt-1 ml-3 text-xs text-green-600 hover:underline"
                             >
-                              Preview first session →
+                              First session →
                             </button>
                           )}
                         </div>
