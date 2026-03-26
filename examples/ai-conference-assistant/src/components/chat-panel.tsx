@@ -2,19 +2,16 @@
 
 import { useChat } from '@ai-sdk/react'
 import { TextStreamChatTransport } from 'ai'
-import { useState, useRef, useEffect, type MutableRefObject, type FormEvent } from 'react'
+import {
+  useState,
+  useRef,
+  useEffect,
+  useMemo,
+  type MutableRefObject,
+  type FormEvent,
+  type KeyboardEvent,
+} from 'react'
 import type { AppConfig, GeneratedData } from '@/app/page'
-
-function safeSessionArrayLength(json: string): number {
-  const t = json.trim()
-  if (!t) return 0
-  try {
-    const parsed = JSON.parse(t) as unknown
-    return Array.isArray(parsed) ? parsed.length : 0
-  } catch {
-    return 0
-  }
-}
 
 interface ChatPanelProps {
   config: AppConfig
@@ -38,22 +35,47 @@ export function ChatPanel({
   const [fileUploaded, setFileUploaded] = useState(false)
   /** Set when a file parses successfully; avoids JSON.parse on ref before parent syncs sessionDataRef. */
   const [uploadedSessionCount, setUploadedSessionCount] = useState<number | null>(null)
-  const [sessionDataSent, setSessionDataSent] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  /** Same JSON as parent ref, set synchronously on file read so the first send cannot race useEffect. */
+  const localSessionJsonRef = useRef('')
+  const fileUploadedRef = useRef(false)
+  useEffect(() => {
+    fileUploadedRef.current = fileUploaded
+  }, [fileUploaded])
+
+  const transport = useMemo(
+    () =>
+      new TextStreamChatTransport({
+        api: '/api/chat',
+        body: {
+          config: {
+            apiKey: config.apiKey,
+            apiEndpoint: config.apiEndpoint,
+            teamPath: config.teamPath,
+          },
+        },
+        prepareSendMessagesRequest: ({ body, messages }) => {
+          // `body` is only the static `config` from transport init; `messages` is passed separately and must be merged in.
+          const merged: Record<string, unknown> = {
+            ...(body as Record<string, unknown>),
+            messages,
+          }
+          const json =
+            localSessionJsonRef.current.trim() || sessionData.current.trim()
+          // Include on every send while a file is loaded so the model keeps <session_data> in context.
+          if (fileUploadedRef.current && json) {
+            merged.sessionDataJson = json
+          }
+          return { body: merged }
+        },
+      }),
+    [config.apiKey, config.apiEndpoint, config.teamPath],
+  )
 
   const { messages, sendMessage, status, error } = useChat({
-    transport: new TextStreamChatTransport({
-      api: '/api/chat',
-      body: {
-        config: {
-          apiKey: config.apiKey,
-          apiEndpoint: config.apiEndpoint,
-          teamPath: config.teamPath,
-        },
-      },
-    }),
+    transport,
   })
 
   const isLoading = status === 'submitted' || status === 'streaming'
@@ -73,6 +95,7 @@ export function ChatPanel({
       try {
         const parsed = JSON.parse(text) as unknown
         const count = Array.isArray(parsed) ? parsed.length : 0
+        localSessionJsonRef.current = text
         onSessionDataChange(text)
         setUploadedSessionCount(count)
         setFileUploaded(true)
@@ -83,26 +106,22 @@ export function ChatPanel({
     reader.readAsText(file)
   }
 
+  function sendCurrentMessage() {
+    if (!inputValue.trim() || isLoading) return
+    void sendMessage({ text: inputValue })
+    setInputValue('')
+  }
+
   function onSubmit(e: FormEvent) {
     e.preventDefault()
-    if (!inputValue.trim() || isLoading) return
+    sendCurrentMessage()
+  }
 
-    // If session data is available and hasn't been sent yet, include it
-    let text = inputValue
-    if (
-      fileUploaded &&
-      sessionData.current.trim() &&
-      !sessionDataSent
-    ) {
-      const count =
-        uploadedSessionCount ??
-        safeSessionArrayLength(sessionData.current)
-      text = `${inputValue}\n\n[Session data uploaded - ${count} sessions]\n<session_data>\n${sessionData.current}\n</session_data>`
-      setSessionDataSent(true)
+  function onComposerKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing) {
+      e.preventDefault()
+      sendCurrentMessage()
     }
-
-    sendMessage({ text })
-    setInputValue('')
   }
 
   return (
@@ -270,7 +289,7 @@ export function ChatPanel({
 
       {/* Input area */}
       <div className="px-6 py-4 bg-white border-t border-gray-200">
-        <form onSubmit={onSubmit} className="flex gap-3">
+        <form onSubmit={onSubmit} className="flex gap-3 items-end">
           <input
             ref={fileInputRef}
             type="file"
@@ -281,26 +300,27 @@ export function ChatPanel({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="px-3 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-gray-600"
+            className="px-3 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-gray-600 shrink-0 self-end"
             title="Upload sessions JSON"
           >
             📁
           </button>
-          <input
-            type="text"
+          <textarea
             value={inputValue}
             onChange={e => setInputValue(e.target.value)}
+            onKeyDown={onComposerKeyDown}
+            rows={3}
             placeholder={
               fileUploaded
-                ? 'Tell me about your conference...'
-                : 'Upload session data first, or ask me anything...'
+                ? 'Message… (Shift+Enter for new line, Enter to send)'
+                : 'Upload session data or ask anything… (Shift+Enter for new line)'
             }
-            className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-gray-900"
+            className="flex-1 min-h-[2.75rem] max-h-40 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-gray-900 resize-y"
           />
           <button
             type="submit"
             disabled={isLoading || !inputValue.trim()}
-            className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition shrink-0"
           >
             Send
           </button>

@@ -6,8 +6,7 @@
  * Note creation is handled separately via /api/create-notes.
  */
 
-import { streamText, stepCountIs, type ModelMessage } from 'ai'
-import { createOpenAI } from '@ai-sdk/openai'
+import { convertToModelMessages, createGateway, streamText, stepCountIs, type UIMessage } from 'ai'
 import { createTools } from '@/lib/tools'
 
 export const maxDuration = 60
@@ -24,11 +23,14 @@ You have tools to:
 
 ## Workflow
 1. First, if the user hasn't verified their setup, call hackmd_get_me to check credentials
-2. Ask about: conference name, team path, session data (user uploads JSON)
+2. Ask about conference name and preferences. **Only** if there is no \`<session_data>\` block in your instructions for this request, ask them to upload session JSON in the UI. If \`<session_data>\` is present, session data is already loaded — do not ask for upload or paste.
 3. Use jq_query to analyze the session data shape and summarize it for the user
 4. If user mentions a reference note, fetch it with hackmd_get_note
 5. Use generate_pages to create all pages, show preview
 6. User confirms → they click "Create Notes" button in the UI
+
+## When session data is already provided
+If this request includes an \`<session_data>\` section below, the user has already uploaded sessions in the app. **Do not** ask them to upload or paste JSON again. Start with jq_query or answer their question using that data.
 
 ## Important Notes
 - Always use jq_query first to understand data shape before generating pages — this saves tokens
@@ -55,13 +57,15 @@ But you should use jq_query to discover the actual shape of uploaded data and ad
 
 export async function POST(req: Request) {
   const body = await req.json()
-  const { messages, config } = body as {
-    messages: ModelMessage[]
+  const { messages, config, sessionDataJson } = body as {
+    messages: UIMessage[]
     config: {
       apiKey: string
       apiEndpoint: string
       teamPath: string
     }
+    /** Raw session JSON; sent out-of-band so the chat UI does not embed huge payloads. */
+    sessionDataJson?: string
   }
 
   if (!config?.apiKey) {
@@ -85,16 +89,29 @@ export async function POST(req: Request) {
   }
 
   const tools = createTools(config.apiKey, config.apiEndpoint)
+  const uiMessages = Array.isArray(messages) ? messages : []
+  const modelMessages = await convertToModelMessages(uiMessages, { tools })
 
-  const openai = createOpenAI({
+  let system = SYSTEM_PROMPT
+  if (sessionDataJson?.trim()) {
+    try {
+      const parsed = JSON.parse(sessionDataJson) as unknown
+      const n = Array.isArray(parsed) ? parsed.length : 0
+      system += `\n\n## Uploaded session data (${n} sessions) — attached by the app on every request while a file is loaded\n**You must not ask the user to upload or paste session JSON** — it is already in \`<session_data>\`. Use jq_query on this JSON. Use generate_pages with sessionsJson from this data when generating pages.\n\n<session_data>\n${sessionDataJson}\n</session_data>`
+    } catch {
+      system += `\n\n## Uploaded session data — attached by the app; do not ask for upload/paste\n<session_data>\n${sessionDataJson}\n</session_data>`
+    }
+  }
+
+  const gateway = createGateway({
     apiKey: aiGatewayApiKey,
     ...(process.env.AI_GATEWAY_BASE_URL && { baseURL: process.env.AI_GATEWAY_BASE_URL }),
   })
 
   const result = streamText({
-    model: openai('gpt-4o'),
-    system: SYSTEM_PROMPT,
-    messages,
+    model: gateway('openai/gpt-5.4-mini'),
+    system,
+    messages: modelMessages,
     tools,
     stopWhen: stepCountIs(10),
   })
