@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { SetupPanel } from '@/components/setup-panel'
 import { ChatPanel } from '@/components/chat-panel'
 import { PreviewPanel } from '@/components/preview-panel'
@@ -21,7 +21,7 @@ export interface GeneratedData {
 export default function Home() {
   const [config, setConfig] = useState<AppConfig | null>(null)
   const [sessionData, setSessionData] = useState<string>('')
-  const [generatedData, setGeneratedData] = useState<GeneratedData | null>(null)
+  const [generatedData, setGeneratedDataState] = useState<GeneratedData | null>(null)
   /** User explicitly confirms the preview before HackMD creation is allowed. */
   const [previewConfirmed, setPreviewConfirmed] = useState(false)
   const [showProgress, setShowProgress] = useState(false)
@@ -29,16 +29,17 @@ export default function Home() {
   const sessionDataRef = useRef(sessionData)
   useEffect(() => { sessionDataRef.current = sessionData }, [sessionData])
 
-  useEffect(() => {
+  const setGeneratedData = useCallback((data: GeneratedData | null) => {
+    setGeneratedDataState(data)
     setPreviewConfirmed(false)
-  }, [generatedData])
+  }, [])
 
   if (!config) {
     return <SetupPanel onConfigured={setConfig} />
   }
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-gray-50 min-h-0">
+    <div className="flex flex-col lg:flex-row h-screen min-h-0 bg-zinc-50 dark:bg-zinc-950">
       {/* Chat */}
       <div className="flex-1 flex flex-col min-h-0 min-w-0 lg:max-w-[calc(100%-480px)]">
         <ChatPanel
@@ -54,7 +55,7 @@ export default function Home() {
       </div>
 
       {/* Preview + confirm + create (always mounted so narrow screens can confirm before HackMD) */}
-      <div className="h-[min(42vh,420px)] lg:h-auto lg:w-[480px] border-t lg:border-t-0 lg:border-l border-gray-200 bg-white flex-shrink-0 flex flex-col min-h-0">
+      <div className="h-[min(42vh,420px)] lg:h-auto lg:w-[480px] flex-shrink-0 flex flex-col min-h-0 border-t border-zinc-200/80 bg-white shadow-[inset_0_1px_0_0_rgba(0,0,0,0.03)] dark:border-zinc-800 dark:bg-zinc-900 lg:border-t-0 lg:border-l">
         <PreviewPanel
           generatedData={generatedData}
           previewPage={previewPage}

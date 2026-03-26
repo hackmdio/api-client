@@ -9,10 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@hackmd/api": "file:../../nodejs",
     "@ai-sdk/react": "^3.0.140",
+    "@hackmd/api": "file:../../nodejs",
     "ai": "^6.0.138",
     "next": "16.2.1",
+    "next-themes": "^0.4.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "zod": "^4.3.6"

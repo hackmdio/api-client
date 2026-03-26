@@ -7,11 +7,14 @@ import {
   useRef,
   useEffect,
   useMemo,
+  useCallback,
   type MutableRefObject,
   type FormEvent,
   type KeyboardEvent,
 } from 'react'
 import type { AppConfig, GeneratedData } from '@/app/page'
+import { AppSettingsBar } from '@/components/app-settings-bar'
+import { useI18n } from '@/i18n/context'
 
 /** AI SDK v6 tool parts use `tool-${name}` or `dynamic-tool` + `toolName`; states are `output-available`, not `result`. */
 function getToolPartName(part: { type: string; toolName?: string }): string {
@@ -50,6 +53,7 @@ export function ChatPanel({
   generatedData,
   previewConfirmed,
 }: ChatPanelProps) {
+  const { t } = useI18n()
   const [fileUploaded, setFileUploaded] = useState(false)
   /** Set when a file parses successfully; avoids JSON.parse on ref before parent syncs sessionDataRef. */
   const [uploadedSessionCount, setUploadedSessionCount] = useState<number | null>(null)
@@ -63,34 +67,36 @@ export function ChatPanel({
     fileUploadedRef.current = fileUploaded
   }, [fileUploaded])
 
-  const transport = useMemo(
-    () =>
-      new DefaultChatTransport({
-        api: '/api/chat',
-        body: {
-          config: {
-            apiKey: config.apiKey,
-            apiEndpoint: config.apiEndpoint,
-            teamPath: config.teamPath,
-          },
-        },
-        prepareSendMessagesRequest: ({ body, messages }) => {
-          // `body` is only the static `config` from transport init; `messages` is passed separately and must be merged in.
-          const merged: Record<string, unknown> = {
-            ...(body as Record<string, unknown>),
-            messages,
-          }
-          const json =
-            localSessionJsonRef.current.trim() || sessionData.current.trim()
-          // Server injects session JSON into tools only (session_jq / generate_preview_pages), not the system prompt.
-          if (fileUploadedRef.current && json) {
-            merged.sessionDataJson = json
-          }
-          return { body: merged }
-        },
-      }),
-    [config.apiKey, config.apiEndpoint, config.teamPath],
+  const prepareSendMessagesRequest = useCallback(
+    ({ body, messages }: { body: unknown; messages: unknown }) => {
+      const merged: Record<string, unknown> = {
+        ...(body as Record<string, unknown>),
+        messages,
+      }
+      const json = localSessionJsonRef.current.trim() || sessionData.current.trim()
+      if (fileUploadedRef.current && json) {
+        merged.sessionDataJson = json
+      }
+      return { body: merged }
+    },
+    [sessionData],
   )
+
+  const transport = useMemo(() => {
+    // prepareSendMessagesRequest reads session refs only when sending; ESLint flags the ref in its closure.
+    /* eslint-disable-next-line react-hooks/refs */
+    return new DefaultChatTransport({
+      api: '/api/chat',
+      body: {
+        config: {
+          apiKey: config.apiKey,
+          apiEndpoint: config.apiEndpoint,
+          teamPath: config.teamPath,
+        },
+      },
+      prepareSendMessagesRequest,
+    })
+  }, [config.apiKey, config.apiEndpoint, config.teamPath, prepareSendMessagesRequest])
 
   const { messages, sendMessage, status, error } = useChat({
     transport,
@@ -154,7 +160,7 @@ export function ChatPanel({
         setUploadedSessionCount(count)
         setFileUploaded(true)
       } catch {
-        alert('Invalid JSON file. Please upload a valid JSON file.')
+        alert(t('chat.invalidJson'))
       }
     }
     reader.readAsText(file)
@@ -179,56 +185,60 @@ export function ChatPanel({
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col bg-zinc-50/80 dark:bg-zinc-950/50">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200">
-        <div className="flex items-center gap-3">
-          <h2 className="font-semibold text-gray-900">📚 Conference Assistant</h2>
-          <span className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
+      <div className="flex items-center justify-between gap-3 border-b border-zinc-200/80 bg-white/90 px-4 py-3 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/90 sm:px-6">
+        <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+          <h2 className="truncate font-semibold text-zinc-900 dark:text-zinc-100">
+            📚 {t('chat.title')}
+          </h2>
+          <span className="hidden max-w-[10rem] truncate rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 dark:bg-blue-500/20 dark:text-blue-200 sm:inline">
             {config.teamPath}
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
+          <AppSettingsBar className="hidden sm:inline-flex" />
           {generatedData && (
             <button
               type="button"
               onClick={onCreateNotes}
               disabled={!previewConfirmed}
               title={
-                previewConfirmed
-                  ? 'Create notes on HackMD'
-                  : 'Confirm preview in the preview column first'
+                previewConfirmed ? t('chat.createNotesTitle') : t('chat.createNotesDisabledTitle')
               }
-              className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 px-3 py-2 text-xs font-medium text-white shadow-sm transition hover:from-emerald-500 hover:to-teal-500 disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 sm:text-sm"
             >
-              🚀 Create {generatedData.pages.length + 1} Notes
+              🚀 {t('chat.createNotes', { count: generatedData.pages.length + 1 })}
             </button>
           )}
         </div>
       </div>
+      <div className="flex justify-end border-b border-zinc-200/60 px-4 py-2 dark:border-zinc-800 sm:hidden">
+        <AppSettingsBar />
+      </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+      <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-6">
         {/* Welcome message */}
         {messages.length === 0 && (
-          <div className="text-center py-12">
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">
-              👋 Welcome! Let&apos;s create conference notes
+          <div className="py-10 text-center sm:py-12">
+            <h3 className="mb-2 text-xl font-semibold text-zinc-800 dark:text-zinc-100">
+              👋 {t('chat.welcomeTitle')}
             </h3>
-            <p className="text-gray-500 mb-6 max-w-md mx-auto">
-              Upload your session data JSON, tell me about your conference, and I&apos;ll
-              generate all the collaborative notes for you.
+            <p className="mx-auto mb-6 max-w-md text-sm text-zinc-500 dark:text-zinc-400">
+              {t('chat.welcomeBody')}
             </p>
-            <div className="flex justify-center gap-3 flex-wrap">
+            <div className="flex flex-wrap justify-center gap-3">
               <button
+                type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition text-sm font-medium"
+                className="rounded-xl bg-blue-100 px-4 py-2 text-sm font-medium text-blue-800 transition hover:bg-blue-200 dark:bg-blue-500/20 dark:text-blue-200 dark:hover:bg-blue-500/30"
               >
-                📁 Upload sessions.json
+                📁 {t('chat.uploadSessions')}
               </button>
               {fileUploaded && uploadedSessionCount !== null && (
-                <span className="px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm">
-                  ✅ {uploadedSessionCount} sessions loaded
+                <span className="rounded-xl bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200">
+                  ✅ {t('chat.sessionsLoaded', { count: uploadedSessionCount })}
                 </span>
               )}
             </div>
@@ -241,10 +251,10 @@ export function ChatPanel({
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+              className={`max-w-[min(80%,42rem)] rounded-2xl px-4 py-3 shadow-sm ${
                 message.role === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white border border-gray-200 text-gray-800'
+                  ? 'bg-gradient-to-br from-blue-600 to-indigo-600 text-white'
+                  : 'border border-zinc-200/80 bg-white text-zinc-800 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100'
               }`}
             >
               {message.parts?.map((part, i) => {
@@ -266,16 +276,19 @@ export function ChatPanel({
                     toolPart.state === 'approval-requested'
                   ) {
                     return (
-                      <div key={i} className="text-xs text-gray-400 italic my-1">
-                        🔧 Calling {toolName}...
+                      <div key={i} className="my-1 text-xs italic text-zinc-400 dark:text-zinc-500">
+                        🔧 {t('chat.callingTool', { tool: toolName })}
                       </div>
                     )
                   }
 
                   if (toolPart.state === 'output-error') {
                     return (
-                      <div key={i} className="my-2 p-2 bg-red-50 border border-red-200 rounded text-xs text-red-800">
-                        {toolName}: {toolPart.errorText ?? 'Tool error'}
+                      <div
+                        key={i}
+                        className="my-2 rounded border border-red-200 bg-red-50 p-2 text-xs text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200"
+                      >
+                        {toolName}: {toolPart.errorText ?? t('chat.toolError')}
                       </div>
                     )
                   }
@@ -296,7 +309,10 @@ export function ChatPanel({
 
                       if (result.error) {
                         return (
-                          <div key={i} className="my-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900">
+                          <div
+                            key={i}
+                            className="my-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100"
+                          >
                             {result.error}
                           </div>
                         )
@@ -305,30 +321,31 @@ export function ChatPanel({
                       return (
                         <div
                           key={i}
-                          className="my-2 p-3 bg-green-50 border border-green-200 rounded-lg text-sm"
+                          className="my-2 rounded-lg border border-emerald-200/80 bg-emerald-50/90 p-3 text-sm dark:border-emerald-900/40 dark:bg-emerald-950/30"
                         >
-                          <p className="font-medium text-green-800">
-                            ✅ Preview: {result.summary || 'Pages ready — check the preview panel'}
+                          <p className="font-medium text-emerald-900 dark:text-emerald-100">
+                            ✅ {t('chat.previewHeading')}{' '}
+                            {result.summary || t('chat.previewSummaryFallback')}
                           </p>
-                          <p className="text-xs text-green-700 mt-1">
-                            Confirm the preview there, then use Create to publish to HackMD.
+                          <p className="mt-1 text-xs text-emerald-800 dark:text-emerald-200/90">
+                            {t('chat.previewHint')}
                           </p>
                           {result.homepage && (
                             <button
                               type="button"
                               onClick={() => onPreviewPage(result.homepage!)}
-                              className="mt-1 text-xs text-green-600 hover:underline"
+                              className="mt-1 text-xs font-medium text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-300"
                             >
-                              Open homepage in preview →
+                              {t('chat.openHomepage')}
                             </button>
                           )}
                           {result.pages && result.pages.length > 0 && (
                             <button
                               type="button"
                               onClick={() => onPreviewPage(result.pages![0])}
-                              className="mt-1 ml-3 text-xs text-green-600 hover:underline"
+                              className="mt-1 ml-3 text-xs font-medium text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-300"
                             >
-                              First session →
+                              {t('chat.firstSession')}
                             </button>
                           )}
                         </div>
@@ -336,8 +353,8 @@ export function ChatPanel({
                     }
 
                     return (
-                      <div key={i} className="text-xs text-gray-400 italic my-1">
-                        ✅ {toolName} completed
+                      <div key={i} className="my-1 text-xs italic text-zinc-400 dark:text-zinc-500">
+                        ✅ {t('chat.toolCompleted', { tool: toolName })}
                       </div>
                     )
                   }
@@ -359,8 +376,8 @@ export function ChatPanel({
 
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3">
-              <div className="flex items-center gap-2 text-gray-400">
+            <div className="rounded-2xl border border-zinc-200/80 bg-white px-4 py-3 dark:border-zinc-700 dark:bg-zinc-900">
+              <div className="flex items-center gap-2 text-zinc-400 dark:text-zinc-500">
                 <div className="animate-pulse">●</div>
                 <div className="animate-pulse" style={{ animationDelay: '0.2s' }}>●</div>
                 <div className="animate-pulse" style={{ animationDelay: '0.4s' }}>●</div>
@@ -370,8 +387,8 @@ export function ChatPanel({
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
-            Error: {error.message}
+          <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200">
+            {t('chat.errorPrefix')} {error.message}
           </div>
         )}
 
@@ -379,8 +396,8 @@ export function ChatPanel({
       </div>
 
       {/* Input area */}
-      <div className="px-6 py-4 bg-white border-t border-gray-200">
-        <form onSubmit={onSubmit} className="flex gap-3 items-end">
+      <div className="border-t border-zinc-200/80 bg-white/95 px-4 py-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95 sm:px-6">
+        <form onSubmit={onSubmit} className="flex items-end gap-2 sm:gap-3">
           <input
             ref={fileInputRef}
             type="file"
@@ -391,8 +408,8 @@ export function ChatPanel({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="px-3 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-gray-600 shrink-0 self-end"
-            title="Upload sessions JSON"
+            className="shrink-0 self-end rounded-xl border border-zinc-300 bg-white px-3 py-2.5 text-zinc-600 transition hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            title={t('chat.uploadFileTitle')}
           >
             📁
           </button>
@@ -402,23 +419,21 @@ export function ChatPanel({
             onKeyDown={onComposerKeyDown}
             rows={3}
             placeholder={
-              fileUploaded
-                ? 'Message… (Shift+Enter for new line, Enter to send)'
-                : 'Upload session data or ask anything… (Shift+Enter for new line)'
+              fileUploaded ? t('chat.placeholderWithFile') : t('chat.placeholderNoFile')
             }
-            className="flex-1 min-h-[2.75rem] max-h-40 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-gray-900 resize-y"
+            className="min-h-[2.75rem] max-h-40 flex-1 resize-y rounded-xl border border-zinc-300 bg-white px-4 py-2.5 text-zinc-900 shadow-sm transition placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-zinc-600 dark:bg-zinc-950/50 dark:text-zinc-100 dark:placeholder:text-zinc-500"
           />
           <button
             type="submit"
             disabled={isLoading || !inputValue.trim()}
-            className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition shrink-0"
+            className="shrink-0 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 font-medium text-white shadow-sm transition hover:from-blue-500 hover:to-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 sm:px-6"
           >
-            Send
+            {t('common.send')}
           </button>
         </form>
         {fileUploaded && uploadedSessionCount !== null && (
-          <p className="text-xs text-green-600 mt-2">
-            ✅ {uploadedSessionCount} sessions loaded from file
+          <p className="mt-2 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+            ✅ {t('chat.sessionsLoadedFromFile', { count: uploadedSessionCount })}
           </p>
         )}
       </div>

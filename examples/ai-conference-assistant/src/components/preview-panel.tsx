@@ -1,6 +1,7 @@
 'use client'
 
 import type { GeneratedData } from '@/app/page'
+import { useI18n } from '@/i18n/context'
 
 interface PreviewPanelProps {
   generatedData: GeneratedData | null
@@ -19,14 +20,13 @@ export function PreviewPanel({
   onPreviewConfirmedChange,
   onCreateNotes,
 }: PreviewPanelProps) {
+  const { t } = useI18n()
+
   if (!generatedData && !previewPage) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-gray-400 p-8">
-        <div className="text-4xl mb-4">📄</div>
-        <p className="text-center">
-          After the assistant runs <strong>generate_preview_pages</strong>, homepage and session pages appear here.
-          Session data is analyzed with <strong>session_jq</strong> on the server — nothing huge is pasted in chat.
-        </p>
+      <div className="flex h-full flex-col items-center justify-center p-8 text-center text-zinc-500 dark:text-zinc-400">
+        <div className="mb-4 text-4xl opacity-90">📄</div>
+        <p className="max-w-sm text-sm leading-relaxed">{t('preview.empty')}</p>
       </div>
     )
   }
@@ -34,31 +34,31 @@ export function PreviewPanel({
   const currentPage = previewPage || generatedData?.homepage
 
   return (
-    <div className="flex flex-col h-full min-h-0">
-      <div className="px-4 py-3 border-b border-gray-200 shrink-0">
-        <h3 className="font-semibold text-gray-900 text-sm">Preview (book mode)</h3>
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="shrink-0 border-b border-zinc-200/80 px-4 py-3 dark:border-zinc-800">
+        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{t('preview.panelTitle')}</h3>
         {generatedData && (
-          <div className="mt-2 flex gap-1 flex-wrap">
+          <div className="mt-2 flex flex-wrap gap-1">
             <button
               type="button"
               onClick={() => onSelectPage(generatedData.homepage)}
-              className={`text-xs px-2 py-1 rounded ${
+              className={`rounded-md px-2 py-1 text-xs font-medium transition ${
                 currentPage?.title === generatedData.homepage.title
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-200'
+                  : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
               }`}
             >
-              📚 Homepage
+              📚 {t('preview.homepage')}
             </button>
             {generatedData.pages.slice(0, 10).map((page, i) => (
               <button
                 type="button"
                 key={i}
                 onClick={() => onSelectPage(page)}
-                className={`text-xs px-2 py-1 rounded truncate max-w-[120px] ${
+                className={`max-w-[120px] truncate rounded-md px-2 py-1 text-xs font-medium transition ${
                   currentPage?.title === page.title
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-200'
+                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
                 }`}
                 title={page.title}
               >
@@ -66,19 +66,19 @@ export function PreviewPanel({
               </button>
             ))}
             {generatedData.pages.length > 10 && (
-              <span className="text-xs text-gray-400 px-2 py-1">
-                +{generatedData.pages.length - 10} more
+              <span className="px-2 py-1 text-xs text-zinc-400 dark:text-zinc-500">
+                {t('preview.morePages', { count: generatedData.pages.length - 10 })}
               </span>
             )}
           </div>
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 min-h-0">
+      <div className="min-h-0 flex-1 overflow-y-auto p-4">
         {currentPage && (
           <div>
-            <h4 className="text-sm font-medium text-gray-500 mb-3">{currentPage.title}</h4>
-            <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono bg-gray-50 rounded-lg p-4 border border-gray-200 leading-relaxed">
+            <h4 className="mb-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">{currentPage.title}</h4>
+            <pre className="whitespace-pre-wrap rounded-xl border border-zinc-200/80 bg-zinc-50 p-4 font-mono text-sm leading-relaxed text-zinc-800 dark:border-zinc-700 dark:bg-zinc-950/50 dark:text-zinc-200">
               {currentPage.content}
             </pre>
           </div>
@@ -86,26 +86,23 @@ export function PreviewPanel({
       </div>
 
       {generatedData && (
-        <div className="border-t border-gray-200 p-4 bg-gray-50 shrink-0 space-y-3">
-          <label className="flex items-start gap-2 cursor-pointer text-sm text-gray-700">
+        <div className="shrink-0 space-y-3 border-t border-zinc-200/80 bg-zinc-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-900/50">
+          <label className="flex cursor-pointer items-start gap-2 text-sm text-zinc-700 dark:text-zinc-300">
             <input
               type="checkbox"
-              className="mt-1 rounded border-gray-300"
+              className="mt-1 rounded border-zinc-300 text-blue-600 focus:ring-blue-500 focus:ring-offset-0 dark:border-zinc-600 dark:bg-zinc-900"
               checked={previewConfirmed}
               onChange={e => onPreviewConfirmedChange(e.target.checked)}
             />
-            <span>
-              I confirm this preview matches what I want on HackMD. Real notes are created only after I click
-              the button below.
-            </span>
+            <span>{t('preview.confirmLabel')}</span>
           </label>
           <button
             type="button"
             onClick={onCreateNotes}
             disabled={!previewConfirmed}
-            className="w-full px-4 py-3 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 py-3 text-sm font-medium text-white shadow-md shadow-emerald-600/20 transition hover:from-emerald-500 hover:to-teal-500 disabled:cursor-not-allowed disabled:opacity-50 dark:shadow-emerald-900/30"
           >
-            Create {generatedData.pages.length + 1} notes on HackMD
+            {t('preview.createButton', { count: generatedData.pages.length + 1 })}
           </button>
         </div>
       )}

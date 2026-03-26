@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import type { AppConfig, GeneratedData } from '@/app/page'
+import { useI18n } from '@/i18n/context'
 
 interface ProgressModalProps {
   config: AppConfig
@@ -39,6 +40,7 @@ interface ProgressEvent {
 }
 
 export function ProgressModal({ config, generatedData, onClose }: ProgressModalProps) {
+  const { t } = useI18n()
   const [phase, setPhase] = useState<string>('idle')
   const [total, setTotal] = useState(0)
   const [completed, setCompleted] = useState(0)
@@ -51,7 +53,7 @@ export function ProgressModal({ config, generatedData, onClose }: ProgressModalP
   const startCreation = useCallback(async () => {
     setStarted(true)
     setPhase('creating-sessions')
-    setLogs([{ type: 'info', text: '🚀 Starting note creation...' }])
+    setLogs([{ type: 'info', text: t('progress.logStarting') }])
 
     try {
       const response = await fetch('/api/create-notes', {
@@ -110,7 +112,7 @@ export function ProgressModal({ config, generatedData, onClose }: ProgressModalP
               ...prev,
               {
                 type: 'success',
-                text: `✅ ${created.title} → ${created.url}`,
+                text: t('progress.logNoteCreated', { title: created.title, url: created.url }),
               },
             ])
           }
@@ -121,7 +123,10 @@ export function ProgressModal({ config, generatedData, onClose }: ProgressModalP
               ...prev,
               {
                 type: 'error',
-                text: `❌ ${err.title || 'Error'}: ${err.message}`,
+                text: t('progress.logError', {
+                  title: err.title || 'Error',
+                  message: err.message,
+                }),
               },
             ])
           }
@@ -130,14 +135,17 @@ export function ProgressModal({ config, generatedData, onClose }: ProgressModalP
             setMainBookUrl(event.mainBookUrl)
             setLogs(prev => [
               ...prev,
-              { type: 'success', text: `📚 Main book: ${event.mainBookUrl}` },
+              { type: 'success', text: t('progress.logMainBook', { url: event.mainBookUrl! }) },
             ])
           }
 
           if (event.phase === 'done') {
             setLogs(prev => [
               ...prev,
-              { type: 'info', text: `🎉 All done! ${event.completed}/${event.total} notes created.` },
+              {
+                type: 'info',
+                text: t('progress.logAllDone', { completed: event.completed, total: event.total }),
+              },
             ])
           }
         }
@@ -145,11 +153,10 @@ export function ProgressModal({ config, generatedData, onClose }: ProgressModalP
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       setPhase('error')
-      setLogs(prev => [...prev, { type: 'error', text: `💥 ${message}` }])
+      setLogs(prev => [...prev, { type: 'error', text: t('progress.logFatal', { message }) }])
     }
-  }, [config, generatedData, delayMs])
+  }, [config, generatedData, delayMs, t])
 
-  // Auto-scroll logs
   useEffect(() => {
     const el = document.getElementById('progress-logs')
     if (el) el.scrollTop = el.scrollHeight
@@ -158,108 +165,112 @@ export function ProgressModal({ config, generatedData, onClose }: ProgressModalP
   const percent = total > 0 ? Math.round((completed / total) * 100) : 0
   const isDone = phase === 'done' || phase === 'error'
 
+  const phaseLabel =
+    phase === 'creating-sessions'
+      ? t('progress.phaseCreatingSessions')
+      : phase === 'creating-book'
+        ? t('progress.phaseCreatingBook')
+        : phase === 'done'
+          ? t('progress.phaseDone')
+          : phase === 'error'
+            ? t('progress.phaseError')
+            : t('progress.phaseStarting')
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] flex flex-col">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900 text-lg">
-            {isDone ? '🎉 Notes Created' : '📝 Creating Notes...'}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm dark:bg-black/60">
+      <div className="flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-900">
+        <div className="flex items-center justify-between border-b border-zinc-200 px-6 py-4 dark:border-zinc-700">
+          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+            {isDone ? t('progress.titleDone') : t('progress.titleCreating')}
           </h3>
           {isDone && (
             <button
+              type="button"
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 text-xl"
+              className="text-xl text-zinc-400 transition hover:text-zinc-700 dark:hover:text-zinc-200"
             >
               ✕
             </button>
           )}
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-hidden flex flex-col p-6">
-          {/* Pre-start config */}
+        <div className="flex flex-1 flex-col overflow-hidden p-6">
           {!started && (
             <div className="space-y-4">
-              <p className="text-gray-600">
-                Ready to create <strong>{generatedData.pages.length + 1}</strong> notes in
-                team <strong>{config.teamPath}</strong>.
+              <p className="text-zinc-600 dark:text-zinc-300">
+                {t('progress.readyBody', {
+                  count: generatedData.pages.length + 1,
+                  team: config.teamPath,
+                })}
               </p>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Delay between requests (ms)
+                <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  {t('progress.delayLabel')}
                 </label>
                 <input
                   type="number"
                   value={delayMs}
-                  onChange={e => setDelayMs(parseInt(e.target.value) || 0)}
+                  onChange={e => setDelayMs(parseInt(e.target.value, 10) || 0)}
                   min={0}
                   max={5000}
                   step={100}
-                  className="w-32 px-3 py-2 border border-gray-300 rounded-lg text-gray-900"
+                  className="w-32 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 dark:border-zinc-600 dark:bg-zinc-950 dark:text-zinc-100"
                 />
-                <p className="text-xs text-gray-400 mt-1">
-                  Recommended: 200-500ms to avoid rate limits
-                </p>
+                <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">{t('progress.delayHint')}</p>
               </div>
 
               <button
+                type="button"
                 onClick={startCreation}
-                className="px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition"
+                className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 font-medium text-white shadow-md transition hover:from-emerald-500 hover:to-teal-500"
               >
-                🚀 Start Creating Notes
+                🚀 {t('progress.startButton')}
               </button>
             </div>
           )}
 
-          {/* Progress bar */}
           {started && (
             <>
               <div className="mb-4">
-                <div className="flex justify-between text-sm text-gray-600 mb-1">
-                  <span>
-                    {phase === 'creating-sessions'
-                      ? 'Creating session notes...'
-                      : phase === 'creating-book'
-                        ? 'Creating homepage...'
-                        : phase === 'done'
-                          ? 'Complete!'
-                          : phase === 'error'
-                            ? 'Error occurred'
-                            : 'Starting...'}
-                  </span>
+                <div className="mb-1 flex justify-between text-sm text-zinc-600 dark:text-zinc-400">
+                  <span>{phaseLabel}</span>
                   <span>
                     {completed}/{total} ({percent}%)
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-3">
+                <div className="h-3 w-full rounded-full bg-zinc-200 dark:bg-zinc-800">
                   <div
                     className={`h-3 rounded-full transition-all duration-300 ${
-                      phase === 'error' ? 'bg-red-500' : phase === 'done' ? 'bg-green-500' : 'bg-blue-500'
+                      phase === 'error'
+                        ? 'bg-red-500'
+                        : phase === 'done'
+                          ? 'bg-emerald-500'
+                          : 'bg-blue-500'
                     }`}
                     style={{ width: `${percent}%` }}
                   />
                 </div>
                 {current && phase !== 'done' && (
-                  <p className="text-xs text-gray-400 mt-1 truncate">Current: {current}</p>
+                  <p className="mt-1 truncate text-xs text-zinc-400 dark:text-zinc-500">
+                    {t('progress.currentLabel')} {current}
+                  </p>
                 )}
               </div>
 
-              {/* Log output */}
               <div
                 id="progress-logs"
-                className="flex-1 overflow-y-auto bg-gray-50 rounded-lg border border-gray-200 p-3 font-mono text-xs space-y-1 min-h-[200px]"
+                className="min-h-[200px] flex-1 space-y-1 overflow-y-auto rounded-xl border border-zinc-200 bg-zinc-50 p-3 font-mono text-xs dark:border-zinc-700 dark:bg-zinc-950/50"
               >
                 {logs.map((log, i) => (
                   <div
                     key={i}
                     className={
                       log.type === 'error'
-                        ? 'text-red-600'
+                        ? 'text-red-600 dark:text-red-400'
                         : log.type === 'success'
-                          ? 'text-green-700'
-                          : 'text-gray-500'
+                          ? 'text-emerald-700 dark:text-emerald-400'
+                          : 'text-zinc-500 dark:text-zinc-400'
                     }
                   >
                     {log.text}
@@ -267,15 +278,16 @@ export function ProgressModal({ config, generatedData, onClose }: ProgressModalP
                 ))}
               </div>
 
-              {/* Main book link */}
               {mainBookUrl && (
-                <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                  <p className="text-sm font-medium text-green-800">📚 Main Book Created:</p>
+                <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900/50 dark:bg-emerald-950/40">
+                  <p className="text-sm font-medium text-emerald-900 dark:text-emerald-200">
+                    {t('progress.mainBookLabel')}
+                  </p>
                   <a
                     href={mainBookUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-green-600 hover:underline break-all"
+                    className="break-all text-sm text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-400"
                   >
                     {mainBookUrl}
                   </a>
@@ -285,14 +297,14 @@ export function ProgressModal({ config, generatedData, onClose }: ProgressModalP
           )}
         </div>
 
-        {/* Footer */}
         {isDone && (
-          <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+          <div className="flex justify-end border-t border-zinc-200 px-6 py-4 dark:border-zinc-700">
             <button
+              type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+              className="rounded-lg bg-zinc-100 px-4 py-2 text-zinc-800 transition hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700"
             >
-              Close
+              {t('common.close')}
             </button>
           </div>
         )}
