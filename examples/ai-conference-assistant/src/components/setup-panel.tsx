@@ -9,7 +9,6 @@ interface SetupPanelProps {
 
 export function SetupPanel({ onConfigured }: SetupPanelProps) {
   const [apiKey, setApiKey] = useState('')
-  const [openaiApiKey, setOpenaiApiKey] = useState('')
   const [apiEndpoint, setApiEndpoint] = useState('https://api.hackmd.io/v1')
   const [teamPath, setTeamPath] = useState('')
   const [webDomain, setWebDomain] = useState('https://hackmd.io')
@@ -22,29 +21,20 @@ export function SetupPanel({ onConfigured }: SetupPanelProps) {
     setVerifying(true)
 
     try {
-      // Verify HackMD credentials
-      const res = await fetch(`${apiEndpoint}/me`, {
-        headers: { Authorization: `Bearer ${apiKey}` },
+      const res = await fetch('/api/verify-hackmd', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey, apiEndpoint, teamPath }),
       })
+      const data = (await res.json()) as { error?: string; teamPath?: string }
       if (!res.ok) {
-        throw new Error(`HackMD API returned ${res.status}: ${res.statusText}`)
-      }
-      const user = await res.json()
-      const teams = user.teams || []
-      const hasTeam = !teamPath || teams.some((t: { path: string }) => t.path === teamPath)
-
-      if (teamPath && !hasTeam) {
-        const teamNames = teams.map((t: { path: string }) => t.path).join(', ')
-        throw new Error(
-          `Team "${teamPath}" not found. Available teams: ${teamNames || 'none'}`,
-        )
+        throw new Error(data.error || 'Verification failed')
       }
 
       onConfigured({
         apiKey,
-        openaiApiKey,
         apiEndpoint,
-        teamPath: teamPath || teams[0]?.path || '',
+        teamPath: data.teamPath ?? '',
         webDomain,
       })
     } catch (err) {
@@ -88,20 +78,6 @@ export function SetupPanel({ onConfigured }: SetupPanelProps) {
                 hackmd.io/settings/api
               </a>
             </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              OpenAI API Key <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="password"
-              value={openaiApiKey}
-              onChange={e => setOpenaiApiKey(e.target.value)}
-              placeholder="sk-..."
-              required
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-gray-900"
-            />
           </div>
 
           <div>
@@ -156,7 +132,7 @@ export function SetupPanel({ onConfigured }: SetupPanelProps) {
 
           <button
             type="submit"
-            disabled={verifying || !apiKey || !openaiApiKey}
+            disabled={verifying || !apiKey}
             className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
             {verifying ? 'Verifying...' : 'Start →'}

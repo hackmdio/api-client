@@ -9,7 +9,7 @@ A web-based AI assistant that helps you create book-mode collaborative note syst
 - **Reference Note Fetching**: Point the AI to an existing HackMD note (e.g., last year's conference) and it will analyze the format
 - **Markdown Preview**: Preview the generated homepage and all session pages before creating
 - **Rate-Limit-Aware Creation**: Batch note creation with configurable delay and real-time progress tracking via SSE
-- **Frontend API Key Entry**: No server-side secrets needed — provide your HackMD and OpenAI API keys from the browser
+- **Server-side LLM credentials**: `AI_GATEWAY_API_KEY` is read only on the server (never sent from the browser); you still enter your HackMD token in the UI
 
 ## Architecture
 
@@ -19,7 +19,7 @@ A web-based AI assistant that helps you create book-mode collaborative note syst
 │                                                  │
 │  ┌──────────────┐  ┌──────────┐  ┌───────────┐  │
 │  │  Setup Panel  │  │  Chat UI │  │  Preview   │  │
-│  │  (API keys)   │  │  (useChat)│  │  (Markdown)│  │
+│  │  (HackMD)     │  │  (useChat)│  │  (Markdown)│  │
 │  └──────┬───────┘  └────┬─────┘  └───────────┘  │
 │         │               │                        │
 └─────────┼───────────────┼────────────────────────┘
@@ -44,7 +44,7 @@ A web-based AI assistant that helps you create book-mode collaborative note syst
 
 - Node.js 18+
 - A [HackMD API token](https://hackmd.io/settings/api)
-- An [OpenAI API key](https://platform.openai.com/api-keys)
+- A [Vercel AI Gateway](https://vercel.com/docs/ai-gateway) API key (or another OpenAI-compatible key) set as **`AI_GATEWAY_API_KEY` in the server environment** — for example in `.env.local` when developing, or in your host’s env for production
 
 ### Setup
 
@@ -55,6 +55,11 @@ cd examples/ai-conference-assistant
 # Install dependencies
 npm install
 
+# Required: LLM key for the API route (not committed — use .env.local)
+echo 'AI_GATEWAY_API_KEY=your_key_here' >> .env.local
+# Optional: custom OpenAI-compatible base URL (e.g. Vercel AI Gateway)
+# echo 'AI_GATEWAY_BASE_URL=https://ai-gateway.vercel.sh/v1' >> .env.local
+
 # Start the development server
 npm run dev
 ```
@@ -63,7 +68,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Usage
 
-1. **Enter your credentials** — HackMD API key, OpenAI API key, and team path
+1. **Enter your HackMD credentials** — API key and team path (LLM access uses `AI_GATEWAY_API_KEY` on the server only)
 2. **Upload session data** — Click the 📁 button to upload your `sessions.json`
 3. **Chat with the AI** — Tell it about your conference, reference notes, customizations
 4. **Preview** — The AI generates pages; preview them in the right panel

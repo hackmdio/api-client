@@ -8,7 +8,6 @@ import { ProgressModal } from '@/components/progress-modal'
 
 export interface AppConfig {
   apiKey: string
-  openaiApiKey: string
   apiEndpoint: string
   teamPath: string
   webDomain: string

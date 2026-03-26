@@ -11,7 +11,7 @@
 
 import { tool } from 'ai'
 import { z } from 'zod'
-import { HackMDClient } from './hackmd-client'
+import { createHackMDApi } from './create-hackmd-api'
 
 /**
  * Create all read-only tools the AI agent can use during conversation.
@@ -19,10 +19,7 @@ import { HackMDClient } from './hackmd-client'
  * is handled by a dedicated server action with progress tracking.
  */
 export function createTools(apiKey: string, apiEndpoint: string) {
-  const client = new HackMDClient({
-    accessToken: apiKey,
-    apiEndpoint,
-  })
+  const client = createHackMDApi(apiKey, apiEndpoint)
 
   return {
     hackmd_get_me: tool({
@@ -34,7 +31,7 @@ export function createTools(apiKey: string, apiEndpoint: string) {
           name: user.name,
           email: user.email,
           userPath: user.userPath,
-          teams: user.teams.map(t => ({
+          teams: user.teams.map((t: (typeof user.teams)[number]) => ({
             name: t.name,
             path: t.path,
             description: t.description,
@@ -68,7 +65,7 @@ export function createTools(apiKey: string, apiEndpoint: string) {
       }),
       execute: async ({ teamPath }) => {
         const notes = await client.getTeamNotes(teamPath)
-        return notes.map(n => ({
+        return notes.map((n: (typeof notes)[number]) => ({
           id: n.id,
           title: n.title,
           shortId: n.shortId,

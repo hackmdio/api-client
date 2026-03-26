@@ -5,7 +5,17 @@
  * and progress streaming via Server-Sent Events.
  */
 
-import { HackMDClient } from '@/lib/hackmd-client'
+import { NotePermissionRole } from '@hackmd/api'
+import { createHackMDApi } from '@/lib/create-hackmd-api'
+
+function isRateLimitError(err: unknown): boolean {
+  if (typeof err === 'object' && err !== null) {
+    const e = err as { code?: number; response?: { status?: number } }
+    if (e.code === 429 || e.response?.status === 429) return true
+  }
+  const msg = err instanceof Error ? err.message : String(err)
+  return msg.includes('429') || msg.toLowerCase().includes('too many requests')
+}
 
 export const maxDuration = 300
 
@@ -40,10 +50,7 @@ export async function POST(req: Request) {
     })
   }
 
-  const client = new HackMDClient({
-    accessToken: config.apiKey,
-    apiEndpoint: config.apiEndpoint,
-  })
+  const client = createHackMDApi(config.apiKey, config.apiEndpoint)
 
   const webDomain = config.webDomain || 'https://hackmd.io'
   const delayMs = Math.max(0, Math.min(config.delayMs || 300, 5000))
@@ -81,8 +88,8 @@ export async function POST(req: Request) {
           const note = await client.createTeamNote(config.teamPath, {
             title: page.title,
             content: page.content,
-            readPermission: 'guest',
-            writePermission: 'signed_in',
+            readPermission: NotePermissionRole.GUEST,
+            writePermission: NotePermissionRole.SIGNED_IN,
           })
 
           createdNotes[page.sessionId] = note.shortId
@@ -119,7 +126,7 @@ export async function POST(req: Request) {
           })
 
           // If it's a rate limit error, wait longer
-          if (message.includes('429')) {
+          if (isRateLimitError(err)) {
             await new Promise(resolve => setTimeout(resolve, 10000))
           } else if (delayMs > 0) {
             await new Promise(resolve => setTimeout(resolve, delayMs))
@@ -150,8 +157,8 @@ export async function POST(req: Request) {
         const mainNote = await client.createTeamNote(config.teamPath, {
           title: homepage.title,
           content: homepageContent,
-          readPermission: 'guest',
-          writePermission: 'signed_in',
+          readPermission: NotePermissionRole.GUEST,
+          writePermission: NotePermissionRole.SIGNED_IN,
         })
 
         completed++

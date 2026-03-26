@@ -5,6 +5,17 @@ import { TextStreamChatTransport } from 'ai'
 import { useState, useRef, useEffect, type MutableRefObject, type FormEvent } from 'react'
 import type { AppConfig, GeneratedData } from '@/app/page'
 
+function safeSessionArrayLength(json: string): number {
+  const t = json.trim()
+  if (!t) return 0
+  try {
+    const parsed = JSON.parse(t) as unknown
+    return Array.isArray(parsed) ? parsed.length : 0
+  } catch {
+    return 0
+  }
+}
+
 interface ChatPanelProps {
   config: AppConfig
   sessionData: MutableRefObject<string>
@@ -25,6 +36,8 @@ export function ChatPanel({
   generatedData,
 }: ChatPanelProps) {
   const [fileUploaded, setFileUploaded] = useState(false)
+  /** Set when a file parses successfully; avoids JSON.parse on ref before parent syncs sessionDataRef. */
+  const [uploadedSessionCount, setUploadedSessionCount] = useState<number | null>(null)
   const [sessionDataSent, setSessionDataSent] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -38,7 +51,6 @@ export function ChatPanel({
           apiKey: config.apiKey,
           apiEndpoint: config.apiEndpoint,
           teamPath: config.teamPath,
-          openaiApiKey: config.openaiApiKey,
         },
       },
     }),
@@ -59,8 +71,10 @@ export function ChatPanel({
     reader.onload = (ev) => {
       const text = ev.target?.result as string
       try {
-        JSON.parse(text) // Validate JSON
+        const parsed = JSON.parse(text) as unknown
+        const count = Array.isArray(parsed) ? parsed.length : 0
         onSessionDataChange(text)
+        setUploadedSessionCount(count)
         setFileUploaded(true)
       } catch {
         alert('Invalid JSON file. Please upload a valid JSON file.')
@@ -77,10 +91,12 @@ export function ChatPanel({
     let text = inputValue
     if (
       fileUploaded &&
-      sessionData.current &&
+      sessionData.current.trim() &&
       !sessionDataSent
     ) {
-      const count = JSON.parse(sessionData.current).length
+      const count =
+        uploadedSessionCount ??
+        safeSessionArrayLength(sessionData.current)
       text = `${inputValue}\n\n[Session data uploaded - ${count} sessions]\n<session_data>\n${sessionData.current}\n</session_data>`
       setSessionDataSent(true)
     }
@@ -130,9 +146,9 @@ export function ChatPanel({
               >
                 📁 Upload sessions.json
               </button>
-              {fileUploaded && (
+              {fileUploaded && uploadedSessionCount !== null && (
                 <span className="px-4 py-2 bg-green-100 text-green-700 rounded-lg text-sm">
-                  ✅ {JSON.parse(sessionData.current).length} sessions loaded
+                  ✅ {uploadedSessionCount} sessions loaded
                 </span>
               )}
             </div>
@@ -289,9 +305,9 @@ export function ChatPanel({
             Send
           </button>
         </form>
-        {fileUploaded && (
+        {fileUploaded && uploadedSessionCount !== null && (
           <p className="text-xs text-green-600 mt-2">
-            ✅ {JSON.parse(sessionData.current).length} sessions loaded from file
+            ✅ {uploadedSessionCount} sessions loaded from file
           </p>
         )}
       </div>

@@ -211,4 +211,6 @@ export class API {
   }
 }
 
+export * from './type'
+
 export default API

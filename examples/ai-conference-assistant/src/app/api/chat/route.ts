@@ -61,7 +61,6 @@ export async function POST(req: Request) {
       apiKey: string
       apiEndpoint: string
       teamPath: string
-      openaiApiKey: string
     }
   }
 
@@ -72,16 +71,25 @@ export async function POST(req: Request) {
     })
   }
 
-  if (!config?.openaiApiKey) {
-    return new Response(JSON.stringify({ error: 'OpenAI API key is required' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    })
+  const aiGatewayApiKey = process.env.AI_GATEWAY_API_KEY
+  if (!aiGatewayApiKey) {
+    return new Response(
+      JSON.stringify({
+        error: 'Server misconfiguration: AI_GATEWAY_API_KEY is not set',
+      }),
+      {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    )
   }
 
   const tools = createTools(config.apiKey, config.apiEndpoint)
 
-  const openai = createOpenAI({ apiKey: config.openaiApiKey })
+  const openai = createOpenAI({
+    apiKey: aiGatewayApiKey,
+    ...(process.env.AI_GATEWAY_BASE_URL && { baseURL: process.env.AI_GATEWAY_BASE_URL }),
+  })
 
   const result = streamText({
     model: openai('gpt-4o'),
