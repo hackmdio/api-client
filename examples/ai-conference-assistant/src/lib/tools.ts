@@ -283,12 +283,14 @@ interface ProcessedSession {
   tags: string[]
 }
 
+/** Default session titles to exclude from note generation (non-content sessions) */
+const DEFAULT_EXCLUDE_TYPES = ['報到時間', '開幕', '閉幕', 'Opening', 'Closing', 'Break', 'Lunch', '休息時間', '午餐']
+
 function processSessions(raw: string, excludeTypes: string[], conferenceName: string): ProcessedSession[] {
   const sessions = JSON.parse(raw)
   if (!Array.isArray(sessions)) throw new Error('Session data must be an array')
 
-  const defaultExclude = ['報到時間', '開幕', '閉幕', 'Opening', 'Closing', 'Break', 'Lunch', '休息時間', '午餐']
-  const allExclude = [...defaultExclude, ...excludeTypes]
+  const allExclude = [...DEFAULT_EXCLUDE_TYPES, ...excludeTypes]
 
   return sessions
     .filter((s: Record<string, unknown>) => {

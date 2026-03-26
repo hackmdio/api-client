@@ -25,6 +25,7 @@ export function ChatPanel({
   generatedData,
 }: ChatPanelProps) {
   const [fileUploaded, setFileUploaded] = useState(false)
+  const [sessionDataSent, setSessionDataSent] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -77,10 +78,11 @@ export function ChatPanel({
     if (
       fileUploaded &&
       sessionData.current &&
-      !messages.some(m => m.parts?.some(p => p.type === 'text' && p.text.includes('[Session data uploaded')))
+      !sessionDataSent
     ) {
       const count = JSON.parse(sessionData.current).length
       text = `${inputValue}\n\n[Session data uploaded - ${count} sessions]\n<session_data>\n${sessionData.current}\n</session_data>`
+      setSessionDataSent(true)
     }
 
     sendMessage({ text })

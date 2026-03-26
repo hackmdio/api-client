@@ -105,21 +105,23 @@ export function ProgressModal({ config, generatedData, onClose }: ProgressModalP
           setCurrent(event.current)
 
           if (event.noteCreated) {
+            const created = event.noteCreated
             setLogs(prev => [
               ...prev,
               {
                 type: 'success',
-                text: `✅ ${event.noteCreated!.title} → ${event.noteCreated!.url}`,
+                text: `✅ ${created.title} → ${created.url}`,
               },
             ])
           }
 
           if (event.error) {
+            const err = event.error
             setLogs(prev => [
               ...prev,
               {
                 type: 'error',
-                text: `❌ ${event.error!.title || 'Error'}: ${event.error!.message}`,
+                text: `❌ ${err.title || 'Error'}: ${err.message}`,
               },
             ])
           }

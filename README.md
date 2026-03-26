@@ -51,6 +51,26 @@ To run the book mode conference example:
 
 This example demonstrates advanced usage patterns including bulk operations, team note management, and creating interconnected note structures for conferences or events.
 
+### AI Conference Assistant (Web)
+
+The `examples/ai-conference-assistant/` directory contains a web-based AI assistant that helps create book-mode conference notes through a chat interface:
+
+- **Chat Interface**: Conversational AI (powered by Vercel AI SDK) guides you through conference note creation
+- **Frontend API Key Entry**: Provide your HackMD and OpenAI API keys from the browser — no server-side secrets needed
+- **Session Data Analysis**: Upload conference session JSON; the AI uses a jq-like tool to efficiently analyze data shape
+- **Reference Note Fetching**: Point the AI to existing HackMD notes to replicate formatting from previous conferences
+- **Markdown Preview**: Preview the generated homepage and all session pages before creating
+- **Rate-Limit-Aware Creation**: Batch note creation with configurable delay and real-time SSE progress tracking
+
+To run the AI conference assistant:
+
+1. Navigate to the example directory: `cd examples/ai-conference-assistant`
+2. Install dependencies: `npm install`
+3. Start the development server: `npm run dev`
+4. Open [http://localhost:3000](http://localhost:3000) and enter your credentials
+
+See [examples/ai-conference-assistant/README.md](./examples/ai-conference-assistant/README.md) for full documentation.
+
 ## LICENSE
 
 MIT

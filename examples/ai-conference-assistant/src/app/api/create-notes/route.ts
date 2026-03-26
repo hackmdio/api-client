@@ -144,8 +144,8 @@ export async function POST(req: Request) {
             `/${shortId}`,
           )
         }
-        // Remove any remaining unresolved placeholders (failed sessions)
-        homepageContent = homepageContent.replace(/\/{noteUrl:[^}]+}/g, '#')
+        // Remove lines with unresolved placeholders (failed sessions)
+        homepageContent = homepageContent.replace(/^.*\/{noteUrl:[^}]+}.*\n?/gm, '')
 
         const mainNote = await client.createTeamNote(config.teamPath, {
           title: homepage.title,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { SetupPanel } from '@/components/setup-panel'
 import { ChatPanel } from '@/components/chat-panel'
 import { PreviewPanel } from '@/components/preview-panel'
@@ -26,7 +26,7 @@ export default function Home() {
   const [showProgress, setShowProgress] = useState(false)
   const [previewPage, setPreviewPage] = useState<{ title: string; content: string } | null>(null)
   const sessionDataRef = useRef(sessionData)
-  sessionDataRef.current = sessionData
+  useEffect(() => { sessionDataRef.current = sessionData }, [sessionData])
 
   if (!config) {
     return <SetupPanel onConfigured={setConfig} />
