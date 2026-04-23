@@ -98,3 +98,33 @@ test('should throw HackMD error object', async () => {
     expect(error).toHaveProperty('resetAfter')
   }
 })
+
+test('should support updating team note title and tags metadata', async () => {
+  const updatedTags = ['team', 'metadata']
+  let requestBody: unknown
+
+  server.use(
+    http.patch('https://api.hackmd.io/v1/teams/test-team/notes/test-note-id', async ({ request }) => {
+      requestBody = await request.json()
+
+      return HttpResponse.json(
+        {
+          id: 'test-note-id',
+          title: 'Updated Team Note',
+          tags: updatedTags
+        }
+      )
+    })
+  )
+
+  const response = await client.updateTeamNote('test-team', 'test-note-id', {
+    title: 'Updated Team Note',
+    tags: updatedTags
+  })
+
+  expect(requestBody).toEqual({
+    title: 'Updated Team Note',
+    tags: updatedTags
+  })
+  expect(response).toHaveProperty('status', 200)
+})

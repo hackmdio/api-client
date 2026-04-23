@@ -268,5 +268,44 @@ describe('Etag support', () => {
       expect(response).toHaveProperty('title', 'Updated Test Note')
       expect(response).toHaveProperty('content', 'Updated content via updateNote')
     })
+
+    test('should support updating note title and tags metadata', async () => {
+      const mockEtag = 'W/"metadata-etag"'
+      const updatedTags = ['api', 'metadata']
+      let requestBody: unknown
+
+      server.use(
+        http.patch('https://api.hackmd.io/v1/notes/test-note-id', async ({ request }) => {
+          requestBody = await request.json()
+
+          return HttpResponse.json(
+            {
+              id: 'test-note-id',
+              title: 'Updated Metadata Title',
+              tags: updatedTags,
+              content: 'Updated content via updateNote'
+            },
+            {
+              headers: {
+                'ETag': mockEtag
+              }
+            }
+          )
+        })
+      )
+
+      const response = await client.updateNote('test-note-id', {
+        title: 'Updated Metadata Title',
+        tags: updatedTags
+      })
+
+      expect(requestBody).toEqual({
+        title: 'Updated Metadata Title',
+        tags: updatedTags
+      })
+      expect(response).toHaveProperty('etag', mockEtag)
+      expect(response).toHaveProperty('title', 'Updated Metadata Title')
+      expect(response.tags).toEqual(updatedTags)
+    })
   })
 })

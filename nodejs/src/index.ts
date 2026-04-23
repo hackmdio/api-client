@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
-import { CreateNoteOptions, GetMe, GetUserHistory, GetUserNotes, GetUserNote, CreateUserNote, GetUserTeams, GetTeamNotes, CreateTeamNote, SingleNote } from './type'
+import { CreateNoteOptions, GetMe, GetUserHistory, GetUserNotes, GetUserNote, CreateUserNote, GetUserTeams, GetTeamNotes, CreateTeamNote, SingleNote, UpdateNoteOptions } from './type'
 import * as HackMDErrors from './error'
 
 export type RequestOptions = {
@@ -165,7 +165,7 @@ export class API {
     return this.unwrapData(this.axios.patch<SingleNote>(`notes/${noteId}`, { content }), options.unwrapData, true) as unknown as OptionReturnType<Opt, SingleNote>
   }
 
-  async updateNote<Opt extends RequestOptions> (noteId: string, payload: Partial<Pick<SingleNote, 'content' | 'readPermission' | 'writePermission' | 'permalink'>>, options = defaultOption as Opt): Promise<OptionReturnType<Opt, SingleNote>> {
+  async updateNote<Opt extends RequestOptions> (noteId: string, payload: UpdateNoteOptions, options = defaultOption as Opt): Promise<OptionReturnType<Opt, SingleNote>> {
     return this.unwrapData(this.axios.patch<SingleNote>(`notes/${noteId}`, payload), options.unwrapData, true) as unknown as OptionReturnType<Opt, SingleNote>
   }
 
@@ -189,7 +189,7 @@ export class API {
     return this.axios.patch<AxiosResponse>(`teams/${teamPath}/notes/${noteId}`, { content })
   }
 
-  async updateTeamNote (teamPath: string, noteId: string, options: Partial<Pick<SingleNote, 'content' | 'readPermission' | 'writePermission' | 'permalink'>>): Promise<AxiosResponse> {
+  async updateTeamNote (teamPath: string, noteId: string, options: UpdateNoteOptions): Promise<AxiosResponse> {
     return this.axios.patch<AxiosResponse>(`teams/${teamPath}/notes/${noteId}`, options)
   }
 
