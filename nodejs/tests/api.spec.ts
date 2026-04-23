@@ -1,7 +1,7 @@
 import { server } from './mock'
 import { API } from '../src'
 import { http, HttpResponse } from 'msw'
-import { TooManyRequestsError } from '../src/error'
+import { InternalServerError, TooManyRequestsError } from '../src/error'
 
 let client: API
 
@@ -99,6 +99,50 @@ test('should throw HackMD error object', async () => {
   }
 })
 
+test('getFolderList returns folders from /folders', async () => {
+  server.use(
+    http.get('https://api.hackmd.io/v1/folders', () => {
+      return HttpResponse.json([
+        {
+          id: 'folder-1',
+          name: 'Research',
+          description: null,
+          icon: null,
+          color: null,
+          parentFolderId: null,
+          createdAt: 1700000000,
+          updatedAt: 1700000001,
+        },
+      ])
+    }),
+  )
+
+  const folders = await client.getFolderList()
+
+  expect(folders).toHaveLength(1)
+  expect(folders[0]).toMatchObject({ id: 'folder-1', name: 'Research' })
+})
+
+test('updateFolderOrder sends order payload', async () => {
+  let requestBody: unknown
+
+  server.use(
+    http.put('https://api.hackmd.io/v1/folders/folder-order', async ({ request }) => {
+      requestBody = await request.json()
+
+      return HttpResponse.json({})
+    }),
+  )
+
+  await client.updateFolderOrder({
+    order: { root: ['a', 'b'], parent: ['c'] },
+  })
+
+  expect(requestBody).toEqual({
+    order: { root: ['a', 'b'], parent: ['c'] },
+  })
+})
+
 test('should support updating team note title and tags metadata', async () => {
   const updatedTags = ['team', 'metadata']
   let requestBody: unknown
@@ -127,4 +171,34 @@ test('should support updating team note title and tags metadata', async () => {
     tags: updatedTags
   })
   expect(response).toHaveProperty('status', 200)
+})
+
+test('should not retry non-idempotent requests when wrapping errors', async () => {
+  let requestCount = 0
+  const clientWithRetryAndWrap = new API(process.env.HACKMD_ACCESS_TOKEN!, undefined, {
+    wrapResponseErrors: true,
+    retryConfig: {
+      maxRetries: 2,
+      baseDelay: 1,
+    },
+  })
+
+  server.use(
+    http.post('https://api.hackmd.io/v1/folders', () => {
+      requestCount += 1
+      if (requestCount === 1) {
+        return HttpResponse.json(
+          { error: 'Folder created but could not be retrieved' },
+          { status: 500 },
+        )
+      }
+
+      return HttpResponse.json({ error: 'Not found' }, { status: 404 })
+    }),
+  )
+
+  await expect(
+    clientWithRetryAndWrap.createFolder({ name: 'retry-safety-test' }),
+  ).rejects.toBeInstanceOf(InternalServerError)
+  expect(requestCount).toBe(1)
 })

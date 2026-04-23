@@ -1,0 +1,36 @@
+# Optional live API checks. Add repository secret HACKMD_E2E_ACCESS_TOKEN.
+# Optionally add HACKMD_E2E_API_ENDPOINT (e.g. https://api-stage.hackmd.io/v1); otherwise production is used.
+
+name: E2E (live HackMD API)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: nodejs/package-lock.json
+
+      - name: Install dependencies
+        working-directory: nodejs
+        run: npm ci
+
+      - name: Run e2e tests
+        working-directory: nodejs
+        env:
+          HACKMD_ACCESS_TOKEN: ${{ secrets.HACKMD_E2E_ACCESS_TOKEN }}
+          HACKMD_API_ENDPOINT: ${{ secrets.HACKMD_E2E_API_ENDPOINT }}
+        run: |
+          if [ -z "${HACKMD_ACCESS_TOKEN:-}" ]; then
+            echo "::error::Add repository secret HACKMD_E2E_ACCESS_TOKEN (a valid API token for the target environment)."
+            exit 1
+          fi
+          npm run test:e2e

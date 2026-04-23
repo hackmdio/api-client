@@ -121,6 +121,39 @@ const updatedNote = await client.getNote('note-id', { etag })
 
 See the [code](./src/index.ts) and [typings](./src/type.ts). The API client is written in TypeScript, so you can get auto-completion and type checking in any TypeScript Language Server powered editor or IDE.
 
+## E2E tests (live API)
+
+Integration tests call a real HackMD API (staging or production). They are **not** run by `npm test` or the default CI job.
+
+**Requirements**
+
+- `HACKMD_ACCESS_TOKEN` — a valid personal access token for the environment you target.
+- Optional: `HACKMD_API_ENDPOINT` — defaults to `https://api.hackmd.io/v1`. For staging, use `https://api-stage.hackmd.io/v1`.
+
+**Read-only (default e2e)**
+
+```bash
+cd nodejs
+export HACKMD_ACCESS_TOKEN=your_token
+export HACKMD_API_ENDPOINT=https://api-stage.hackmd.io/v1   # optional
+npm run test:e2e
+```
+
+**With CRUD / mutations**
+
+Set `HACKMD_E2E_MUTATIONS=1` to run write tests against your account:
+
+- **Notes:** create → get → update (title, content, tags) → list → delete.
+- **Folders:** one integration test runs create (root + nested) → get → update → list → folder-order round-trip (skipped if that API returns 404) → delete. If **POST `/folders`** returns 404 (common before full production rollout), the test exits early with a warning; use staging or `HACKMD_E2E_FOLDERS=0`.
+
+```bash
+HACKMD_E2E_MUTATIONS=1 npm run test:e2e
+```
+
+Folder CRUD touches folder display order briefly, then restores the previous order in an `afterAll` hook. To skip folder mutations (e.g. production without `/folders`), set `HACKMD_E2E_FOLDERS=0`.
+
+The read-only `getFolderList` test still treats HTTP 404 as “folders not available on this host yet” and passes without failing the suite.
+
 ## License
 
 MIT

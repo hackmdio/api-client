@@ -25,7 +25,8 @@
     "watch": "npm run clean && rollup -c -w",
     "prepublishOnly": "npm run build",
     "lint": "eslint src --fix --ext .ts",
-    "test": "jest"
+    "test": "jest",
+    "test:e2e": "jest --config jest.e2e.config.ts"
   },
   "keywords": [
     "HackMD",
