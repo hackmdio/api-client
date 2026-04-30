@@ -2,6 +2,11 @@
   "name": "@hackmd/api",
   "version": "2.5.0",
   "description": "HackMD Node.js API Client",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hackmdio/api-client.git",
+    "directory": "nodejs"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
