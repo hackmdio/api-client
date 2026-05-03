@@ -11,7 +11,7 @@
   "dependencies": {
     "@hackmd/api": "file:../../nodejs",
     "dotenv": "^16.4.5",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "moment": "^2.29.4"
   },
   "devDependencies": {
