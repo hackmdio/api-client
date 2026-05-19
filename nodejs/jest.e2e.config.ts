@@ -1,12 +1,14 @@
 import type { JestConfigWithTsJest } from "ts-jest"
 
-const customJestConfig: JestConfigWithTsJest = {
+/** Live API tests; run with `npm run test:e2e` (see nodejs/README.md). */
+const e2eJestConfig: JestConfigWithTsJest = {
   preset: "ts-jest",
   testEnvironment: "node",
   transformIgnorePatterns: ["<rootDir>/node_modules/"],
   extensionsToTreatAsEsm: [".ts"],
   setupFiles: ["dotenv/config"],
-  testPathIgnorePatterns: ["/node_modules/", "<rootDir>/tests/e2e/"],
+  testMatch: ["<rootDir>/tests/e2e/**/*.spec.ts"],
+  testTimeout: 60_000,
 }
 
-export default customJestConfig
+export default e2eJestConfig

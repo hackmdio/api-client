@@ -1,0 +1,23 @@
+{
+  "name": "hackmd-api-book-mode-conference-example",
+  "version": "1.0.0",
+  "description": "Example for creating a book mode conference note with HackMD API",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "tsx index.ts",
+    "dev": "tsx watch index.ts"
+  },
+  "dependencies": {
+    "@hackmd/api": "file:../../nodejs",
+    "dotenv": "^16.4.5",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.4"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.202",
+    "@types/node": "^20.10.6",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

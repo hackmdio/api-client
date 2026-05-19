@@ -1,7 +1,12 @@
 {
   "name": "@hackmd/api",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "description": "HackMD Node.js API Client",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hackmdio/api-client.git",
+    "directory": "nodejs"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -25,7 +30,8 @@
     "watch": "npm run clean && rollup -c -w",
     "prepublishOnly": "npm run build",
     "lint": "eslint src --fix --ext .ts",
-    "test": "jest"
+    "test": "jest",
+    "test:e2e": "jest --config jest.e2e.config.ts"
   },
   "keywords": [
     "HackMD",

@@ -30,6 +30,27 @@ To run the Node.js example:
 
 The example includes detailed comments and demonstrates best practices for using the HackMD API client.
 
+### Book Mode Conference Note Example
+
+The `examples/book-mode-conference/` directory contains a TypeScript example for creating a "book mode" conference note system:
+
+- **Book Mode Notes**: Creates a master note that links to all session notes
+- **Bulk Note Creation**: Automatically creates individual notes for each conference session
+- **TypeScript Implementation**: Full type safety with tsx support for direct execution
+- **Configurable Templates**: Customizable note templates and conference settings
+- **Hierarchical Organization**: Sessions organized by day and time in the main book
+- **Error Handling**: Graceful handling of API failures during bulk operations
+
+To run the book mode conference example:
+
+1. Navigate to the example directory: `cd examples/book-mode-conference`
+2. Follow the setup instructions in [examples/book-mode-conference/README.md](./examples/book-mode-conference/README.md)
+3. Customize the configuration constants and session data
+4. Set your HackMD access token
+5. Run `npm start`
+
+This example demonstrates advanced usage patterns including bulk operations, team note management, and creating interconnected note structures for conferences or events.
+
 ## LICENSE
 
 MIT

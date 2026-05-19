@@ -21,10 +21,13 @@ export enum CommentPermissionType {
 export type CreateNoteOptions = {
   title?: string
   content?: string
+  description?: string
+  tags?: string[]
   readPermission?: NotePermissionRole,
   writePermission?: NotePermissionRole,
   commentPermission?: CommentPermissionType,
   permalink?: string
+  parentFolderId?: string
 }
 
 export type Team = {
@@ -62,6 +65,16 @@ export enum NotePermissionRole {
   GUEST = 'guest'
 }
 
+/** Folder breadcrumb segment as returned on notes (OpenAPI `FolderPath`). */
+export type FolderPath = {
+  id: string
+  name: string
+  icon: string | null
+  color: string | null
+  parentId: string | null
+  clientId: string
+}
+
 export type Note = {
   id: string
   title: string
@@ -79,10 +92,15 @@ export type Note = {
 
   readPermission: NotePermissionRole
   writePermission: NotePermissionRole
+  folderPaths?: FolderPath[]
 }
 
 export type SingleNote = Note & {
   content: string
+}
+
+export type UpdateNoteOptions = Partial<Pick<SingleNote, 'content' | 'title' | 'tags' | 'readPermission' | 'writePermission' | 'permalink'>> & {
+  parentFolderId?: string
 }
 
 // User
@@ -105,4 +123,55 @@ export type CreateTeamNote = SingleNote
 export type UpdateTeamNote = void
 export type DeleteTeamNote = void
 
+// Folders (user & team workspaces)
+export type ApiFolder = {
+  id: string
+  name: string
+  description: string | null
+  icon: string | null
+  color: string | null
+  parentFolderId: string | null
+  createdAt: number
+  updatedAt: number
+}
+
+/** Maps each parent folder id or the literal `root` to ordered child folder ids. */
+export type ApiFolderOrder = Record<string, string[]>
+
+export type CreateUserFolderBody = {
+  name?: string
+  description?: string
+  icon?: string
+  color?: string
+  parentFolderId?: string
+}
+
+export type UpdateUserFolderBody = {
+  name?: string
+  description?: string | null
+  icon?: string | null
+  color?: string | null
+  parentFolderId?: string | null
+}
+
+export type CreateTeamFolderBody = CreateUserFolderBody
+
+export type UpdateTeamFolderBody = UpdateUserFolderBody
+
+export type UpdateFolderOrderBody = {
+  order: ApiFolderOrder
+}
+
+export type GetFolders = ApiFolder[]
+export type GetTeamFolders = ApiFolder[]
+export type GetFolder = ApiFolder
+export type GetTeamFolder = ApiFolder
+export type CreateFolderResult = ApiFolder
+export type CreateTeamFolderResult = ApiFolder
+export type UpdateFolderResult = ApiFolder
+export type UpdateTeamFolderResult = ApiFolder
+export type DeleteFolderResult = void
+export type DeleteTeamFolderResult = void
+export type GetFolderOrder = ApiFolderOrder
+export type GetTeamFolderOrder = ApiFolderOrder
 
