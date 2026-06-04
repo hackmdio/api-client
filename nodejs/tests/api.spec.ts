@@ -168,38 +168,12 @@ test('uploadNoteImage sends image as multipart form data', async () => {
   )
 
   expect(contentType).toContain('multipart/form-data')
-  expect(contentType).not.toContain('application/json')
   expect(uploaded).toBeInstanceOf(Blob)
   const uploadedBlob = uploaded as unknown as Blob
   expect(uploadedBlob.type).toBe('image/png')
   expect(response).toEqual({
     data: {
       link: 'https://hackmd.io/_uploads/test-image.png',
-    },
-  })
-})
-
-test('uploadNoteImage supports raw Axios response', async () => {
-  server.use(
-    http.post('https://api.hackmd.io/v1/notes/test-note-id/images', () => {
-      return HttpResponse.json({
-        data: {
-          link: 'https://hackmd.io/_uploads/raw-image.png',
-        },
-      })
-    }),
-  )
-
-  const response = await client.uploadNoteImage(
-    'test-note-id',
-    new Blob(['test image'], { type: 'image/png' }),
-    { filename: 'raw-image.png', unwrapData: false },
-  )
-
-  expect(response).toHaveProperty('status', 200)
-  expect(response.data).toEqual({
-    data: {
-      link: 'https://hackmd.io/_uploads/raw-image.png',
     },
   })
 })

@@ -148,26 +148,14 @@ describe('HackMD API (live e2e)', () => {
       it('uploadNoteImage uploads an image to the note', async () => {
         const image = readFileSync('tests/fixtures/hackmd-cute-logo.png')
 
-        try {
-          const uploaded = await client.uploadNoteImage(
-            noteId,
-            new Blob([new Uint8Array(image)], { type: 'image/png' }),
-            { filename: `hackmd-cute-logo-${stamp}.png` },
-          )
+        const uploaded = await client.uploadNoteImage(
+          noteId,
+          new Blob([new Uint8Array(image)], { type: 'image/png' }),
+          { filename: `hackmd-cute-logo-${stamp}.png` },
+        )
 
-          expect(uploaded.data.link).toEqual(expect.any(String))
-          expect(uploaded.data.link.length).toBeGreaterThan(0)
-        } catch (err) {
-          if (isNotFound(err)) {
-            console.warn(
-              '[e2e] POST /notes/{noteId}/images returned 404 (image upload not on this host). ' +
-                'Use https://api-stage.hackmd.io/v1 to test image uploads.',
-            )
-            expect(isNotFound(err)).toBe(true)
-            return
-          }
-          throw err
-        }
+        expect(uploaded.data.link).toEqual(expect.any(String))
+        expect(uploaded.data.link.length).toBeGreaterThan(0)
       })
 
       it('getNoteList includes the note', async () => {
