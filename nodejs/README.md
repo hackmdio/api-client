@@ -117,6 +117,23 @@ const updatedNote = await client.getNote('note-id', { etag })
 // If the note hasn't changed, the response will have status 304
 ```
 
+### Image Upload
+
+Upload an image to a note with `uploadNoteImage`. The API returns the uploaded image link in `data.link`.
+
+```javascript
+// Browser: pass a File from an <input type="file">
+const uploaded = await client.uploadNoteImage('note-id', file)
+console.log(uploaded.data.link)
+
+// Node.js 18+: pass a Blob and optional filename
+const image = new Blob([imageBuffer], { type: 'image/png' })
+const uploadedFromNode = await client.uploadNoteImage('note-id', image, {
+  filename: 'diagram.png'
+})
+console.log(uploadedFromNode.data.link)
+```
+
 ## API
 
 See the [code](./src/index.ts) and [typings](./src/type.ts). The API client is written in TypeScript, so you can get auto-completion and type checking in any TypeScript Language Server powered editor or IDE.
@@ -143,7 +160,7 @@ npm run test:e2e
 
 Set `HACKMD_E2E_MUTATIONS=1` to run write tests against your account:
 
-- **Notes:** create → get → update (title, content, tags) → list → delete.
+- **Notes:** create → get → update (title, content, tags) → upload fixture image → list → delete.
 - **Folders:** one integration test runs create (root + nested) → get → update → list → folder-order round-trip (skipped if that API returns 404) → delete. If **POST `/folders`** returns 404 (common before full production rollout), the test exits early with a warning; use staging or `HACKMD_E2E_FOLDERS=0`.
 
 ```bash
