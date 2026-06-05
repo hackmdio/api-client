@@ -42,6 +42,9 @@
     "README.md",
     "LICENSE"
   ],
+  "engines": {
+    "node": ">=22"
+  },
   "author": {
     "name": "HackMD",
     "email": "support@hackmd.io",
