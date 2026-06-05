@@ -2,38 +2,43 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ master, develop ]
+    branches: [master, develop]
   pull_request:
-    branches: [ master, develop ]
+    branches: [master, develop]
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '24'
-        cache: 'npm'
-        cache-dependency-path: nodejs/package-lock.json
+      - uses: actions/checkout@v4
 
-    - name: Install dependencies
-      working-directory: nodejs
-      run: npm ci
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.33.2
 
-    - name: Run lint
-      working-directory: nodejs
-      run: npm run lint
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: "pnpm"
+          cache-dependency-path: nodejs/pnpm-lock.yaml
 
-    - name: Build
-      working-directory: nodejs
-      run: npm run build
+      - name: Install dependencies
+        working-directory: nodejs
+        run: pnpm install --frozen-lockfile
 
-    - name: Run tests
-      working-directory: nodejs
-      env:
-        HACKMD_ACCESS_TOKEN: "test_token_123456789"
-      run: npm test 
+      - name: Run lint
+        working-directory: nodejs
+        run: pnpm lint
+
+      - name: Build
+        working-directory: nodejs
+        run: pnpm build
+
+      - name: Run tests
+        working-directory: nodejs
+        env:
+          HACKMD_ACCESS_TOKEN: "test_token_123456789"
+        run: pnpm test

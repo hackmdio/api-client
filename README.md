@@ -26,7 +26,7 @@ To run the Node.js example:
 1. Navigate to the example directory: `cd examples/nodejs`
 2. Follow the setup instructions in [examples/nodejs/README.md](./examples/nodejs/README.md)
 3. Set your HackMD access token
-4. Run `npm start`
+4. Run `pnpm start`
 
 The example includes detailed comments and demonstrates best practices for using the HackMD API client.
 
@@ -47,7 +47,7 @@ To run the book mode conference example:
 2. Follow the setup instructions in [examples/book-mode-conference/README.md](./examples/book-mode-conference/README.md)
 3. Customize the configuration constants and session data
 4. Set your HackMD access token
-5. Run `npm start`
+5. Run `pnpm start`
 
 This example demonstrates advanced usage patterns including bulk operations, team note management, and creating interconnected note structures for conferences or events.
 
