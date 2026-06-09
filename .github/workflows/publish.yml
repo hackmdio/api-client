@@ -19,25 +19,30 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.33.2
+
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '24'
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'npm'
-          cache-dependency-path: nodejs/package-lock.json
+          node-version: 24
+          registry-url: "https://registry.npmjs.org"
+          cache: "pnpm"
+          cache-dependency-path: nodejs/pnpm-lock.yaml
 
       - name: Install dependencies
         working-directory: nodejs
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build
         working-directory: nodejs
-        run: npm run build
+        run: pnpm build
 
       - name: Publish to NPM
         working-directory: nodejs
-        run: npm publish --access public
+        run: pnpm publish --access public
 
       - name: Extract version from tag
         run: |
@@ -62,17 +67,22 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.33.2
+
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '24'
-          registry-url: 'https://registry.npmjs.org'
-          cache: 'npm'
-          cache-dependency-path: nodejs/package-lock.json
+          node-version: 24
+          registry-url: "https://registry.npmjs.org"
+          cache: "pnpm"
+          cache-dependency-path: nodejs/pnpm-lock.yaml
 
       - name: Install dependencies
         working-directory: nodejs
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Configure Git
         run: |
@@ -88,15 +98,15 @@ jobs:
           PRE_RELEASE_VERSION="${CURRENT_VERSION}-beta.${TIMESTAMP}.${SHORT_SHA}"
           echo "Pre-release version: $PRE_RELEASE_VERSION"
           echo "PRE_RELEASE_VERSION=$PRE_RELEASE_VERSION" >> $GITHUB_ENV
-          npm version $PRE_RELEASE_VERSION --no-git-tag-version
+          pnpm version $PRE_RELEASE_VERSION --no-git-tag-version
 
       - name: Build
         working-directory: nodejs
-        run: npm run build
+        run: pnpm build
 
       - name: Publish pre-release to NPM
         working-directory: nodejs
-        run: npm publish --tag beta --access public
+        run: pnpm publish --tag beta --access public
 
       - name: Create GitHub pre-release
         env:
