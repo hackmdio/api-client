@@ -143,6 +143,41 @@ test('updateFolderOrder sends order payload', async () => {
   })
 })
 
+test('uploadNoteImage sends image as multipart form data', async () => {
+  let uploaded: FormDataEntryValue | null = null
+  let contentType: string | null = null
+
+  server.use(
+    http.post('https://api.hackmd.io/v1/notes/test-note-id/images', async ({ request }) => {
+      contentType = request.headers.get('content-type')
+      const formData = await request.formData()
+      uploaded = formData.get('image')
+
+      return HttpResponse.json({
+        data: {
+          link: 'https://hackmd.io/_uploads/test-image.png',
+        },
+      })
+    }),
+  )
+
+  const response = await client.uploadNoteImage(
+    'test-note-id',
+    new Blob(['test image'], { type: 'image/png' }),
+    { filename: 'test-image.png' },
+  )
+
+  expect(contentType).toContain('multipart/form-data')
+  expect(uploaded).toBeInstanceOf(Blob)
+  const uploadedBlob = uploaded as unknown as Blob
+  expect(uploadedBlob.type).toBe('image/png')
+  expect(response).toEqual({
+    data: {
+      link: 'https://hackmd.io/_uploads/test-image.png',
+    },
+  })
+})
+
 test('should support updating team note title and tags metadata', async () => {
   const updatedTags = ['team', 'metadata']
   let requestBody: unknown
