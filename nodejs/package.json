@@ -1,6 +1,6 @@
 {
   "name": "@hackmd/api",
-  "version": "2.5.0",
+  "version": "2.7.0",
   "description": "HackMD Node.js API Client",
   "repository": {
     "type": "git",
