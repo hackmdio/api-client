@@ -1,6 +1,6 @@
 import type { JestConfigWithTsJest } from "ts-jest"
 
-/** Live API tests; run with `npm run test:e2e` (see nodejs/README.md). */
+/** Live API tests; run with `pnpm test:e2e` (see nodejs/README.md). */
 const e2eJestConfig: JestConfigWithTsJest = {
   preset: "ts-jest",
   testEnvironment: "node",

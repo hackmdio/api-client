@@ -7,8 +7,9 @@
   "scripts": {
     "start": "node index.js"
   },
+  "packageManager": "pnpm@10.33.2",
   "dependencies": {
     "@hackmd/api": "file:../../nodejs",
     "dotenv": "^16.4.5"
   }
-} 
+}

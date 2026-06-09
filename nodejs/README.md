@@ -80,7 +80,7 @@ The client supports automatic retry for failed requests with exponential backoff
 ```javascript
 const client = new HackMDAPI('YOUR_ACCESS_TOKEN', 'https://api.hackmd.io/v1', {
   retryConfig: {
-    maxRetries: 3,    // Maximum number of retry attempts
+    maxRetries: 3, // Maximum number of retry attempts
     baseDelay: 100    // Base delay in milliseconds for exponential backoff
   }
 })
@@ -123,7 +123,7 @@ See the [code](./src/index.ts) and [typings](./src/type.ts). The API client is w
 
 ## E2E tests (live API)
 
-Integration tests call a real HackMD API (staging or production). They are **not** run by `npm test` or the default CI job.
+Integration tests call a real HackMD API (staging or production). They are **not** run by `pnpm test` or the default CI job.
 
 **Requirements**
 
@@ -136,7 +136,7 @@ Integration tests call a real HackMD API (staging or production). They are **not
 cd nodejs
 export HACKMD_ACCESS_TOKEN=your_token
 export HACKMD_API_ENDPOINT=https://api-stage.hackmd.io/v1   # optional
-npm run test:e2e
+pnpm test:e2e
 ```
 
 **With CRUD / mutations**
@@ -147,7 +147,7 @@ Set `HACKMD_E2E_MUTATIONS=1` to run write tests against your account:
 - **Folders:** one integration test runs create (root + nested) → get → update → list → folder-order round-trip (skipped if that API returns 404) → delete. If **POST `/folders`** returns 404 (common before full production rollout), the test exits early with a warning; use staging or `HACKMD_E2E_FOLDERS=0`.
 
 ```bash
-HACKMD_E2E_MUTATIONS=1 npm run test:e2e
+HACKMD_E2E_MUTATIONS=1 pnpm test:e2e
 ```
 
 Folder CRUD touches folder display order briefly, then restores the previous order in an `afterAll` hook. To skip folder mutations (e.g. production without `/folders`), set `HACKMD_E2E_FOLDERS=0`.

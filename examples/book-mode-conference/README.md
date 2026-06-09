@@ -23,18 +23,21 @@ This example demonstrates how to create a "book mode" conference note system usi
 ## Setup
 
 ### 1. Install Dependencies
+
 ```bash
 cd /path/to/api-client/examples/book-mode-conference
-npm install
+pnpm install
 ```
 
 ### 2. Configure Environment
+
 ```bash
 cp .env.example .env
 # Edit .env with your settings
 ```
 
 Required `.env` settings:
+
 ```bash
 HACKMD_ACCESS_TOKEN=your_access_token_here
 HACKMD_API_ENDPOINT=https://api.hackmd.io/v1
