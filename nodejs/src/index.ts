@@ -26,6 +26,8 @@ import {
   UpdateFolderOrderBody,
   UpdateTeamFolderBody,
   UpdateUserFolderBody,
+  UploadNoteImageOptions,
+  UploadNoteImageResponse,
 } from './type'
 import * as HackMDErrors from './error'
 
@@ -70,9 +72,6 @@ export class API {
 
     this.axios = axios.create({
       baseURL: hackmdAPIEndpointURL,
-      headers:{
-        "Content-Type": "application/json",
-      },
       timeout: options.timeout
     })
 
@@ -207,6 +206,16 @@ export class API {
 
   async deleteNote<Opt extends RequestOptions> (noteId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, SingleNote>> {
     return this.unwrapData(this.axios.delete<SingleNote>(`notes/${noteId}`), options.unwrapData) as unknown as OptionReturnType<Opt, SingleNote>
+  }
+
+  async uploadNoteImage<Opt extends UploadNoteImageOptions> (noteId: string, image: Blob, options = defaultOption as Opt): Promise<OptionReturnType<Opt, UploadNoteImageResponse>> {
+    const formData = new FormData()
+    formData.append('image', image, options.filename ?? undefined)
+
+    return this.unwrapData(
+      this.axios.post<UploadNoteImageResponse>(`notes/${noteId}/images`, formData),
+      options.unwrapData,
+    ) as unknown as OptionReturnType<Opt, UploadNoteImageResponse>
   }
 
   async getTeams<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserTeams>> {

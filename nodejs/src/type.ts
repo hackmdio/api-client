@@ -114,6 +114,17 @@ export type CreateUserNote = SingleNote
 export type UpdateUserNote = void
 export type DeleteUserNote = void
 
+export type UploadNoteImageResponse = {
+  data: {
+    link: string
+  }
+}
+
+export type UploadNoteImageOptions = {
+  unwrapData?: boolean
+  filename?: string
+}
+
 // Teams
 export type GetUserTeams = Team[]
 

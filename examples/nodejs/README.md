@@ -5,30 +5,34 @@ This is an example project demonstrating the usage of the HackMD API client.
 ## Setup
 
 1. First, build the HackMD API package:
+
 ```bash
 cd ../../nodejs
-npm install
-npm run build
+pnpm install
+pnpm build
 cd ../examples/nodejs
 ```
 
 2. Install the example dependencies:
+
 ```bash
-npm install
+pnpm install
 ```
 
 3. Set up your HackMD access token using one of these methods:
 
    a. Set it as an environment variable:
+
    ```bash
    # For Unix/Linux/macOS
    export HACKMD_ACCESS_TOKEN=your_access_token_here
-   
+
    # For Windows PowerShell
    $env:HACKMD_ACCESS_TOKEN="your_access_token_here"
    ```
 
    b. Or create a `.env` file in the project root (not tracked by git):
+
    ```
    HACKMD_ACCESS_TOKEN=your_access_token_here
    ```
@@ -40,7 +44,7 @@ You can get your access token from [HackMD API documentation](https://hackmd.io/
 To run the example:
 
 ```bash
-npm start
+pnpm start
 ```
 
 ## What's Demonstrated
@@ -60,4 +64,4 @@ The example demonstrates several features of the HackMD API client:
 - ETag support for caching
 - Response data unwrapping
 - Error handling
-- Environment variable configuration 
+- Environment variable configuration

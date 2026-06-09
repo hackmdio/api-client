@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs'
 import type { ApiFolderOrder } from '../../src'
 import { API } from '../../src'
 import { HttpResponseError } from '../../src/error'
@@ -142,6 +143,19 @@ describe('HackMD API (live e2e)', () => {
         if (typeof n.content === 'string' && n.content.length > 0) {
           expect(n.content).toContain('patched')
         }
+      })
+
+      it('uploadNoteImage uploads an image to the note', async () => {
+        const image = readFileSync('tests/fixtures/hackmd-cute-logo.png')
+
+        const uploaded = await client.uploadNoteImage(
+          noteId,
+          new Blob([new Uint8Array(image)], { type: 'image/png' }),
+          { filename: `hackmd-cute-logo-${stamp}.png` },
+        )
+
+        expect(uploaded.data.link).toEqual(expect.any(String))
+        expect(uploaded.data.link.length).toBeGreaterThan(0)
       })
 
       it('getNoteList includes the note', async () => {

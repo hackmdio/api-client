@@ -26,9 +26,9 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "build": "npm run clean && rollup -c",
-    "watch": "npm run clean && rollup -c -w",
-    "prepublishOnly": "npm run build",
+    "build": "pnpm run clean && rollup -c",
+    "watch": "pnpm run clean && rollup -c -w",
+    "prepublishOnly": "pnpm run build",
     "lint": "eslint src --fix --ext .ts",
     "test": "jest",
     "test:e2e": "jest --config jest.e2e.config.ts"
@@ -42,12 +42,16 @@
     "README.md",
     "LICENSE"
   ],
+  "engines": {
+    "node": ">=22"
+  },
   "author": {
     "name": "HackMD",
     "email": "support@hackmd.io",
     "url": "https://hackmd.io"
   },
   "license": "MIT",
+  "packageManager": "pnpm@10.33.2",
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
     "@rollup/plugin-commonjs": "^28.0.3",

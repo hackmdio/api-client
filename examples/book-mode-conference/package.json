@@ -8,6 +8,7 @@
     "start": "tsx index.ts",
     "dev": "tsx watch index.ts"
   },
+  "packageManager": "pnpm@10.33.2",
   "dependencies": {
     "@hackmd/api": "file:../../nodejs",
     "dotenv": "^16.4.5",
