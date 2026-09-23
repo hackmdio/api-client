@@ -18,10 +18,16 @@ async function exploreConditionalNote (client: API): Promise<string | undefined>
   return response.content
 }
 
+async function exploreNoteList (client: API): Promise<number> {
+  const notes = await client.getNoteList()
+  return notes[0].createdAt
+}
+
 function exploreRawNote (note: RawNote): string {
   return note.content
 }
 
 void exploreClient
 void exploreConditionalNote
+void exploreNoteList
 void exploreRawNote

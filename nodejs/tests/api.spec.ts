@@ -1,7 +1,7 @@
 import { server } from './mock'
 import { API } from '../src'
 import { http, HttpResponse } from 'msw'
-import { InternalServerError, TooManyRequestsError } from '../src/error'
+import { HttpResponseError, InternalServerError, TooManyRequestsError } from '../src/error'
 
 let client: API
 
@@ -37,6 +37,37 @@ test('getMe unwrapped', async () => {
   expect(response).toHaveProperty('email')
   expect(response).toHaveProperty('userPath')
   expect(response).toHaveProperty('photo')
+})
+
+test('getNoteList keeps the legacy response shapes and authorization', async () => {
+  const note = { id: 'note-1', title: 'A note', createdAt: 1700000000000 }
+  let authorization: string | null = null
+  server.use(
+    http.get('https://api.hackmd.io/v1/notes', ({ request }) => {
+      authorization = request.headers.get('Authorization')
+      return HttpResponse.json([note])
+    })
+  )
+
+  expect(await client.getNoteList()).toEqual([note])
+  const raw = await client.getNoteList({ unwrapData: false })
+  expect(raw.status).toBe(200)
+  expect(raw.data).toEqual([note])
+  expect(authorization).toBe(`Bearer ${process.env.HACKMD_ACCESS_TOKEN}`)
+})
+
+test('getNoteList keeps legacy error wrapping', async () => {
+  server.use(
+    http.get('https://api.hackmd.io/v1/notes', () =>
+      HttpResponse.json({ error: 'Forbidden' }, { status: 403 })
+    )
+  )
+  const customClient = new API('custom-token', undefined, {
+    wrapResponseErrors: true,
+    retryConfig: undefined,
+  })
+
+  await expect(customClient.getNoteList()).rejects.toBeInstanceOf(HttpResponseError)
 })
 
 test('should throw axios error object if set wrapResponseErrors to false', async () => {
