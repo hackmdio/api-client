@@ -17,6 +17,11 @@
       "require": "./dist/index.cjs",
       "types": "./dist/index.d.ts"
     },
+    "./raw": {
+      "import": "./dist/raw.js",
+      "require": "./dist/raw.cjs",
+      "types": "./dist/raw.d.ts"
+    },
     "./dist": {
       "import": "./dist/index.js",
       "require": "./dist/index.cjs",
@@ -26,7 +31,12 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "build": "pnpm run clean && rollup -c",
+    "build": "pnpm run clean && rollup -c && pnpm check:node-types",
+    "generate": "openapi-ts",
+    "check:generated": "node scripts/check-generated.mjs",
+    "check:node-types": "tsc --noEmit --strict --module NodeNext tests/types/raw.mts tests/types/raw.cts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "spec:pull": "curl -fsSL https://api.hackmd.io/v1/docs/swagger.json -o spec/hackmd-openapi.json",
     "watch": "pnpm run clean && rollup -c -w",
     "prepublishOnly": "pnpm run build",
     "lint": "eslint src --fix --ext .ts",

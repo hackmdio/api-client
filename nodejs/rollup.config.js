@@ -5,9 +5,13 @@ import typescript from '@rollup/plugin-typescript'
 export default [
   // ESM build
   {
-    input: 'src/index.ts',
+    input: {
+      index: 'src/index.ts',
+      raw: 'src/raw.ts',
+    },
     output: {
-      file: 'dist/index.js',
+      dir: 'dist',
+      entryFileNames: '[name].js',
       format: 'esm',
       sourcemap: true,
     },
@@ -27,9 +31,13 @@ export default [
   },
   // CJS build
   {
-    input: 'src/index.ts',
+    input: {
+      index: 'src/index.ts',
+      raw: 'src/raw.ts',
+    },
     output: {
-      file: 'dist/index.cjs',
+      dir: 'dist',
+      entryFileNames: '[name].cjs',
       format: 'cjs',
       sourcemap: true,
       exports: 'named'
