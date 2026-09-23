@@ -196,8 +196,10 @@ test('should throw HackMD error object', async () => {
 })
 
 test('getFolderList returns folders from /folders', async () => {
+  let authorization: string | null = null
   server.use(
-    http.get('https://api.hackmd.io/v1/folders', () => {
+    http.get('https://api.hackmd.io/v1/folders', ({ request }) => {
+      authorization = request.headers.get('Authorization')
       return HttpResponse.json([
         {
           id: 'folder-1',
@@ -217,6 +219,24 @@ test('getFolderList returns folders from /folders', async () => {
 
   expect(folders).toHaveLength(1)
   expect(folders[0]).toMatchObject({ id: 'folder-1', name: 'Research' })
+  const raw = await client.getFolderList({ unwrapData: false })
+  expect(raw.status).toBe(200)
+  expect(raw.data).toEqual(folders)
+  expect(authorization).toBe(`Bearer ${process.env.HACKMD_ACCESS_TOKEN}`)
+})
+
+test('getFolderList keeps legacy error wrapping', async () => {
+  server.use(
+    http.get('https://api.hackmd.io/v1/folders', () =>
+      HttpResponse.json({ error: 'Forbidden' }, { status: 403 })
+    )
+  )
+  const customClient = new API('custom-token', undefined, {
+    wrapResponseErrors: true,
+    retryConfig: undefined,
+  })
+
+  await expect(customClient.getFolderList()).rejects.toBeInstanceOf(HttpResponseError)
 })
 
 test('updateFolderOrder sends order payload', async () => {

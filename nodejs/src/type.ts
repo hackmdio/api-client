@@ -1,4 +1,5 @@
 import type {
+  ApiFolder as GeneratedApiFolder,
   FolderPath as GeneratedFolderPath,
   GetUserHistory as GeneratedUserHistory,
   NoteType as GeneratedNote,
@@ -108,16 +109,7 @@ export type UpdateTeamNote = void
 export type DeleteTeamNote = void
 
 // Folders (user & team workspaces)
-export type ApiFolder = {
-  id: string
-  name: string
-  description: string | null
-  icon: string | null
-  color: string | null
-  parentFolderId: string | null
-  createdAt: number
-  updatedAt: number
-}
+export type ApiFolder = GeneratedApiFolder
 
 /** Maps each parent folder id or the literal `root` to ordered child folder ids. */
 export type ApiFolderOrder = Record<string, string[]>

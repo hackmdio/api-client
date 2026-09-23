@@ -33,6 +33,11 @@ async function exploreTeamNotes (client: API): Promise<number> {
   return notes[0].createdAt
 }
 
+async function exploreFolders (client: API): Promise<number> {
+  const folders = await client.getFolderList()
+  return folders[0].createdAt
+}
+
 function exploreRawNote (note: RawNote): string {
   return note.content
 }
@@ -42,4 +47,5 @@ void exploreConditionalNote
 void exploreNoteList
 void exploreHistory
 void exploreTeamNotes
+void exploreFolders
 void exploreRawNote

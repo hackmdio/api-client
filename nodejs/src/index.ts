@@ -2,7 +2,7 @@
 
 import axios, { AxiosInstance, AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { createClient, type Client } from './generated/client/index.js'
-import { getHistory as generatedGetHistory, getNote as generatedGetNote, listNotes, listTeamNotes } from './generated/sdk.gen.js'
+import { getHistory as generatedGetHistory, getNote as generatedGetNote, listFolders, listNotes, listTeamNotes } from './generated/sdk.gen.js'
 import {
   CreateNoteOptions,
   CreateTeamFolderBody,
@@ -276,7 +276,7 @@ export class API {
   }
 
   async getFolderList<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetFolders>> {
-    return this.unwrapData(this.axios.get<GetFolders>('folders'), options.unwrapData) as unknown as OptionReturnType<Opt, GetFolders>
+    return this.unwrapData(listFolders({ client: this.generatedClient, throwOnError: true }), options.unwrapData) as unknown as OptionReturnType<Opt, GetFolders>
   }
 
   async createFolder<Opt extends RequestOptions> (payload: CreateUserFolderBody, options = defaultOption as Opt): Promise<OptionReturnType<Opt, CreateFolderResult>> {
