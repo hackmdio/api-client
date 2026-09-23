@@ -4,7 +4,9 @@ import axios, { AxiosInstance, AxiosError, AxiosResponse, InternalAxiosRequestCo
 import { createClient, type Client } from './generated/client/index.js'
 import {
   createFolder as generatedCreateFolder,
+  createNote as generatedCreateNote,
   createTeamFolder as generatedCreateTeamFolder,
+  createTeamNote as generatedCreateTeamNote,
   deleteFolder as generatedDeleteFolder,
   deleteNote as generatedDeleteNote,
   deleteTeamFolder as generatedDeleteTeamFolder,
@@ -28,16 +30,17 @@ import {
 } from './generated/sdk.gen.js'
 import {
   CreateNoteOptions,
+  CreateNoteMultiStatusResponse,
   CreateTeamFolderBody,
   CreateUserFolderBody,
   GetMe,
   GetUserHistory,
   GetUserNotes,
   GetUserNote,
-  CreateUserNote,
   GetUserTeams,
   GetTeamNotes,
   CreateTeamNote,
+  SingleNote,
   UpdateNoteOptions,
   GetFolders,
   GetFolder,
@@ -72,8 +75,20 @@ type OptionReturnType<Opt, T> = Opt extends { unwrapData: false } ? AxiosRespons
 type UpdateNoteReturnType<Opt extends RequestOptions> = Opt extends { unwrapData: false }
   ? AxiosResponse<void> & { status: 202 }
   : UpdateNoteResult
+type CreateNoteReturnType<Opt extends RequestOptions> = Opt extends { unwrapData: false }
+  ? CreateNoteRawResult
+  : CreateNoteResult
+type CreateTeamNoteReturnType<Opt extends RequestOptions> = Opt extends { unwrapData: false }
+  ? CreateNoteRawResult
+  : CreateTeamNote
 
 export type UpdateNoteResult = { status: 202; etag?: string }
+export type CreateNoteResult =
+  | (SingleNote & { status: 201; etag?: string })
+  | (CreateNoteMultiStatusResponse & { status: 207; etag?: string })
+export type CreateNoteRawResult =
+  | (AxiosResponse<SingleNote> & { status: 201 })
+  | (AxiosResponse<CreateNoteMultiStatusResponse> & { status: 207 })
 
 export type GetNoteSuccess = GetUserNote & { status: 200; etag?: string }
 export type GetNoteNotModified = { status: 304; etag?: string }
@@ -248,8 +263,8 @@ export class API {
     return this.unwrapData(request, options.unwrapData, true) as unknown as Promise<GetNoteResult | GetNoteRawResult>
   }
 
-  async createNote<Opt extends RequestOptions> (payload: CreateNoteOptions, options = defaultOption as Opt): Promise<OptionReturnType<Opt, CreateUserNote>> {
-    return this.unwrapData(this.axios.post<CreateUserNote>("notes", payload), options.unwrapData, true) as unknown as OptionReturnType<Opt, CreateUserNote>
+  async createNote<Opt extends RequestOptions> (payload: CreateNoteOptions, options = defaultOption as Opt): Promise<CreateNoteReturnType<Opt>> {
+    return this.unwrapData(generatedCreateNote({ client: this.generatedClient, body: payload, throwOnError: true }), options.unwrapData, true) as unknown as CreateNoteReturnType<Opt>
   }
 
   async updateNoteContent<Opt extends RequestOptions> (noteId: string, content?: string, options = defaultOption as Opt): Promise<UpdateNoteReturnType<Opt>> {
@@ -300,8 +315,13 @@ export class API {
     }), options.unwrapData) as unknown as OptionReturnType<Opt, GetTeamNotes>
   }
 
-  async createTeamNote<Opt extends RequestOptions> (teamPath: string, payload: CreateNoteOptions, options = defaultOption as Opt): Promise<OptionReturnType<Opt, CreateTeamNote>> {
-    return this.unwrapData(this.axios.post<CreateTeamNote>(`teams/${teamPath}/notes`, payload), options.unwrapData) as unknown as OptionReturnType<Opt, CreateTeamNote>
+  async createTeamNote<Opt extends RequestOptions> (teamPath: string, payload: CreateNoteOptions, options = defaultOption as Opt): Promise<CreateTeamNoteReturnType<Opt>> {
+    return this.unwrapData(generatedCreateTeamNote({
+      client: this.generatedClient,
+      path: { teampath: teamPath },
+      body: payload,
+      throwOnError: true,
+    }), options.unwrapData) as unknown as CreateTeamNoteReturnType<Opt>
   }
 
   async updateTeamNoteContent (teamPath: string, noteId: string, content?: string): Promise<AxiosResponse> {

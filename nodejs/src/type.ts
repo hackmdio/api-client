@@ -1,5 +1,7 @@
 import type {
   ApiFolder as GeneratedApiFolder,
+  CreateNoteData as GeneratedCreateNoteData,
+  CreateNoteMultiStatusResponse as GeneratedCreateNoteMultiStatusResponse,
   FolderPath as GeneratedFolderPath,
   GetUserHistory as GeneratedUserHistory,
   NoteType as GeneratedNote,
@@ -28,17 +30,8 @@ export enum CommentPermissionType {
   EVERYONE = 'everyone'
 }
 
-export type CreateNoteOptions = {
-  title?: string
-  content?: string
-  description?: string
-  tags?: string[]
-  readPermission?: NotePermissionRole,
-  writePermission?: NotePermissionRole,
-  commentPermission?: CommentPermissionType,
-  permalink?: string
-  parentFolderId?: string
-}
+export type CreateNoteOptions = Exclude<NonNullable<GeneratedCreateNoteData['body']>, string>
+export type CreateNoteMultiStatusResponse = GeneratedCreateNoteMultiStatusResponse
 
 export type Team = {
   id: string
@@ -83,7 +76,7 @@ export type GetMe = User
 export type GetUserNotes = Note[]
 export type GetUserNote = SingleNote
 export type GetUserHistory = GeneratedUserHistory
-export type CreateUserNote = SingleNote
+export type CreateUserNote = SingleNote | CreateNoteMultiStatusResponse
 export type UpdateUserNote = void
 export type DeleteUserNote = void
 
@@ -103,7 +96,7 @@ export type GetUserTeams = Team[]
 
 // Team notes
 export type GetTeamNotes = Note[]
-export type CreateTeamNote = SingleNote
+export type CreateTeamNote = SingleNote | CreateNoteMultiStatusResponse
 export type UpdateTeamNote = void
 export type DeleteTeamNote = void
 

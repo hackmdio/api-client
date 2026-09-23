@@ -576,6 +576,36 @@ test('note mutations keep legacy error wrapping', async () => {
   await expect(customClient.updateTeamNote('test-team', 'missing', { title: 'Updated' })).rejects.toBeInstanceOf(HttpResponseError)
 })
 
+test.each([
+  { scope: 'personal', path: '/notes', status: 201, body: { id: 'note-1', title: 'New note' } },
+  { scope: 'personal', path: '/notes', status: 207, body: { note: { id: 'note-1', title: 'New note' }, error: 'Failed to add note to folder' } },
+  { scope: 'team', path: '/teams/test-team/notes', status: 201, body: { id: 'note-1', title: 'New note' } },
+  { scope: 'team', path: '/teams/test-team/notes', status: 207, body: { note: { id: 'note-1', title: 'New note' }, error: 'Failed to add note to folder' } },
+])('createNote $scope $status preserves its request and legacy response wrapper', async ({ scope, path, status, body }) => {
+  const requests: Array<{ body: unknown; authorization: string | null }> = []
+  server.use(
+    http.post(`https://api.hackmd.io/v1${path}`, async ({ request }) => {
+      requests.push({ body: await request.json(), authorization: request.headers.get('Authorization') })
+      return HttpResponse.json(body, { status, headers: { ETag: 'W/"created"' } })
+    })
+  )
+  const payload = { title: 'New note', noteFeatures: { citation: 'signed_in_users' as const } }
+  const result = scope === 'personal'
+    ? await client.createNote(payload)
+    : await client.createTeamNote('test-team', payload)
+  const raw = scope === 'personal'
+    ? await client.createNote(payload, { unwrapData: false })
+    : await client.createTeamNote('test-team', payload, { unwrapData: false })
+
+  expect(result).toEqual(scope === 'personal' ? { ...body, status, etag: 'W/"created"' } : body)
+  expect(raw.status).toBe(status)
+  expect(raw.data).toEqual(body)
+  expect(requests).toEqual([1, 2].map(() => ({
+    body: payload,
+    authorization: `Bearer ${process.env.HACKMD_ACCESS_TOKEN}`,
+  })))
+})
+
 test('should not retry non-idempotent requests when wrapping errors', async () => {
   let requestCount = 0
   const clientWithRetryAndWrap = new API(process.env.HACKMD_ACCESS_TOKEN!, undefined, {

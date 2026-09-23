@@ -78,6 +78,16 @@ async function exploreNoteMutations (client: API): Promise<void> {
   void deleted
 }
 
+async function exploreNoteCreation (client: API): Promise<string> {
+  const personal = await client.createNote({ title: 'New note' })
+  const personalId = personal.status === 201 ? personal.id : personal.note.id
+  const raw = await client.createNote({ title: 'New note' }, { unwrapData: false })
+  const rawId = raw.status === 201 ? raw.data.id : raw.data.note.id
+  const team = await client.createTeamNote('TEAM_PATH', { title: 'New note' })
+  const teamId = 'note' in team ? team.note.id : team.id
+  return [personalId, rawId, teamId].join(',')
+}
+
 function exploreRawNote (note: RawNote): string {
   return note.content
 }
@@ -92,4 +102,5 @@ void exploreTeamFolders
 void exploreFolderReads
 void exploreFolderWrites
 void exploreNoteMutations
+void exploreNoteCreation
 void exploreRawNote

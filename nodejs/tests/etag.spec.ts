@@ -270,6 +270,7 @@ describe('Etag support', () => {
               title: 'New Test Note'
             },
             {
+              status: 201,
               headers: {
                 'ETag': mockEtag
               }
@@ -283,6 +284,8 @@ describe('Etag support', () => {
 
       // Verify response has etag property
       expect(response).toHaveProperty('etag', mockEtag)
+      expect(response.status).toBe(201)
+      if (response.status !== 201) throw new Error('Expected 201')
       
       // Verify data properties still exist
       expect(response).toHaveProperty('id', 'new-note-id')

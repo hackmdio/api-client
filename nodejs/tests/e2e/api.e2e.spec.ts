@@ -110,6 +110,10 @@ describe('HackMD API (live e2e)', () => {
           tags: ['e2e'],
         })
 
+        if (created.status === 207) {
+          noteId = created.note.id
+          throw new Error(`Note created, but folder placement failed: ${created.error}`)
+        }
         expect(created.id).toEqual(expect.any(String))
         expect(created.title).toBe(title)
         expect(created.tags).toContain('e2e')
