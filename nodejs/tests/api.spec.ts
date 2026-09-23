@@ -279,6 +279,80 @@ test('getTeamFolderList keeps legacy error wrapping', async () => {
   await expect(customClient.getTeamFolderList('missing-team')).rejects.toBeInstanceOf(HttpResponseError)
 })
 
+const folder = {
+  id: 'folder-1',
+  name: 'Research',
+  description: null,
+  icon: null,
+  color: null,
+  parentFolderId: null,
+  createdAt: 1700000000000,
+  updatedAt: 1700000000000,
+}
+const folderOrder = { root: ['folder-1'] }
+
+test.each([
+  {
+    name: 'getFolder',
+    path: '/folders/folder-1',
+    body: folder,
+    get: (api: API) => api.getFolder('folder-1'),
+    getRaw: (api: API) => api.getFolder('folder-1', { unwrapData: false }),
+  },
+  {
+    name: 'getTeamFolder',
+    path: '/teams/test-team/folders/folder-1',
+    body: folder,
+    get: (api: API) => api.getTeamFolder('test-team', 'folder-1'),
+    getRaw: (api: API) => api.getTeamFolder('test-team', 'folder-1', { unwrapData: false }),
+  },
+  {
+    name: 'getFolderOrder',
+    path: '/folders/folder-order',
+    body: folderOrder,
+    get: (api: API) => api.getFolderOrder(),
+    getRaw: (api: API) => api.getFolderOrder({ unwrapData: false }),
+  },
+  {
+    name: 'getTeamFolderOrder',
+    path: '/teams/test-team/folders/folder-order',
+    body: folderOrder,
+    get: (api: API) => api.getTeamFolderOrder('test-team'),
+    getRaw: (api: API) => api.getTeamFolderOrder('test-team', { unwrapData: false }),
+  },
+])('$name keeps legacy response shapes and authorization', async ({ path, body, get, getRaw }) => {
+  let authorization: string | null = null
+  server.use(
+    http.get(`https://api.hackmd.io/v1${path}`, ({ request }) => {
+      authorization = request.headers.get('Authorization')
+      return HttpResponse.json(body)
+    })
+  )
+
+  expect(await get(client)).toEqual(body)
+  const raw = await getRaw(client)
+  expect(raw.status).toBe(200)
+  expect(raw.data).toEqual(body)
+  expect(authorization).toBe(`Bearer ${process.env.HACKMD_ACCESS_TOKEN}`)
+})
+
+test.each([
+  ['getFolder', '/folders/missing', (api: API) => api.getFolder('missing')],
+  ['getTeamFolder', '/teams/test-team/folders/missing', (api: API) => api.getTeamFolder('test-team', 'missing')],
+] as const)('%s keeps legacy error wrapping', async (_name, path, get) => {
+  server.use(
+    http.get(`https://api.hackmd.io/v1${path}`, () =>
+      HttpResponse.json({ error: 'Folder not found' }, { status: 404 })
+    )
+  )
+  const customClient = new API('custom-token', undefined, {
+    wrapResponseErrors: true,
+    retryConfig: undefined,
+  })
+
+  await expect(get(customClient)).rejects.toBeInstanceOf(HttpResponseError)
+})
+
 test('updateFolderOrder sends order payload', async () => {
   let requestBody: unknown
 

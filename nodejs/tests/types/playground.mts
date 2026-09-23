@@ -43,6 +43,14 @@ async function exploreTeamFolders (client: API): Promise<number> {
   return folders[0].updatedAt
 }
 
+async function exploreFolderReads (client: API): Promise<string[]> {
+  const personalFolder = await client.getFolder('FOLDER_ID')
+  const teamFolder = await client.getTeamFolder('TEAM_PATH', 'FOLDER_ID')
+  const personalOrder = await client.getFolderOrder()
+  const teamOrder = await client.getTeamFolderOrder('TEAM_PATH')
+  return [personalFolder.id, teamFolder.id, ...personalOrder.root, ...teamOrder.root]
+}
+
 function exploreRawNote (note: RawNote): string {
   return note.content
 }
@@ -54,4 +62,5 @@ void exploreHistory
 void exploreTeamNotes
 void exploreFolders
 void exploreTeamFolders
+void exploreFolderReads
 void exploreRawNote
