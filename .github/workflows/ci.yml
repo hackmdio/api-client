@@ -29,6 +29,14 @@ jobs:
         working-directory: nodejs
         run: pnpm install --frozen-lockfile
 
+      - name: Check generated client
+        working-directory: nodejs
+        run: pnpm check:generated
+
+      - name: Typecheck
+        working-directory: nodejs
+        run: pnpm typecheck
+
       - name: Run lint
         working-directory: nodejs
         run: pnpm lint

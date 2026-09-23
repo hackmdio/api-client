@@ -134,9 +134,49 @@ const uploadedFromNode = await client.uploadNoteImage('note-id', image, {
 console.log(uploadedFromNode.data.link)
 ```
 
+### Generated Raw API
+
+The `@hackmd/api/raw` entry point exposes every OpenAPI operation as a generated,
+one-to-one function. Create a client to share authentication and the API endpoint:
+
+```typescript
+import { createClient, getNote } from '@hackmd/api/raw'
+
+const client = createClient({
+  auth: 'YOUR_ACCESS_TOKEN',
+  baseURL: 'https://api.hackmd.io/v1',
+})
+
+const response = await getNote({
+  client,
+  path: { noteId: 'NOTE_ID' },
+  throwOnError: true,
+})
+
+console.log(response.data.content)
+```
+
+The package root remains the compatibility layer with response unwrapping,
+retries, and ETag handling. Files under `src/generated` are generated from the
+vendored OpenAPI document and must not be edited manually.
+
 ## API
 
 See the [code](./src/index.ts) and [typings](./src/type.ts). The API client is written in TypeScript, so you can get auto-completion and type checking in any TypeScript Language Server powered editor or IDE.
+
+## Regenerating the raw client
+
+Generation requires Node.js 22.18 or newer.
+
+```bash
+pnpm spec:pull
+pnpm generate
+pnpm check:generated
+```
+
+The OpenAPI document is committed at `spec/hackmd-openapi.json`, and generated
+sources are committed under `src/generated` so package builds remain offline and
+deterministic.
 
 ## E2E tests (live API)
 
