@@ -5,6 +5,7 @@ import type {
   FolderPath as GeneratedFolderPath,
   GetUserHistory as GeneratedUserHistory,
   NoteType as GeneratedNote,
+  NoteImageUploadResponse as GeneratedNoteImageUploadResponse,
   SimpleUserProfile as GeneratedSimpleUserProfile,
   SingleNote as GeneratedSingleNote,
   Team as GeneratedTeam,
@@ -64,11 +65,7 @@ export type CreateUserNote = SingleNote | CreateNoteMultiStatusResponse
 export type UpdateUserNote = void
 export type DeleteUserNote = void
 
-export type UploadNoteImageResponse = {
-  data: {
-    link: string
-  }
-}
+export type UploadNoteImageResponse = GeneratedNoteImageUploadResponse
 
 export type UploadNoteImageOptions = {
   unwrapData?: boolean

@@ -504,10 +504,12 @@ test('folder writes keep legacy error wrapping', async () => {
 test('uploadNoteImage sends image as multipart form data', async () => {
   let uploaded: FormDataEntryValue | null = null
   let contentType: string | null = null
+  let authorization: string | null = null
 
   server.use(
     http.post('https://api.hackmd.io/v1/notes/test-note-id/images', async ({ request }) => {
       contentType = request.headers.get('content-type')
+      authorization = request.headers.get('Authorization')
       const formData = await request.formData()
       uploaded = formData.get('image')
 
@@ -515,7 +517,7 @@ test('uploadNoteImage sends image as multipart form data', async () => {
         data: {
           link: 'https://hackmd.io/_uploads/test-image.png',
         },
-      })
+      }, { status: 201 })
     }),
   )
 
@@ -529,11 +531,32 @@ test('uploadNoteImage sends image as multipart form data', async () => {
   expect(uploaded).toBeInstanceOf(Blob)
   const uploadedBlob = uploaded as unknown as Blob
   expect(uploadedBlob.type).toBe('image/png')
+  expect((uploaded as unknown as File).name).toBe('test-image.png')
+  expect(authorization).toBe(`Bearer ${process.env.HACKMD_ACCESS_TOKEN}`)
   expect(response).toEqual({
     data: {
       link: 'https://hackmd.io/_uploads/test-image.png',
     },
   })
+
+  const raw = await client.uploadNoteImage('test-note-id', new Blob(['test image'], { type: 'image/png' }), {
+    filename: 'test-image.png',
+    unwrapData: false,
+  })
+  expect(raw.status).toBe(201)
+  expect(raw.data).toEqual(response)
+})
+
+test('uploadNoteImage keeps legacy error wrapping', async () => {
+  server.use(http.post('https://api.hackmd.io/v1/notes/missing/images', () =>
+    HttpResponse.json({ message: 'Forbidden' }, { status: 403 })
+  ))
+  const customClient = new API('custom-token', undefined, {
+    wrapResponseErrors: true,
+    retryConfig: undefined,
+  })
+
+  await expect(customClient.uploadNoteImage('missing', new Blob(['image'], { type: 'image/png' }))).rejects.toBeInstanceOf(HttpResponseError)
 })
 
 test('should support updating team note title and tags metadata', async () => {

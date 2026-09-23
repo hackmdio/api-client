@@ -99,6 +99,15 @@ async function exploreProfileAndTeams (client: API): Promise<number> {
   return createdAt
 }
 
+async function exploreImageUpload (client: API): Promise<string> {
+  const image = new Blob(['image'], { type: 'image/png' })
+  const uploaded = await client.uploadNoteImage('NOTE_ID', image, { filename: 'image.png' })
+  const raw = await client.uploadNoteImage('NOTE_ID', image, { unwrapData: false })
+  const status: number = raw.status
+  void status
+  return uploaded.data.link
+}
+
 function exploreRawNote (note: RawNote): string {
   return note.content
 }
@@ -115,4 +124,5 @@ void exploreFolderWrites
 void exploreNoteMutations
 void exploreNoteCreation
 void exploreProfileAndTeams
+void exploreImageUpload
 void exploreRawNote

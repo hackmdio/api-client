@@ -29,6 +29,7 @@ import {
   updateTeamFolder as generatedUpdateTeamFolder,
   updateTeamFolderOrder as generatedUpdateTeamFolderOrder,
   updateTeamNote as generatedUpdateTeamNote,
+  uploadNoteImage as generatedUploadNoteImage,
 } from './generated/sdk.gen.js'
 import {
   CreateNoteOptions,
@@ -300,7 +301,13 @@ export class API {
     formData.append('image', image, options.filename ?? undefined)
 
     return this.unwrapData(
-      this.axios.post<UploadNoteImageResponse>(`notes/${noteId}/images`, formData),
+      generatedUploadNoteImage({
+        client: this.generatedClient,
+        path: { noteId },
+        body: { image },
+        bodySerializer: () => formData,
+        throwOnError: true,
+      }),
       options.unwrapData,
     ) as unknown as OptionReturnType<Opt, UploadNoteImageResponse>
   }
