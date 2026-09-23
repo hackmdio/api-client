@@ -3801,6 +3801,25 @@
 									"$ref": "#/components/schemas/SingleNote"
 								}
 							}
+						},
+						"headers": {
+							"ETag": {
+								"schema": {
+									"type": "string"
+								},
+								"required": true
+							}
+						}
+					},
+					"304": {
+						"description": "",
+						"headers": {
+							"ETag": {
+								"schema": {
+									"type": "string"
+								},
+								"required": true
+							}
 						}
 					},
 					"403": {
@@ -4888,6 +4907,25 @@
 								"schema": {
 									"$ref": "#/components/schemas/SingleNote"
 								}
+							}
+						},
+						"headers": {
+							"ETag": {
+								"schema": {
+									"type": "string"
+								},
+								"required": true
+							}
+						}
+					},
+					"304": {
+						"description": "",
+						"headers": {
+							"ETag": {
+								"schema": {
+									"type": "string"
+								},
+								"required": true
 							}
 						}
 					},

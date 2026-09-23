@@ -113,6 +113,19 @@ describe('generated raw API', () => {
     }
   })
 
+  test('note detail GETs document a bodyless 304 and ETag headers', () => {
+    const paths = openApiDocument.paths as Record<string, OpenApiPath>
+    for (const path of ['/notes/{noteId}', '/teams/{teampath}/notes/{noteId}']) {
+      const responses = paths[path]?.get?.responses as Record<string, {
+        content?: unknown
+        headers?: Record<string, unknown>
+      }>
+      expect(responses['200'].headers).toHaveProperty('ETag')
+      expect(responses['304'].headers).toHaveProperty('ETag')
+      expect(responses['304']).not.toHaveProperty('content')
+    }
+  })
+
   test('supports an authenticated custom Axios client', async () => {
     let authorization: string | null = null
     server.use(
