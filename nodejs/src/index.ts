@@ -2,7 +2,7 @@
 
 import axios, { AxiosInstance, AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { createClient, type Client } from './generated/client/index.js'
-import { getNote as generatedGetNote, listNotes } from './generated/sdk.gen.js'
+import { getHistory as generatedGetHistory, getNote as generatedGetNote, listNotes } from './generated/sdk.gen.js'
 import {
   CreateNoteOptions,
   CreateTeamFolderBody,
@@ -39,6 +39,8 @@ export type RequestOptions = {
   unwrapData?: boolean;
   etag?: string | undefined;
 }
+
+export type GetHistoryOptions = RequestOptions & { limit?: number }
 
 const defaultOption: RequestOptions = {
   unwrapData: true,
@@ -189,8 +191,12 @@ export class API {
     return this.unwrapData(this.axios.get<GetMe>("me"), options.unwrapData) as unknown as OptionReturnType<Opt, GetMe>
   }
 
-  async getHistory<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserHistory>> {
-    return this.unwrapData(this.axios.get<GetUserHistory>("history"), options.unwrapData) as unknown as OptionReturnType<Opt, GetUserHistory>
+  async getHistory<Opt extends GetHistoryOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserHistory>> {
+    return this.unwrapData(generatedGetHistory({
+      client: this.generatedClient,
+      query: options.limit === undefined ? undefined : { limit: options.limit },
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, GetUserHistory>
   }
 
   async getNoteList<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserNotes>> {

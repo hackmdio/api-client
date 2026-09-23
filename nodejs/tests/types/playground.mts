@@ -23,6 +23,11 @@ async function exploreNoteList (client: API): Promise<number> {
   return notes[0].createdAt
 }
 
+async function exploreHistory (client: API): Promise<number> {
+  const notes = await client.getHistory({ limit: 5 })
+  return notes[0].lastChangedAt
+}
+
 function exploreRawNote (note: RawNote): string {
   return note.content
 }
@@ -30,4 +35,5 @@ function exploreRawNote (note: RawNote): string {
 void exploreClient
 void exploreConditionalNote
 void exploreNoteList
+void exploreHistory
 void exploreRawNote

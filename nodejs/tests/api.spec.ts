@@ -70,6 +70,40 @@ test('getNoteList keeps legacy error wrapping', async () => {
   await expect(customClient.getNoteList()).rejects.toBeInstanceOf(HttpResponseError)
 })
 
+test('getHistory keeps the legacy response shapes and authorization', async () => {
+  const history = [{ id: 'note-1', title: 'Recent note', createdAt: 1700000000000 }]
+  let authorization: string | null = null
+  const limits: Array<string | null> = []
+  server.use(
+    http.get('https://api.hackmd.io/v1/history', ({ request }) => {
+      authorization = request.headers.get('Authorization')
+      limits.push(new URL(request.url).searchParams.get('limit'))
+      return HttpResponse.json(history)
+    })
+  )
+
+  expect(await client.getHistory()).toEqual(history)
+  const raw = await client.getHistory({ unwrapData: false, limit: 5 })
+  expect(raw.status).toBe(200)
+  expect(raw.data).toEqual(history)
+  expect(authorization).toBe(`Bearer ${process.env.HACKMD_ACCESS_TOKEN}`)
+  expect(limits).toEqual([null, '5'])
+})
+
+test('getHistory keeps legacy error wrapping', async () => {
+  server.use(
+    http.get('https://api.hackmd.io/v1/history', () =>
+      HttpResponse.json({ error: 'Forbidden' }, { status: 403 })
+    )
+  )
+  const customClient = new API('custom-token', undefined, {
+    wrapResponseErrors: true,
+    retryConfig: undefined,
+  })
+
+  await expect(customClient.getHistory()).rejects.toBeInstanceOf(HttpResponseError)
+})
+
 test('should throw axios error object if set wrapResponseErrors to false', async () => {
   const customCilent = new API(process.env.HACKMD_ACCESS_TOKEN!, undefined, {
     wrapResponseErrors: false,

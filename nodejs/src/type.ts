@@ -1,5 +1,6 @@
 import type {
   FolderPath as GeneratedFolderPath,
+  GetUserHistory as GeneratedUserHistory,
   NoteType as GeneratedNote,
   SimpleUserProfile as GeneratedSimpleUserProfile,
   SingleNote as GeneratedSingleNote,
@@ -81,7 +82,7 @@ export type GetMe = User
 // User notes
 export type GetUserNotes = Note[]
 export type GetUserNote = SingleNote
-export type GetUserHistory = Note[]
+export type GetUserHistory = GeneratedUserHistory
 export type CreateUserNote = SingleNote
 export type UpdateUserNote = void
 export type DeleteUserNote = void
