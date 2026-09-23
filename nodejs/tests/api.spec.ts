@@ -353,24 +353,99 @@ test.each([
   await expect(get(customClient)).rejects.toBeInstanceOf(HttpResponseError)
 })
 
-test('updateFolderOrder sends order payload', async () => {
-  let requestBody: unknown
+const folderWriteCases = [
+  {
+    name: 'createFolder', path: '/folders', method: 'POST', status: 201,
+    payload: { name: 'Research' },
+    run: (api: API) => api.createFolder({ name: 'Research' }),
+    runRaw: (api: API) => api.createFolder({ name: 'Research' }, { unwrapData: false }),
+  },
+  {
+    name: 'createTeamFolder', path: '/teams/test-team/folders', method: 'POST', status: 201,
+    payload: { name: 'Research' },
+    run: (api: API) => api.createTeamFolder('test-team', { name: 'Research' }),
+    runRaw: (api: API) => api.createTeamFolder('test-team', { name: 'Research' }, { unwrapData: false }),
+  },
+  {
+    name: 'updateFolder', path: '/folders/folder-1', method: 'PATCH', status: 202,
+    payload: { name: 'Updated' },
+    run: (api: API) => api.updateFolder('folder-1', { name: 'Updated' }),
+    runRaw: (api: API) => api.updateFolder('folder-1', { name: 'Updated' }, { unwrapData: false }),
+  },
+  {
+    name: 'updateTeamFolder', path: '/teams/test-team/folders/folder-1', method: 'PATCH', status: 202,
+    payload: { name: 'Updated' },
+    run: (api: API) => api.updateTeamFolder('test-team', 'folder-1', { name: 'Updated' }),
+    runRaw: (api: API) => api.updateTeamFolder('test-team', 'folder-1', { name: 'Updated' }, { unwrapData: false }),
+  },
+  {
+    name: 'deleteFolder', path: '/folders/folder-1', method: 'DELETE', status: 204,
+    payload: undefined,
+    run: (api: API) => api.deleteFolder('folder-1'),
+    runRaw: (api: API) => api.deleteFolder('folder-1', { unwrapData: false }),
+  },
+  {
+    name: 'deleteTeamFolder', path: '/teams/test-team/folders/folder-1', method: 'DELETE', status: 204,
+    payload: undefined,
+    run: (api: API) => api.deleteTeamFolder('test-team', 'folder-1'),
+    runRaw: (api: API) => api.deleteTeamFolder('test-team', 'folder-1', { unwrapData: false }),
+  },
+  {
+    name: 'updateFolderOrder', path: '/folders/folder-order', method: 'PUT', status: 204,
+    payload: { order: { root: ['folder-1'] } },
+    run: (api: API) => api.updateFolderOrder({ order: { root: ['folder-1'] } }),
+    runRaw: (api: API) => api.updateFolderOrder({ order: { root: ['folder-1'] } }, { unwrapData: false }),
+  },
+  {
+    name: 'updateTeamFolderOrder', path: '/teams/test-team/folders/folder-order', method: 'PUT', status: 204,
+    payload: { order: { root: ['folder-1'] } },
+    run: (api: API) => api.updateTeamFolderOrder('test-team', { order: { root: ['folder-1'] } }),
+    runRaw: (api: API) => api.updateTeamFolderOrder('test-team', { order: { root: ['folder-1'] } }, { unwrapData: false }),
+  },
+]
 
+test.each(folderWriteCases)('$name keeps the path, payload, status, and response shape', async ({ path, method, payload, status, run, runRaw }) => {
+  const requests: Array<{ method: string; body: string; authorization: string | null }> = []
   server.use(
-    http.put('https://api.hackmd.io/v1/folders/folder-order', async ({ request }) => {
-      requestBody = await request.json()
-
-      return HttpResponse.json({})
-    }),
+    http.all(`https://api.hackmd.io/v1${path}`, async ({ request }) => {
+      requests.push({
+        method: request.method,
+        body: await request.text(),
+        authorization: request.headers.get('Authorization'),
+      })
+      return status === 201 ? HttpResponse.json(folder, { status }) : new HttpResponse(null, { status })
+    })
   )
 
-  await client.updateFolderOrder({
-    order: { root: ['a', 'b'], parent: ['c'] },
+  const unwrapped = await run(client)
+  const raw = await runRaw(client)
+  expect(raw.status).toBe(status)
+  if (status === 201) {
+    expect(unwrapped).toEqual(folder)
+    expect(raw.data).toEqual(folder)
+  } else {
+    expect([undefined, '']).toContain(unwrapped)
+    expect([undefined, '']).toContain(raw.data)
+  }
+  expect(requests).toEqual([1, 2].map(() => ({
+    method,
+    body: payload ? JSON.stringify(payload) : '',
+    authorization: `Bearer ${process.env.HACKMD_ACCESS_TOKEN}`,
+  })))
+})
+
+test('folder writes keep legacy error wrapping', async () => {
+  server.use(
+    http.patch('https://api.hackmd.io/v1/folders/missing', () =>
+      HttpResponse.json({ error: 'Folder not found' }, { status: 404 })
+    )
+  )
+  const customClient = new API('custom-token', undefined, {
+    wrapResponseErrors: true,
+    retryConfig: undefined,
   })
 
-  expect(requestBody).toEqual({
-    order: { root: ['a', 'b'], parent: ['c'] },
-  })
+  await expect(customClient.updateFolder('missing', { name: 'Updated' })).rejects.toBeInstanceOf(HttpResponseError)
 })
 
 test('uploadNoteImage sends image as multipart form data', async () => {

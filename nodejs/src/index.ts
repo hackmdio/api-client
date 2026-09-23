@@ -3,6 +3,10 @@
 import axios, { AxiosInstance, AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { createClient, type Client } from './generated/client/index.js'
 import {
+  createFolder as generatedCreateFolder,
+  createTeamFolder as generatedCreateTeamFolder,
+  deleteFolder as generatedDeleteFolder,
+  deleteTeamFolder as generatedDeleteTeamFolder,
   getFolder as generatedGetFolder,
   getFolderOrder as generatedGetFolderOrder,
   getHistory as generatedGetHistory,
@@ -13,6 +17,10 @@ import {
   listNotes,
   listTeamFolders,
   listTeamNotes,
+  updateFolder as generatedUpdateFolder,
+  updateFolderOrder as generatedUpdateFolderOrder,
+  updateTeamFolder as generatedUpdateTeamFolder,
+  updateTeamFolderOrder as generatedUpdateTeamFolderOrder,
 } from './generated/sdk.gen.js'
 import {
   CreateNoteOptions,
@@ -291,7 +299,7 @@ export class API {
   }
 
   async createFolder<Opt extends RequestOptions> (payload: CreateUserFolderBody, options = defaultOption as Opt): Promise<OptionReturnType<Opt, CreateFolderResult>> {
-    return this.unwrapData(this.axios.post<CreateFolderResult>('folders', payload), options.unwrapData) as unknown as OptionReturnType<Opt, CreateFolderResult>
+    return this.unwrapData(generatedCreateFolder({ client: this.generatedClient, body: payload, throwOnError: true }), options.unwrapData) as unknown as OptionReturnType<Opt, CreateFolderResult>
   }
 
   async getFolder<Opt extends RequestOptions> (folderId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetFolder>> {
@@ -303,11 +311,20 @@ export class API {
   }
 
   async updateFolder<Opt extends RequestOptions> (folderId: string, payload: UpdateUserFolderBody, options = defaultOption as Opt): Promise<OptionReturnType<Opt, UpdateFolderResult>> {
-    return this.unwrapData(this.axios.patch<UpdateFolderResult>(`folders/${folderId}`, payload), options.unwrapData) as unknown as OptionReturnType<Opt, UpdateFolderResult>
+    return this.unwrapData(generatedUpdateFolder({
+      client: this.generatedClient,
+      path: { folderId },
+      body: payload,
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, UpdateFolderResult>
   }
 
   async deleteFolder<Opt extends RequestOptions> (folderId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, void>> {
-    return this.unwrapData(this.axios.delete(`folders/${folderId}`), options.unwrapData) as unknown as OptionReturnType<Opt, void>
+    return this.unwrapData(generatedDeleteFolder({
+      client: this.generatedClient,
+      path: { folderId },
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, void>
   }
 
   async getFolderOrder<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetFolderOrder>> {
@@ -315,7 +332,7 @@ export class API {
   }
 
   async updateFolderOrder<Opt extends RequestOptions> (payload: UpdateFolderOrderBody, options = defaultOption as Opt): Promise<OptionReturnType<Opt, UpdateFolderResult>> {
-    return this.unwrapData(this.axios.put<UpdateFolderResult>('folders/folder-order', payload), options.unwrapData) as unknown as OptionReturnType<Opt, UpdateFolderResult>
+    return this.unwrapData(generatedUpdateFolderOrder({ client: this.generatedClient, body: payload, throwOnError: true }), options.unwrapData) as unknown as OptionReturnType<Opt, UpdateFolderResult>
   }
 
   async getTeamFolderList<Opt extends RequestOptions> (teamPath: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetTeamFolders>> {
@@ -327,7 +344,12 @@ export class API {
   }
 
   async createTeamFolder<Opt extends RequestOptions> (teamPath: string, payload: CreateTeamFolderBody, options = defaultOption as Opt): Promise<OptionReturnType<Opt, CreateTeamFolderResult>> {
-    return this.unwrapData(this.axios.post<CreateTeamFolderResult>(`teams/${teamPath}/folders`, payload), options.unwrapData) as unknown as OptionReturnType<Opt, CreateTeamFolderResult>
+    return this.unwrapData(generatedCreateTeamFolder({
+      client: this.generatedClient,
+      path: { teampath: teamPath },
+      body: payload,
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, CreateTeamFolderResult>
   }
 
   async getTeamFolder<Opt extends RequestOptions> (teamPath: string, folderId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetTeamFolder>> {
@@ -339,11 +361,20 @@ export class API {
   }
 
   async updateTeamFolder<Opt extends RequestOptions> (teamPath: string, folderId: string, payload: UpdateTeamFolderBody, options = defaultOption as Opt): Promise<OptionReturnType<Opt, UpdateTeamFolderResult>> {
-    return this.unwrapData(this.axios.patch<UpdateTeamFolderResult>(`teams/${teamPath}/folders/${folderId}`, payload), options.unwrapData) as unknown as OptionReturnType<Opt, UpdateTeamFolderResult>
+    return this.unwrapData(generatedUpdateTeamFolder({
+      client: this.generatedClient,
+      path: { teampath: teamPath, folderId },
+      body: payload,
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, UpdateTeamFolderResult>
   }
 
   async deleteTeamFolder<Opt extends RequestOptions> (teamPath: string, folderId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, void>> {
-    return this.unwrapData(this.axios.delete(`teams/${teamPath}/folders/${folderId}`), options.unwrapData) as unknown as OptionReturnType<Opt, void>
+    return this.unwrapData(generatedDeleteTeamFolder({
+      client: this.generatedClient,
+      path: { teampath: teamPath, folderId },
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, void>
   }
 
   async getTeamFolderOrder<Opt extends RequestOptions> (teamPath: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetTeamFolderOrder>> {
@@ -355,7 +386,12 @@ export class API {
   }
 
   async updateTeamFolderOrder<Opt extends RequestOptions> (teamPath: string, payload: UpdateFolderOrderBody, options = defaultOption as Opt): Promise<OptionReturnType<Opt, UpdateTeamFolderResult>> {
-    return this.unwrapData(this.axios.put<UpdateTeamFolderResult>(`teams/${teamPath}/folders/folder-order`, payload), options.unwrapData) as unknown as OptionReturnType<Opt, UpdateTeamFolderResult>
+    return this.unwrapData(generatedUpdateTeamFolderOrder({
+      client: this.generatedClient,
+      path: { teampath: teamPath },
+      body: payload,
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, UpdateTeamFolderResult>
   }
 
   private unwrapData<T> (reqP: Promise<AxiosResponse<T>>, unwrap = true, includeEtag = false) {

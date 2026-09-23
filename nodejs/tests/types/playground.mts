@@ -51,6 +51,22 @@ async function exploreFolderReads (client: API): Promise<string[]> {
   return [personalFolder.id, teamFolder.id, ...personalOrder.root, ...teamOrder.root]
 }
 
+async function exploreFolderWrites (client: API): Promise<void> {
+  const folder = await client.createFolder({ name: 'Research' })
+  const teamFolder = await client.createTeamFolder('TEAM_PATH', { name: 'Research' })
+  const updated: void = await client.updateFolder(folder.id, { name: 'Updated' })
+  const teamUpdated: void = await client.updateTeamFolder('TEAM_PATH', teamFolder.id, { name: 'Updated' })
+  const ordered: void = await client.updateFolderOrder({ order: { root: [folder.id] } })
+  const teamOrdered: void = await client.updateTeamFolderOrder('TEAM_PATH', { order: { root: [teamFolder.id] } })
+  const raw = await client.deleteFolder(folder.id, { unwrapData: false })
+  const status: number = raw.status
+  void updated
+  void teamUpdated
+  void ordered
+  void teamOrdered
+  void status
+}
+
 function exploreRawNote (note: RawNote): string {
   return note.content
 }
@@ -63,4 +79,5 @@ void exploreTeamNotes
 void exploreFolders
 void exploreTeamFolders
 void exploreFolderReads
+void exploreFolderWrites
 void exploreRawNote
