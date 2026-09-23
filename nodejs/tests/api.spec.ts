@@ -37,6 +37,59 @@ test('getMe unwrapped', async () => {
   expect(response).toHaveProperty('email')
   expect(response).toHaveProperty('userPath')
   expect(response).toHaveProperty('photo')
+  expect(response).toHaveProperty('upgraded', false)
+})
+
+test('getMe keeps the generated profile shape and authorization', async () => {
+  const team = {
+    id: 'team-1', ownerId: 'user-1', name: 'Research', logo: '', path: 'research',
+    description: null, visibility: 'private', upgraded: false, createdAt: 1700000000000,
+  }
+  const profile = {
+    id: 'user-1', email: null, name: 'Researcher', userPath: 'researcher',
+    photo: '', teams: [team], upgraded: true,
+  }
+  let authorization: string | null = null
+  server.use(http.get('https://api.hackmd.io/v1/me', ({ request }) => {
+    authorization = request.headers.get('Authorization')
+    return HttpResponse.json(profile)
+  }))
+
+  expect(await client.getMe()).toEqual(profile)
+  const raw = await client.getMe({ unwrapData: false })
+  expect(raw.status).toBe(200)
+  expect(raw.data).toEqual(profile)
+  expect(authorization).toBe(`Bearer ${process.env.HACKMD_ACCESS_TOKEN}`)
+})
+
+test('getTeams keeps the generated team shape and legacy response forms', async () => {
+  const teams = [{
+    id: 'team-1', ownerId: 'user-1', name: 'Research', logo: '', path: 'research',
+    description: null, visibility: 'private', upgraded: false, createdAt: 1700000000000,
+  }]
+  let authorization: string | null = null
+  server.use(http.get('https://api.hackmd.io/v1/teams', ({ request }) => {
+    authorization = request.headers.get('Authorization')
+    return HttpResponse.json(teams)
+  }))
+
+  expect(await client.getTeams()).toEqual(teams)
+  const raw = await client.getTeams({ unwrapData: false })
+  expect(raw.status).toBe(200)
+  expect(raw.data).toEqual(teams)
+  expect(authorization).toBe(`Bearer ${process.env.HACKMD_ACCESS_TOKEN}`)
+})
+
+test('getTeams keeps legacy error wrapping', async () => {
+  server.use(http.get('https://api.hackmd.io/v1/teams', () =>
+    HttpResponse.json({ error: 'Forbidden' }, { status: 403 })
+  ))
+  const customClient = new API('custom-token', undefined, {
+    wrapResponseErrors: true,
+    retryConfig: undefined,
+  })
+
+  await expect(customClient.getTeams()).rejects.toBeInstanceOf(HttpResponseError)
 })
 
 test('getNoteList keeps the legacy response shapes and authorization', async () => {

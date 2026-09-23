@@ -7,7 +7,9 @@ import type {
   NoteType as GeneratedNote,
   SimpleUserProfile as GeneratedSimpleUserProfile,
   SingleNote as GeneratedSingleNote,
+  Team as GeneratedTeam,
   UpdateNoteData as GeneratedUpdateNoteData,
+  User as GeneratedUser,
 } from './generated/types.gen.js'
 
 export enum TeamVisibilityType {
@@ -33,26 +35,8 @@ export enum CommentPermissionType {
 export type CreateNoteOptions = Exclude<NonNullable<GeneratedCreateNoteData['body']>, string>
 export type CreateNoteMultiStatusResponse = GeneratedCreateNoteMultiStatusResponse
 
-export type Team = {
-  id: string
-  ownerId: string
-  name: string
-  logo: string
-  path: string
-  description: string
-  hardBreaks: boolean
-  visibility: TeamVisibilityType
-  createdAt: Date
-}
-
-export type User = {
-  id: string
-  email: string | null
-  name: string
-  userPath: string
-  photo: string
-  teams: Team[]
-}
+export type Team = GeneratedTeam
+export type User = GeneratedUser
 
 export type SimpleUserProfile = GeneratedSimpleUserProfile
 

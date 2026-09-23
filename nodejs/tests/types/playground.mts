@@ -88,6 +88,17 @@ async function exploreNoteCreation (client: API): Promise<string> {
   return [personalId, rawId, teamId].join(',')
 }
 
+async function exploreProfileAndTeams (client: API): Promise<number> {
+  const profile = await client.getMe()
+  const teams = await client.getTeams()
+  const createdAt: number = teams[0].createdAt
+  const description: string | null = profile.teams[0].description
+  const upgraded: boolean = profile.upgraded
+  void description
+  void upgraded
+  return createdAt
+}
+
 function exploreRawNote (note: RawNote): string {
   return note.content
 }
@@ -103,4 +114,5 @@ void exploreFolderReads
 void exploreFolderWrites
 void exploreNoteMutations
 void exploreNoteCreation
+void exploreProfileAndTeams
 void exploreRawNote

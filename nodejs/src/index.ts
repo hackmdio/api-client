@@ -11,6 +11,7 @@ import {
   deleteNote as generatedDeleteNote,
   deleteTeamFolder as generatedDeleteTeamFolder,
   deleteTeamNote as generatedDeleteTeamNote,
+  getCurrentUser,
   getFolder as generatedGetFolder,
   getFolderOrder as generatedGetFolderOrder,
   getHistory as generatedGetHistory,
@@ -19,6 +20,7 @@ import {
   getTeamFolderOrder as generatedGetTeamFolderOrder,
   listFolders,
   listNotes,
+  listTeams,
   listTeamFolders,
   listTeamNotes,
   updateFolder as generatedUpdateFolder,
@@ -230,7 +232,7 @@ export class API {
     )
   }
   async getMe<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetMe>> {
-    return this.unwrapData(this.axios.get<GetMe>("me"), options.unwrapData) as unknown as OptionReturnType<Opt, GetMe>
+    return this.unwrapData(getCurrentUser({ client: this.generatedClient, throwOnError: true }), options.unwrapData) as unknown as OptionReturnType<Opt, GetMe>
   }
 
   async getHistory<Opt extends GetHistoryOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserHistory>> {
@@ -304,7 +306,7 @@ export class API {
   }
 
   async getTeams<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserTeams>> {
-    return this.unwrapData(this.axios.get<GetUserTeams>("teams"), options.unwrapData) as unknown as OptionReturnType<Opt, GetUserTeams>
+    return this.unwrapData(listTeams({ client: this.generatedClient, throwOnError: true }), options.unwrapData) as unknown as OptionReturnType<Opt, GetUserTeams>
   }
 
   async getTeamNotes<Opt extends RequestOptions> (teamPath: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetTeamNotes>> {
