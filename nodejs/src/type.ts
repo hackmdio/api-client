@@ -1,3 +1,10 @@
+import type {
+  FolderPath as GeneratedFolderPath,
+  NoteType as GeneratedNote,
+  SimpleUserProfile as GeneratedSimpleUserProfile,
+  SingleNote as GeneratedSingleNote,
+} from './generated/types.gen.js'
+
 export enum TeamVisibilityType {
   PUBLIC = 'public',
   PRIVATE = 'private',
@@ -51,13 +58,7 @@ export type User = {
   teams: Team[]
 }
 
-export type SimpleUserProfile = {
-  name: string,
-  userPath: string
-  photo: string
-  biography: string | null
-  createdAt: Date
-}
+export type SimpleUserProfile = GeneratedSimpleUserProfile
 
 export enum NotePermissionRole {
   OWNER = 'owner',
@@ -65,39 +66,10 @@ export enum NotePermissionRole {
   GUEST = 'guest'
 }
 
-/** Folder breadcrumb segment as returned on notes (OpenAPI `FolderPath`). */
-export type FolderPath = {
-  id: string
-  name: string
-  icon: string | null
-  color: string | null
-  parentId: string | null
-  clientId: string
-}
-
-export type Note = {
-  id: string
-  title: string
-  tags: string[]
-  lastChangedAt: string
-  createdAt: string
-  lastChangeUser: SimpleUserProfile | null
-  publishType: NotePublishType
-  publishedAt: string | null
-  userPath: string | null
-  teamPath: string | null
-  permalink: string | null
-  shortId: string
-  publishLink: string
-
-  readPermission: NotePermissionRole
-  writePermission: NotePermissionRole
-  folderPaths?: FolderPath[]
-}
-
-export type SingleNote = Note & {
-  content: string
-}
+/** Note response types are generated from the v1 OpenAPI contract. */
+export type FolderPath = GeneratedFolderPath
+export type Note = GeneratedNote
+export type SingleNote = GeneratedSingleNote
 
 export type UpdateNoteOptions = Partial<Pick<SingleNote, 'content' | 'title' | 'tags' | 'readPermission' | 'writePermission' | 'permalink'>> & {
   parentFolderId?: string
@@ -185,4 +157,3 @@ export type DeleteFolderResult = void
 export type DeleteTeamFolderResult = void
 export type GetFolderOrder = ApiFolderOrder
 export type GetTeamFolderOrder = ApiFolderOrder
-

@@ -1,6 +1,8 @@
 /** @module @hackmd/api */
 
 import axios, { AxiosInstance, AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
+import { createClient, type Client } from './generated/client/index.js'
+import { getNote as generatedGetNote } from './generated/sdk.gen.js'
 import {
   CreateNoteOptions,
   CreateTeamFolderBody,
@@ -44,6 +46,13 @@ const defaultOption: RequestOptions = {
 
 type OptionReturnType<Opt, T> = Opt extends { unwrapData: false } ? AxiosResponse<T> : Opt extends { unwrapData: true } ? T : T
 
+export type GetNoteSuccess = GetUserNote & { status: 200; etag?: string }
+export type GetNoteNotModified = { status: 304; etag?: string }
+export type GetNoteResult = GetNoteSuccess | GetNoteNotModified
+export type GetNoteRawResult =
+  | (AxiosResponse<GetUserNote> & { status: 200 })
+  | (AxiosResponse<unknown> & { status: 304 })
+
 export type APIClientOptions = {
   wrapResponseErrors: boolean;
   timeout?: number;
@@ -55,6 +64,7 @@ export type APIClientOptions = {
 
 export class API {
   private axios: AxiosInstance
+  private generatedClient: Client
 
   constructor (
     readonly accessToken: string,
@@ -75,6 +85,10 @@ export class API {
     this.axios = axios.create({
       baseURL: hackmdAPIEndpointURL,
       timeout: options.timeout
+    })
+    this.generatedClient = createClient({
+      axios: this.axios,
+      baseURL: hackmdAPIEndpointURL.replace(/\/+$/, ''),
     })
 
     this.axios.interceptors.request.use(
@@ -183,15 +197,22 @@ export class API {
     return this.unwrapData(this.axios.get<GetUserNotes>("notes"), options.unwrapData) as unknown as OptionReturnType<Opt, GetUserNotes>
   }
 
-  async getNote<Opt extends RequestOptions> (noteId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserNote>> {
-    // Prepare request config with etag if provided in options
-    const config = options.etag ? {
-      headers: { 'If-None-Match': options.etag },
-      // Consider 304 responses as successful
-      validateStatus: (status: number) => (status >= 200 && status < 300) || status === 304
-    } : undefined
-    const request = this.axios.get<GetUserNote>(`notes/${noteId}`, config)
-    return this.unwrapData(request, options.unwrapData, true) as unknown as OptionReturnType<Opt, GetUserNote>
+  async getNote (noteId: string): Promise<GetNoteSuccess>
+  async getNote (noteId: string, options: { unwrapData: false; etag?: undefined }): Promise<AxiosResponse<GetUserNote> & { status: 200 }>
+  async getNote (noteId: string, options: { unwrapData: false; etag: string }): Promise<GetNoteRawResult>
+  async getNote (noteId: string, options: { unwrapData?: true; etag: string }): Promise<GetNoteResult>
+  async getNote (noteId: string, options: { unwrapData?: true; etag?: undefined }): Promise<GetNoteSuccess>
+  async getNote (noteId: string, options: RequestOptions): Promise<GetNoteResult | GetNoteRawResult>
+  async getNote (noteId: string, options: RequestOptions = defaultOption): Promise<GetNoteResult | GetNoteRawResult> {
+    const request = generatedGetNote({
+      client: this.generatedClient,
+      path: { noteId },
+      headers: options.etag ? { 'If-None-Match': options.etag } : undefined,
+      validateStatus: (status: number) =>
+        (status >= 200 && status < 300) || Boolean(options.etag && status === 304),
+      throwOnError: true,
+    })
+    return this.unwrapData(request, options.unwrapData, true) as unknown as Promise<GetNoteResult | GetNoteRawResult>
   }
 
   async createNote<Opt extends RequestOptions> (payload: CreateNoteOptions, options = defaultOption as Opt): Promise<OptionReturnType<Opt, CreateUserNote>> {

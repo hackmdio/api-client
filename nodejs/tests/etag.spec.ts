@@ -1,5 +1,6 @@
 import { server } from './mock'
 import { API } from '../src'
+import { HttpResponseError } from '../src/error'
 import { http, HttpResponse } from 'msw'
 
 let client: API
@@ -55,6 +56,7 @@ describe('Etag support', () => {
       // Verify data properties still exist
       expect(response).toHaveProperty('id', 'test-note-id')
       expect(response).toHaveProperty('title', 'Test Note')
+      expect(response.status).toBe(200)
     })
     
     test('should include etag in response headers when unwrapData is false', async () => {
@@ -199,6 +201,59 @@ describe('Etag support', () => {
       // With unwrapData: true and a 304 response, we just get the etag
       expect(response).toHaveProperty('etag', mockEtag)
       expect(response).toHaveProperty('status', 304)
+      expect(response).not.toHaveProperty('content')
+    })
+
+    test('uses the legacy Axios instance for custom base URL and authorization', async () => {
+      let authorization: string | null = null
+      server.use(
+        http.get('https://custom.hackmd.test/v1/notes/test-note-id', ({ request }) => {
+          authorization = request.headers.get('Authorization')
+          return HttpResponse.json({ id: 'test-note-id', content: 'hello' })
+        })
+      )
+
+      const customClient = new API('custom-token', 'https://custom.hackmd.test/v1/')
+      const response = await customClient.getNote('test-note-id')
+
+      expect(authorization).toBe('Bearer custom-token')
+      expect(response.status).toBe(200)
+      expect(response.content).toBe('hello')
+    })
+
+    test('keeps legacy error wrapping for generated requests', async () => {
+      server.use(
+        http.get('https://api.hackmd.io/v1/notes/missing-note', () =>
+          HttpResponse.json({ error: 'Note not found' }, { status: 404 })
+        )
+      )
+
+      const customClient = new API('custom-token', undefined, {
+        wrapResponseErrors: true,
+        retryConfig: undefined,
+      })
+
+      await expect(customClient.getNote('missing-note')).rejects.toBeInstanceOf(HttpResponseError)
+    })
+
+    test('keeps legacy retry behavior for generated requests', async () => {
+      let attempts = 0
+      server.use(
+        http.get('https://api.hackmd.io/v1/notes/retry-note', () => {
+          attempts++
+          if (attempts === 1) return HttpResponse.json({}, { status: 503 })
+          return HttpResponse.json({ id: 'retry-note', content: 'retried' })
+        })
+      )
+
+      const retryClient = new API('custom-token', undefined, {
+        wrapResponseErrors: true,
+        retryConfig: { maxRetries: 1, baseDelay: 0 },
+      })
+      const response = await retryClient.getNote('retry-note')
+
+      expect(attempts).toBe(2)
+      expect(response.content).toBe('retried')
     })
   })
   
