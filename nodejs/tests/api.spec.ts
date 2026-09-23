@@ -490,14 +490,7 @@ test('should support updating team note title and tags metadata', async () => {
   server.use(
     http.patch('https://api.hackmd.io/v1/teams/test-team/notes/test-note-id', async ({ request }) => {
       requestBody = await request.json()
-
-      return HttpResponse.json(
-        {
-          id: 'test-note-id',
-          title: 'Updated Team Note',
-          tags: updatedTags
-        }
-      )
+      return new HttpResponse(null, { status: 202 })
     })
   )
 
@@ -510,7 +503,77 @@ test('should support updating team note title and tags metadata', async () => {
     title: 'Updated Team Note',
     tags: updatedTags
   })
-  expect(response).toHaveProperty('status', 200)
+  expect(response.status).toBe(202)
+  expect([undefined, '']).toContain(response.data)
+})
+
+test('updateNote keeps the legacy status/etag wrapper and raw response', async () => {
+  const payload = { description: 'Updated', parentFolderId: null }
+  const requests: string[] = []
+  server.use(
+    http.patch('https://api.hackmd.io/v1/notes/test-note-id', async ({ request }) => {
+      requests.push(await request.text())
+      return new HttpResponse(null, { status: 202, headers: { ETag: 'W/"updated"' } })
+    })
+  )
+
+  expect(await client.updateNote('test-note-id', payload)).toEqual({ status: 202, etag: 'W/"updated"' })
+  const raw = await client.updateNote('test-note-id', payload, { unwrapData: false })
+  expect(raw.status).toBe(202)
+  expect([undefined, '']).toContain(raw.data)
+  expect(requests).toEqual([JSON.stringify(payload), JSON.stringify(payload)])
+})
+
+test('updateTeamNoteContent keeps the team path and raw response', async () => {
+  let requestBody: unknown
+  server.use(
+    http.patch('https://api.hackmd.io/v1/teams/test-team/notes/test-note-id', async ({ request }) => {
+      requestBody = await request.json()
+      return new HttpResponse(null, { status: 202 })
+    })
+  )
+
+  const response = await client.updateTeamNoteContent('test-team', 'test-note-id', 'Updated content')
+  expect(requestBody).toEqual({ content: 'Updated content' })
+  expect(response.status).toBe(202)
+})
+
+test.each([
+  {
+    name: 'deleteNote', path: '/notes/test-note-id',
+    run: (api: API) => api.deleteNote('test-note-id', { unwrapData: false }),
+  },
+  {
+    name: 'deleteTeamNote', path: '/teams/test-team/notes/test-note-id',
+    run: (api: API) => api.deleteTeamNote('test-team', 'test-note-id'),
+  },
+])('$name keeps the path and 204 response', async ({ path, run }) => {
+  let authorization: string | null = null
+  server.use(
+    http.delete(`https://api.hackmd.io/v1${path}`, ({ request }) => {
+      authorization = request.headers.get('Authorization')
+      return new HttpResponse(null, { status: 204 })
+    })
+  )
+
+  const response = await run(client)
+  expect(response.status).toBe(204)
+  expect([undefined, '']).toContain(response.data)
+  expect(authorization).toBe(`Bearer ${process.env.HACKMD_ACCESS_TOKEN}`)
+})
+
+test('note mutations keep legacy error wrapping', async () => {
+  server.use(
+    http.patch('https://api.hackmd.io/v1/teams/test-team/notes/missing', () =>
+      HttpResponse.json({ error: 'Note not found' }, { status: 404 })
+    )
+  )
+  const customClient = new API('custom-token', undefined, {
+    wrapResponseErrors: true,
+    retryConfig: undefined,
+  })
+
+  await expect(customClient.updateTeamNote('test-team', 'missing', { title: 'Updated' })).rejects.toBeInstanceOf(HttpResponseError)
 })
 
 test('should not retry non-idempotent requests when wrapping errors', async () => {

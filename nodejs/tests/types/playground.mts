@@ -67,6 +67,17 @@ async function exploreFolderWrites (client: API): Promise<void> {
   void status
 }
 
+async function exploreNoteMutations (client: API): Promise<void> {
+  const updated = await client.updateNote('NOTE_ID', { description: 'Updated', parentFolderId: null })
+  const status: 202 = updated.status
+  const raw = await client.updateNoteContent('NOTE_ID', 'Updated', { unwrapData: false })
+  const rawStatus: 202 = raw.status
+  const deleted: void = await client.deleteNote('NOTE_ID')
+  void status
+  void rawStatus
+  void deleted
+}
+
 function exploreRawNote (note: RawNote): string {
   return note.content
 }
@@ -80,4 +91,5 @@ void exploreFolders
 void exploreTeamFolders
 void exploreFolderReads
 void exploreFolderWrites
+void exploreNoteMutations
 void exploreRawNote

@@ -131,11 +131,7 @@ describe('HackMD API (live e2e)', () => {
           tags: ['e2e', 'updated'],
         }, { unwrapData: false })
 
-        expect([200, 202]).toContain(patch.status)
-        const patchedBody = patch.data as { content?: string }
-        if (typeof patchedBody.content === 'string' && patchedBody.content.length > 0) {
-          expect(patchedBody.content).toContain('patched')
-        }
+        expect(patch.status).toBe(202)
 
         const n = await client.getNote(noteId)
         expect(n.title).toBe(title)

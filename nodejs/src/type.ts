@@ -5,6 +5,7 @@ import type {
   NoteType as GeneratedNote,
   SimpleUserProfile as GeneratedSimpleUserProfile,
   SingleNote as GeneratedSingleNote,
+  UpdateNoteData as GeneratedUpdateNoteData,
 } from './generated/types.gen.js'
 
 export enum TeamVisibilityType {
@@ -73,9 +74,7 @@ export type FolderPath = GeneratedFolderPath
 export type Note = GeneratedNote
 export type SingleNote = GeneratedSingleNote
 
-export type UpdateNoteOptions = Partial<Pick<SingleNote, 'content' | 'title' | 'tags' | 'readPermission' | 'writePermission' | 'permalink'>> & {
-  parentFolderId?: string
-}
+export type UpdateNoteOptions = GeneratedUpdateNoteData['body']
 
 // User
 export type GetMe = User

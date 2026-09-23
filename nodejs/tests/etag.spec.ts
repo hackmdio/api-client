@@ -297,31 +297,14 @@ describe('Etag support', () => {
       
       server.use(
         http.patch('https://api.hackmd.io/v1/notes/test-note-id', () => {
-          return HttpResponse.json(
-            { 
-              id: 'test-note-id',
-              title: 'Updated Test Note',
-              content: 'Updated content via updateNote'
-            },
-            {
-              headers: {
-                'ETag': mockEtag
-              }
-            }
-          )
+          return new HttpResponse(null, { status: 202, headers: { ETag: mockEtag } })
         })
       )
 
       // Make request with default unwrapData: true
       const response = await client.updateNoteContent('test-note-id', 'Updated content')
 
-      // Verify response has etag property
-      expect(response).toHaveProperty('etag', mockEtag)
-      
-      // Verify data properties still exist
-      expect(response).toHaveProperty('id', 'test-note-id')
-      expect(response).toHaveProperty('title', 'Updated Test Note')
-      expect(response).toHaveProperty('content', 'Updated content via updateNote')
+      expect(response).toEqual({ status: 202, etag: mockEtag })
     })
 
     test('should support updating note title and tags metadata', async () => {
@@ -333,19 +316,7 @@ describe('Etag support', () => {
         http.patch('https://api.hackmd.io/v1/notes/test-note-id', async ({ request }) => {
           requestBody = await request.json()
 
-          return HttpResponse.json(
-            {
-              id: 'test-note-id',
-              title: 'Updated Metadata Title',
-              tags: updatedTags,
-              content: 'Updated content via updateNote'
-            },
-            {
-              headers: {
-                'ETag': mockEtag
-              }
-            }
-          )
+          return new HttpResponse(null, { status: 202, headers: { ETag: mockEtag } })
         })
       )
 
@@ -358,9 +329,7 @@ describe('Etag support', () => {
         title: 'Updated Metadata Title',
         tags: updatedTags
       })
-      expect(response).toHaveProperty('etag', mockEtag)
-      expect(response).toHaveProperty('title', 'Updated Metadata Title')
-      expect(response.tags).toEqual(updatedTags)
+      expect(response).toEqual({ status: 202, etag: mockEtag })
     })
   })
 })

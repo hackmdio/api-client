@@ -6,7 +6,9 @@ import {
   createFolder as generatedCreateFolder,
   createTeamFolder as generatedCreateTeamFolder,
   deleteFolder as generatedDeleteFolder,
+  deleteNote as generatedDeleteNote,
   deleteTeamFolder as generatedDeleteTeamFolder,
+  deleteTeamNote as generatedDeleteTeamNote,
   getFolder as generatedGetFolder,
   getFolderOrder as generatedGetFolderOrder,
   getHistory as generatedGetHistory,
@@ -19,8 +21,10 @@ import {
   listTeamNotes,
   updateFolder as generatedUpdateFolder,
   updateFolderOrder as generatedUpdateFolderOrder,
+  updateNote as generatedUpdateNote,
   updateTeamFolder as generatedUpdateTeamFolder,
   updateTeamFolderOrder as generatedUpdateTeamFolderOrder,
+  updateTeamNote as generatedUpdateTeamNote,
 } from './generated/sdk.gen.js'
 import {
   CreateNoteOptions,
@@ -34,7 +38,6 @@ import {
   GetUserTeams,
   GetTeamNotes,
   CreateTeamNote,
-  SingleNote,
   UpdateNoteOptions,
   GetFolders,
   GetFolder,
@@ -66,6 +69,11 @@ const defaultOption: RequestOptions = {
 }
 
 type OptionReturnType<Opt, T> = Opt extends { unwrapData: false } ? AxiosResponse<T> : Opt extends { unwrapData: true } ? T : T
+type UpdateNoteReturnType<Opt extends RequestOptions> = Opt extends { unwrapData: false }
+  ? AxiosResponse<void> & { status: 202 }
+  : UpdateNoteResult
+
+export type UpdateNoteResult = { status: 202; etag?: string }
 
 export type GetNoteSuccess = GetUserNote & { status: 200; etag?: string }
 export type GetNoteNotModified = { status: 304; etag?: string }
@@ -244,16 +252,30 @@ export class API {
     return this.unwrapData(this.axios.post<CreateUserNote>("notes", payload), options.unwrapData, true) as unknown as OptionReturnType<Opt, CreateUserNote>
   }
 
-  async updateNoteContent<Opt extends RequestOptions> (noteId: string, content?: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, SingleNote>> {
-    return this.unwrapData(this.axios.patch<SingleNote>(`notes/${noteId}`, { content }), options.unwrapData, true) as unknown as OptionReturnType<Opt, SingleNote>
+  async updateNoteContent<Opt extends RequestOptions> (noteId: string, content?: string, options = defaultOption as Opt): Promise<UpdateNoteReturnType<Opt>> {
+    return this.unwrapData(generatedUpdateNote({
+      client: this.generatedClient,
+      path: { noteId },
+      body: { content },
+      throwOnError: true,
+    }), options.unwrapData, true) as unknown as UpdateNoteReturnType<Opt>
   }
 
-  async updateNote<Opt extends RequestOptions> (noteId: string, payload: UpdateNoteOptions, options = defaultOption as Opt): Promise<OptionReturnType<Opt, SingleNote>> {
-    return this.unwrapData(this.axios.patch<SingleNote>(`notes/${noteId}`, payload), options.unwrapData, true) as unknown as OptionReturnType<Opt, SingleNote>
+  async updateNote<Opt extends RequestOptions> (noteId: string, payload: UpdateNoteOptions, options = defaultOption as Opt): Promise<UpdateNoteReturnType<Opt>> {
+    return this.unwrapData(generatedUpdateNote({
+      client: this.generatedClient,
+      path: { noteId },
+      body: payload,
+      throwOnError: true,
+    }), options.unwrapData, true) as unknown as UpdateNoteReturnType<Opt>
   }
 
-  async deleteNote<Opt extends RequestOptions> (noteId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, SingleNote>> {
-    return this.unwrapData(this.axios.delete<SingleNote>(`notes/${noteId}`), options.unwrapData) as unknown as OptionReturnType<Opt, SingleNote>
+  async deleteNote<Opt extends RequestOptions> (noteId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, void>> {
+    return this.unwrapData(generatedDeleteNote({
+      client: this.generatedClient,
+      path: { noteId },
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, void>
   }
 
   async uploadNoteImage<Opt extends UploadNoteImageOptions> (noteId: string, image: Blob, options = defaultOption as Opt): Promise<OptionReturnType<Opt, UploadNoteImageResponse>> {
@@ -283,15 +305,29 @@ export class API {
   }
 
   async updateTeamNoteContent (teamPath: string, noteId: string, content?: string): Promise<AxiosResponse> {
-    return this.axios.patch<AxiosResponse>(`teams/${teamPath}/notes/${noteId}`, { content })
+    return generatedUpdateTeamNote({
+      client: this.generatedClient,
+      path: { teampath: teamPath, noteId },
+      body: { content },
+      throwOnError: true,
+    })
   }
 
   async updateTeamNote (teamPath: string, noteId: string, options: UpdateNoteOptions): Promise<AxiosResponse> {
-    return this.axios.patch<AxiosResponse>(`teams/${teamPath}/notes/${noteId}`, options)
+    return generatedUpdateTeamNote({
+      client: this.generatedClient,
+      path: { teampath: teamPath, noteId },
+      body: options,
+      throwOnError: true,
+    })
   }
 
   async deleteTeamNote (teamPath: string, noteId: string): Promise<AxiosResponse> {
-    return this.axios.delete<AxiosResponse>(`teams/${teamPath}/notes/${noteId}`)
+    return generatedDeleteTeamNote({
+      client: this.generatedClient,
+      path: { teampath: teamPath, noteId },
+      throwOnError: true,
+    })
   }
 
   async getFolderList<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetFolders>> {
