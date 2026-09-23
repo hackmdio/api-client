@@ -104,6 +104,37 @@ test('getHistory keeps legacy error wrapping', async () => {
   await expect(customClient.getHistory()).rejects.toBeInstanceOf(HttpResponseError)
 })
 
+test('getTeamNotes keeps the legacy response shapes and team path', async () => {
+  const notes = [{ id: 'team-note-1', title: 'Team note', createdAt: 1700000000000 }]
+  let authorization: string | null = null
+  server.use(
+    http.get('https://api.hackmd.io/v1/teams/test-team/notes', ({ request }) => {
+      authorization = request.headers.get('Authorization')
+      return HttpResponse.json(notes)
+    })
+  )
+
+  expect(await client.getTeamNotes('test-team')).toEqual(notes)
+  const raw = await client.getTeamNotes('test-team', { unwrapData: false })
+  expect(raw.status).toBe(200)
+  expect(raw.data).toEqual(notes)
+  expect(authorization).toBe(`Bearer ${process.env.HACKMD_ACCESS_TOKEN}`)
+})
+
+test('getTeamNotes keeps legacy error wrapping', async () => {
+  server.use(
+    http.get('https://api.hackmd.io/v1/teams/missing-team/notes', () =>
+      HttpResponse.json({ error: 'Team not found' }, { status: 404 })
+    )
+  )
+  const customClient = new API('custom-token', undefined, {
+    wrapResponseErrors: true,
+    retryConfig: undefined,
+  })
+
+  await expect(customClient.getTeamNotes('missing-team')).rejects.toBeInstanceOf(HttpResponseError)
+})
+
 test('should throw axios error object if set wrapResponseErrors to false', async () => {
   const customCilent = new API(process.env.HACKMD_ACCESS_TOKEN!, undefined, {
     wrapResponseErrors: false,

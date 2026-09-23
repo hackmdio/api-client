@@ -28,6 +28,11 @@ async function exploreHistory (client: API): Promise<number> {
   return notes[0].lastChangedAt
 }
 
+async function exploreTeamNotes (client: API): Promise<number> {
+  const notes = await client.getTeamNotes('TEAM_PATH')
+  return notes[0].createdAt
+}
+
 function exploreRawNote (note: RawNote): string {
   return note.content
 }
@@ -36,4 +41,5 @@ void exploreClient
 void exploreConditionalNote
 void exploreNoteList
 void exploreHistory
+void exploreTeamNotes
 void exploreRawNote
