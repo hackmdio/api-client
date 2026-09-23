@@ -1,0 +1,6683 @@
+{
+	"openapi": "3.0.0",
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"ApiWebhookScope": {
+				"anyOf": [
+					{
+						"properties": {
+							"type": {
+								"type": "string",
+								"enum": [
+									"workspace"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"type"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"folderId": {
+								"type": "string"
+							},
+							"type": {
+								"type": "string",
+								"enum": [
+									"folder"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"folderId",
+							"type"
+						],
+						"type": "object"
+					}
+				]
+			},
+			"ApiWebhook": {
+				"properties": {
+					"updatedAt": {
+						"type": "number",
+						"format": "double"
+					},
+					"createdAt": {
+						"type": "number",
+						"format": "double"
+					},
+					"eventDeliveryMode": {
+						"type": "string",
+						"enum": [
+							"all_supported_events"
+						],
+						"nullable": false
+					},
+					"deliveryPolicyReason": {
+						"type": "string",
+						"enum": [
+							"unsafe_destination",
+							"suspicious_pattern",
+							"policy_violation",
+							null
+						],
+						"nullable": true
+					},
+					"deliveryPolicyStatus": {
+						"type": "string",
+						"enum": [
+							"normal",
+							"suppressed"
+						]
+					},
+					"configuredStatusReason": {
+						"type": "string",
+						"enum": [
+							"scope_deleted",
+							null
+						],
+						"nullable": true
+					},
+					"configuredStatus": {
+						"type": "string",
+						"enum": [
+							"active",
+							"disabled"
+						]
+					},
+					"scope": {
+						"$ref": "#/components/schemas/ApiWebhookScope"
+					},
+					"url": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"updatedAt",
+					"createdAt",
+					"eventDeliveryMode",
+					"deliveryPolicyReason",
+					"deliveryPolicyStatus",
+					"configuredStatusReason",
+					"configuredStatus",
+					"scope",
+					"url",
+					"name",
+					"id"
+				],
+				"type": "object"
+			},
+			"WebhookApiErrorResponse": {
+				"properties": {
+					"error": {
+						"properties": {
+							"message": {
+								"type": "string"
+							},
+							"code": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"message",
+							"code"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"error"
+				],
+				"type": "object"
+			},
+			"ApiValidationFieldError": {
+				"properties": {
+					"message": {
+						"type": "string"
+					},
+					"value": {}
+				},
+				"required": [
+					"message"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Record_string.ApiValidationFieldError_": {
+				"properties": {},
+				"additionalProperties": {
+					"$ref": "#/components/schemas/ApiValidationFieldError"
+				},
+				"type": "object",
+				"description": "Construct a type with a set of properties K of type T"
+			},
+			"ApiValidationError": {
+				"properties": {
+					"message": {
+						"type": "string",
+						"enum": [
+							"Validation Failed"
+						],
+						"nullable": false
+					},
+					"details": {
+						"$ref": "#/components/schemas/Record_string.ApiValidationFieldError_"
+					}
+				},
+				"required": [
+					"message",
+					"details"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateWebhookData": {
+				"properties": {
+					"scope": {
+						"anyOf": [
+							{
+								"properties": {
+									"type": {
+										"type": "string",
+										"enum": [
+											"workspace"
+										],
+										"nullable": false
+									}
+								},
+								"required": [
+									"type"
+								],
+								"type": "object"
+							},
+							{
+								"properties": {
+									"folderId": {
+										"type": "string"
+									},
+									"type": {
+										"type": "string",
+										"enum": [
+											"folder"
+										],
+										"nullable": false
+									}
+								},
+								"required": [
+									"folderId",
+									"type"
+								],
+								"type": "object"
+							}
+						]
+					},
+					"url": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string",
+						"nullable": true,
+						"maxLength": 255
+					}
+				},
+				"required": [
+					"scope",
+					"url"
+				],
+				"type": "object"
+			},
+			"CreateApiWebhookBody": {
+				"allOf": [
+					{
+						"$ref": "#/components/schemas/CreateWebhookData"
+					},
+					{
+						"properties": {
+							"active": {
+								"type": "boolean"
+							}
+						},
+						"type": "object"
+					}
+				]
+			},
+			"UpdateWebhookData": {
+				"properties": {
+					"active": {
+						"type": "boolean"
+					},
+					"url": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string",
+						"nullable": true,
+						"maxLength": 255
+					}
+				},
+				"type": "object"
+			},
+			"UpdateApiWebhookBody": {
+				"$ref": "#/components/schemas/UpdateWebhookData"
+			},
+			"WebhookDeliveryStatusCategory": {
+				"type": "string",
+				"enum": [
+					"delivered",
+					"delivery_issue",
+					"not_delivered"
+				]
+			},
+			"ApiWebhookDelivery": {
+				"properties": {
+					"deliveredAt": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"createdAt": {
+						"type": "number",
+						"format": "double"
+					},
+					"latencyMs": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"errorMessage": {
+						"type": "string",
+						"nullable": true
+					},
+					"errorCategory": {
+						"type": "string",
+						"nullable": true
+					},
+					"httpStatus": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"statusCategory": {
+						"$ref": "#/components/schemas/WebhookDeliveryStatusCategory"
+					},
+					"status": {
+						"type": "string",
+						"enum": [
+							"success",
+							"failed",
+							"skipped"
+						]
+					},
+					"attemptKind": {
+						"type": "string",
+						"enum": [
+							"event",
+							"ping"
+						]
+					},
+					"eventType": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"deliveredAt",
+					"createdAt",
+					"latencyMs",
+					"errorMessage",
+					"errorCategory",
+					"httpStatus",
+					"statusCategory",
+					"status",
+					"attemptKind",
+					"eventType",
+					"id"
+				],
+				"type": "object"
+			},
+			"PaginatedQuery": {
+				"properties": {
+					"limit": {
+						"type": "number",
+						"format": "double"
+					},
+					"page": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"limit",
+					"page"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"PaginatedResponse_ApiWebhookDelivery_": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/ApiWebhookDelivery"
+						},
+						"type": "array"
+					},
+					"meta": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/PaginatedQuery"
+							},
+							{
+								"properties": {
+									"totalPages": {
+										"type": "number",
+										"format": "double"
+									},
+									"total": {
+										"type": "number",
+										"format": "double"
+									}
+								},
+								"type": "object"
+							}
+						]
+					}
+				},
+				"required": [
+					"data",
+					"meta"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiWebhookPage": {
+				"type": "integer",
+				"format": "int32",
+				"default": 1,
+				"minimum": 1
+			},
+			"ApiWebhookLimit": {
+				"type": "integer",
+				"format": "int32",
+				"default": 20,
+				"minimum": 1,
+				"maximum": 100
+			},
+			"SimpleUserProfile": {
+				"properties": {
+					"name": {
+						"type": "string"
+					},
+					"userPath": {
+						"type": "string"
+					},
+					"photo": {
+						"type": "string"
+					},
+					"biography": {
+						"type": "string",
+						"nullable": true
+					}
+				},
+				"required": [
+					"name",
+					"userPath",
+					"photo",
+					"biography"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NotePublishType": {
+				"enum": [
+					"edit",
+					"view",
+					"slide",
+					"book"
+				],
+				"type": "string"
+			},
+			"NotePermissionRole": {
+				"enum": [
+					"owner",
+					"signed_in",
+					"guest"
+				],
+				"type": "string"
+			},
+			"FolderPath": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"icon": {
+						"type": "string",
+						"nullable": true
+					},
+					"color": {
+						"type": "string",
+						"nullable": true
+					},
+					"parentId": {
+						"type": "string",
+						"nullable": true
+					},
+					"clientId": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"icon",
+					"color",
+					"parentId",
+					"clientId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NoteType": {
+				"properties": {
+					"folderPaths": {
+						"items": {
+							"$ref": "#/components/schemas/FolderPath"
+						},
+						"type": "array"
+					},
+					"writePermission": {
+						"$ref": "#/components/schemas/NotePermissionRole"
+					},
+					"readPermission": {
+						"$ref": "#/components/schemas/NotePermissionRole"
+					},
+					"shortId": {
+						"type": "string"
+					},
+					"publishLink": {
+						"type": "string"
+					},
+					"permalink": {
+						"type": "string",
+						"nullable": true
+					},
+					"teamPath": {
+						"type": "string",
+						"nullable": true
+					},
+					"userPath": {
+						"type": "string",
+						"nullable": true
+					},
+					"publishedAt": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"publishType": {
+						"$ref": "#/components/schemas/NotePublishType"
+					},
+					"lastChangeUser": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/SimpleUserProfile"
+							}
+						],
+						"nullable": true
+					},
+					"tagsUpdatedAt": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"titleUpdatedAt": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"createdAt": {
+						"type": "number",
+						"format": "double"
+					},
+					"lastChangedAt": {
+						"type": "number",
+						"format": "double"
+					},
+					"description": {
+						"type": "string"
+					},
+					"tags": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"title": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"writePermission",
+					"readPermission",
+					"shortId",
+					"publishLink",
+					"permalink",
+					"teamPath",
+					"userPath",
+					"publishedAt",
+					"publishType",
+					"lastChangeUser",
+					"tagsUpdatedAt",
+					"titleUpdatedAt",
+					"createdAt",
+					"lastChangedAt",
+					"description",
+					"tags",
+					"title",
+					"id"
+				],
+				"type": "object"
+			},
+			"SingleNote": {
+				"properties": {
+					"folderPaths": {
+						"items": {
+							"$ref": "#/components/schemas/FolderPath"
+						},
+						"type": "array"
+					},
+					"writePermission": {
+						"$ref": "#/components/schemas/NotePermissionRole"
+					},
+					"readPermission": {
+						"$ref": "#/components/schemas/NotePermissionRole"
+					},
+					"shortId": {
+						"type": "string"
+					},
+					"publishLink": {
+						"type": "string"
+					},
+					"permalink": {
+						"type": "string",
+						"nullable": true
+					},
+					"teamPath": {
+						"type": "string",
+						"nullable": true
+					},
+					"userPath": {
+						"type": "string",
+						"nullable": true
+					},
+					"publishedAt": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"publishType": {
+						"$ref": "#/components/schemas/NotePublishType"
+					},
+					"lastChangeUser": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/SimpleUserProfile"
+							}
+						],
+						"nullable": true
+					},
+					"tagsUpdatedAt": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"titleUpdatedAt": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"createdAt": {
+						"type": "number",
+						"format": "double"
+					},
+					"lastChangedAt": {
+						"type": "number",
+						"format": "double"
+					},
+					"description": {
+						"type": "string"
+					},
+					"tags": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"title": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					},
+					"content": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"writePermission",
+					"readPermission",
+					"shortId",
+					"publishLink",
+					"permalink",
+					"teamPath",
+					"userPath",
+					"publishedAt",
+					"publishType",
+					"lastChangeUser",
+					"tagsUpdatedAt",
+					"titleUpdatedAt",
+					"createdAt",
+					"lastChangedAt",
+					"description",
+					"tags",
+					"title",
+					"id",
+					"content"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiErrorResponse": {
+				"properties": {
+					"error": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateNoteMultiStatusResponse": {
+				"properties": {
+					"note": {
+						"$ref": "#/components/schemas/SingleNote"
+					},
+					"error": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"note",
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiRequestErrorResponse": {
+				"properties": {
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"message"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiBadRequestResponse": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ApiErrorResponse"
+					},
+					{
+						"$ref": "#/components/schemas/ApiRequestErrorResponse"
+					}
+				]
+			},
+			"CommentPermissionType": {
+				"enum": [
+					"disabled",
+					"forbidden",
+					"owners",
+					"signed_in_users",
+					"everyone"
+				],
+				"type": "string"
+			},
+			"SuggestEditPermissionType": {
+				"enum": [
+					"disabled",
+					"forbidden",
+					"owners",
+					"signed_in_users"
+				],
+				"type": "string"
+			},
+			"ApiNoteFeatures": {
+				"properties": {
+					"emoji-reply": {
+						"type": "string",
+						"enum": [
+							"disabled",
+							"signed_in_users"
+						]
+					},
+					"citation": {
+						"type": "string",
+						"enum": [
+							"disabled",
+							"signed_in_users"
+						]
+					}
+				},
+				"type": "object",
+				"additionalProperties": false
+			},
+			"FolderName": {
+				"type": "string",
+				"example": "Engineering",
+				"description": "Folder name."
+			},
+			"FolderIconCodepoint": {
+				"type": "string",
+				"example": "1F525",
+				"description": "Folder icon as an emoji unified codepoint string.\nExamples: `1F525` (🔥), `2764-FE0F` (❤️)."
+			},
+			"FolderColorHex": {
+				"type": "string",
+				"example": "#FF6B6B",
+				"description": "Folder display color in hexadecimal format.\nAccepts `#RGB`, `#RGBA`, `#RRGGBB`, or `#RRGGBBAA`."
+			},
+			"ApiFolder": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"$ref": "#/components/schemas/FolderName"
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					},
+					"icon": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/FolderIconCodepoint"
+							}
+						],
+						"nullable": true
+					},
+					"color": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/FolderColorHex"
+							}
+						],
+						"nullable": true
+					},
+					"parentFolderId": {
+						"type": "string",
+						"nullable": true
+					},
+					"createdAt": {
+						"type": "number",
+						"format": "double"
+					},
+					"updatedAt": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"description",
+					"icon",
+					"color",
+					"parentFolderId",
+					"createdAt",
+					"updatedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiFolderOrder": {
+				"description": "Per-user display order of folders: maps each parent folder id (or `root`) to\nan ordered list of child folder ids. Keys and values use the same UUIDs as\n{@link ApiFolder.id} (not Yjs clientIds stored internally in preferences).",
+				"properties": {},
+				"type": "object",
+				"additionalProperties": {
+					"items": {
+						"type": "string"
+					},
+					"type": "array"
+				}
+			},
+			"UpdateFolderOrderBody": {
+				"properties": {
+					"order": {
+						"$ref": "#/components/schemas/ApiFolderOrder"
+					}
+				},
+				"required": [
+					"order"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateUserFolderBody": {
+				"properties": {
+					"color": {
+						"$ref": "#/components/schemas/FolderColorHex"
+					},
+					"icon": {
+						"$ref": "#/components/schemas/FolderIconCodepoint"
+					},
+					"description": {
+						"type": "string"
+					},
+					"parentFolderId": {
+						"type": "string"
+					},
+					"name": {
+						"$ref": "#/components/schemas/FolderName"
+					}
+				},
+				"type": "object"
+			},
+			"UpdateUserFolderBody": {
+				"properties": {
+					"parentFolderId": {
+						"type": "string",
+						"nullable": true
+					},
+					"color": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/FolderColorHex"
+							}
+						],
+						"nullable": true
+					},
+					"icon": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/FolderIconCodepoint"
+							}
+						],
+						"nullable": true
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					},
+					"name": {
+						"$ref": "#/components/schemas/FolderName"
+					}
+				},
+				"type": "object"
+			},
+			"ApiTrashNote": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"title": {
+						"type": "string"
+					},
+					"tags": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"deletedAt": {
+						"type": "number",
+						"format": "double"
+					},
+					"ownerId": {
+						"type": "string"
+					},
+					"teamId": {
+						"type": "string",
+						"nullable": true
+					},
+					"shortId": {
+						"type": "string"
+					},
+					"publishType": {
+						"type": "string"
+					},
+					"permanentDeletedAt": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					}
+				},
+				"required": [
+					"id",
+					"title",
+					"tags",
+					"deletedAt",
+					"ownerId",
+					"teamId",
+					"shortId",
+					"publishType",
+					"permanentDeletedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BatchRestoreTrashBody": {
+				"properties": {
+					"noteIds": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					}
+				},
+				"required": [
+					"noteIds"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BatchOperationError": {
+				"enum": [
+					"NOT_FOUND",
+					"PERMISSION_DENIED",
+					"INTERNAL_ERROR"
+				],
+				"type": "string"
+			},
+			"TrashBatchOperationResponse": {
+				"properties": {},
+				"additionalProperties": {
+					"properties": {
+						"reason": {
+							"$ref": "#/components/schemas/BatchOperationError"
+						},
+						"status": {
+							"type": "string",
+							"enum": [
+								"success",
+								"failure"
+							]
+						}
+					},
+					"required": [
+						"status"
+					],
+					"type": "object"
+				},
+				"type": "object"
+			},
+			"TeamVisibilityType": {
+				"enum": [
+					"public",
+					"private"
+				],
+				"type": "string"
+			},
+			"Team": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"ownerId": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"logo": {
+						"type": "string"
+					},
+					"path": {
+						"type": "string"
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					},
+					"visibility": {
+						"$ref": "#/components/schemas/TeamVisibilityType"
+					},
+					"upgraded": {
+						"type": "boolean"
+					},
+					"createdAt": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"id",
+					"ownerId",
+					"name",
+					"logo",
+					"path",
+					"description",
+					"visibility",
+					"upgraded",
+					"createdAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateTeamFolderBody": {
+				"properties": {
+					"color": {
+						"$ref": "#/components/schemas/FolderColorHex"
+					},
+					"icon": {
+						"$ref": "#/components/schemas/FolderIconCodepoint"
+					},
+					"description": {
+						"type": "string"
+					},
+					"parentFolderId": {
+						"type": "string"
+					},
+					"name": {
+						"$ref": "#/components/schemas/FolderName"
+					}
+				},
+				"type": "object"
+			},
+			"UpdateTeamFolderBody": {
+				"properties": {
+					"parentFolderId": {
+						"type": "string",
+						"nullable": true
+					},
+					"color": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/FolderColorHex"
+							}
+						],
+						"nullable": true
+					},
+					"icon": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/FolderIconCodepoint"
+							}
+						],
+						"nullable": true
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					},
+					"name": {
+						"$ref": "#/components/schemas/FolderName"
+					}
+				},
+				"type": "object"
+			},
+			"NoteVersionUser": {
+				"properties": {
+					"user_id": {
+						"type": "string"
+					},
+					"display_name": {
+						"type": "string"
+					},
+					"photo": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"user_id",
+					"display_name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NoteVersionMetadata": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"name_source": {
+						"type": "string",
+						"enum": [
+							"user",
+							"system"
+						]
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"created_by": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NoteVersionUser"
+							}
+						],
+						"nullable": true
+					},
+					"authorship": {
+						"items": {
+							"$ref": "#/components/schemas/NoteVersionUser"
+						},
+						"type": "array"
+					},
+					"content_available": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"name_source",
+					"created_at",
+					"created_by",
+					"authorship",
+					"content_available"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"GetNoteVersions": {
+				"properties": {
+					"data": {
+						"items": {
+							"$ref": "#/components/schemas/NoteVersionMetadata"
+						},
+						"type": "array"
+					},
+					"meta": {
+						"properties": {
+							"total_pages": {
+								"type": "number",
+								"format": "double"
+							},
+							"total": {
+								"type": "number",
+								"format": "double"
+							},
+							"limit": {
+								"type": "number",
+								"format": "double"
+							},
+							"page": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						"required": [
+							"total_pages",
+							"total",
+							"limit",
+							"page"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"data",
+					"meta"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiError": {
+				"properties": {
+					"error_code": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					},
+					"unavailable_ref": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"error_code",
+					"message"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CompareNoteVersions": {
+				"properties": {
+					"unified_diff": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"unified_diff"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NoteVersion": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"name_source": {
+						"type": "string",
+						"enum": [
+							"user",
+							"system"
+						]
+					},
+					"description": {
+						"type": "string",
+						"nullable": true
+					},
+					"created_at": {
+						"type": "string"
+					},
+					"created_by": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/NoteVersionUser"
+							}
+						],
+						"nullable": true
+					},
+					"authorship": {
+						"items": {
+							"$ref": "#/components/schemas/NoteVersionUser"
+						},
+						"type": "array"
+					},
+					"content_available": {
+						"type": "boolean"
+					},
+					"content": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"id",
+					"name",
+					"name_source",
+					"created_at",
+					"created_by",
+					"authorship",
+					"content_available"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NoContentChangeError": {
+				"properties": {
+					"error_code": {
+						"type": "string",
+						"enum": [
+							"no_content_change"
+						],
+						"nullable": false
+					},
+					"message": {
+						"type": "string"
+					},
+					"latest_version_id": {
+						"type": "string"
+					},
+					"latest_name_source": {
+						"type": "string",
+						"enum": [
+							"system",
+							"user"
+						]
+					}
+				},
+				"required": [
+					"error_code",
+					"message",
+					"latest_version_id",
+					"latest_name_source"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"VersionAlreadyNamedError": {
+				"properties": {
+					"error_code": {
+						"type": "string",
+						"enum": [
+							"version_already_named"
+						],
+						"nullable": false
+					},
+					"message": {
+						"type": "string"
+					},
+					"version_id": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"error_code",
+					"message",
+					"version_id",
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CreateNoteVersionConflictError": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/NoContentChangeError"
+					},
+					{
+						"$ref": "#/components/schemas/VersionAlreadyNamedError"
+					}
+				]
+			},
+			"CreateNoteVersionBody": {
+				"properties": {
+					"base": {
+						"type": "string",
+						"description": "Saved content to name. Accepts note_content or version:{id}.",
+						"default": "note_content"
+					},
+					"name": {
+						"type": "string",
+						"minLength": 1,
+						"maxLength": 80,
+						"pattern": "\\S"
+					},
+					"description": {
+						"type": "string",
+						"maxLength": 500
+					}
+				},
+				"required": [
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"VersionNotNamedError": {
+				"properties": {
+					"error_code": {
+						"type": "string",
+						"enum": [
+							"version_not_named"
+						],
+						"nullable": false
+					},
+					"message": {
+						"type": "string"
+					},
+					"version_id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"error_code",
+					"message",
+					"version_id"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"UpdateNoteVersionBody": {
+				"anyOf": [
+					{
+						"properties": {
+							"description": {
+								"type": "string",
+								"maxLength": 500
+							},
+							"name": {
+								"type": "string",
+								"minLength": 1,
+								"maxLength": 80,
+								"pattern": "\\S"
+							},
+							"base": {
+								"type": "string",
+								"description": "Existing named version to update, formatted as version:{id}."
+							}
+						},
+						"required": [
+							"name",
+							"base"
+						],
+						"type": "object"
+					},
+					{
+						"properties": {
+							"description": {
+								"type": "string",
+								"maxLength": 500
+							},
+							"name": {
+								"type": "string",
+								"minLength": 1,
+								"maxLength": 80,
+								"pattern": "\\S"
+							},
+							"base": {
+								"type": "string",
+								"description": "Existing named version to update, formatted as version:{id}."
+							}
+						},
+						"required": [
+							"description",
+							"base"
+						],
+						"type": "object"
+					}
+				]
+			},
+			"NoteImageUploadResponse": {
+				"properties": {
+					"data": {
+						"properties": {
+							"link": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"link"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"data"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiCommentStatus": {
+				"type": "string",
+				"enum": [
+					"open",
+					"hidden"
+				]
+			},
+			"ApiCommentStateReason": {
+				"type": "string",
+				"enum": [
+					"resolved",
+					"spam",
+					"abuse",
+					"off_topic",
+					null
+				],
+				"nullable": true
+			},
+			"ApiCommentStateUserActor": {
+				"properties": {
+					"kind": {
+						"type": "string",
+						"enum": [
+							"user"
+						],
+						"nullable": false
+					},
+					"userId": {
+						"type": "string",
+						"format": "uuid"
+					},
+					"displayName": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"kind",
+					"userId",
+					"displayName"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiCommentStateDeletedUserActor": {
+				"properties": {
+					"kind": {
+						"type": "string",
+						"enum": [
+							"deleted_user"
+						],
+						"nullable": false
+					}
+				},
+				"required": [
+					"kind"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiCommentStateActor": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ApiCommentStateUserActor"
+					},
+					{
+						"$ref": "#/components/schemas/ApiCommentStateDeletedUserActor"
+					}
+				]
+			},
+			"ApiCommentThreadState": {
+				"properties": {
+					"status": {
+						"$ref": "#/components/schemas/ApiCommentStatus"
+					},
+					"reason": {
+						"$ref": "#/components/schemas/ApiCommentStateReason"
+					},
+					"actedBy": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ApiCommentStateActor"
+							}
+						],
+						"nullable": true
+					},
+					"actedAt": {
+						"type": "number",
+						"format": "double",
+						"nullable": true,
+						"description": "Unix timestamp in milliseconds."
+					},
+					"sourceCommentId": {
+						"type": "string",
+						"format": "uuid"
+					}
+				},
+				"required": [
+					"status",
+					"reason",
+					"actedBy",
+					"actedAt",
+					"sourceCommentId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiCommentUserActor": {
+				"properties": {
+					"kind": {
+						"type": "string",
+						"enum": [
+							"user"
+						],
+						"nullable": false
+					},
+					"userId": {
+						"type": "string",
+						"format": "uuid"
+					},
+					"displayName": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"kind",
+					"userId",
+					"displayName"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiCommentGuestActor": {
+				"properties": {
+					"kind": {
+						"type": "string",
+						"enum": [
+							"guest"
+						],
+						"nullable": false
+					},
+					"displayName": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"kind",
+					"displayName"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiCommentTeamActor": {
+				"properties": {
+					"kind": {
+						"type": "string",
+						"enum": [
+							"team"
+						],
+						"nullable": false
+					},
+					"teamId": {
+						"type": "string",
+						"format": "uuid"
+					},
+					"displayName": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"kind",
+					"teamId",
+					"displayName"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiCommentDeletedUserActor": {
+				"properties": {
+					"kind": {
+						"type": "string",
+						"enum": [
+							"deleted_user"
+						],
+						"nullable": false
+					}
+				},
+				"required": [
+					"kind"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiCommentActor": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ApiCommentUserActor"
+					},
+					{
+						"$ref": "#/components/schemas/ApiCommentGuestActor"
+					},
+					{
+						"$ref": "#/components/schemas/ApiCommentTeamActor"
+					},
+					{
+						"$ref": "#/components/schemas/ApiCommentDeletedUserActor"
+					}
+				]
+			},
+			"ApiCommentState": {
+				"properties": {
+					"status": {
+						"$ref": "#/components/schemas/ApiCommentStatus"
+					},
+					"reason": {
+						"$ref": "#/components/schemas/ApiCommentStateReason"
+					},
+					"actedBy": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ApiCommentStateActor"
+							}
+						],
+						"nullable": true
+					},
+					"actedAt": {
+						"type": "number",
+						"format": "double",
+						"nullable": true,
+						"description": "Unix timestamp in milliseconds."
+					}
+				},
+				"required": [
+					"status",
+					"reason",
+					"actedBy",
+					"actedAt"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiCommentAnchor": {
+				"properties": {
+					"offset": {
+						"type": "integer",
+						"format": "int32",
+						"minimum": 0
+					},
+					"length": {
+						"type": "integer",
+						"format": "int32",
+						"minimum": 0
+					}
+				},
+				"required": [
+					"offset",
+					"length"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiCommentReactionShortcode": {
+				"type": "string",
+				"enum": [
+					"+1",
+					"-1",
+					"joy",
+					"tada",
+					"thinking_face",
+					"heart",
+					"rocket",
+					"eyes"
+				]
+			},
+			"ApiCommentReactionSummary": {
+				"properties": {
+					"shortcode": {
+						"$ref": "#/components/schemas/ApiCommentReactionShortcode"
+					},
+					"count": {
+						"type": "integer",
+						"format": "int32",
+						"minimum": 1
+					}
+				},
+				"required": [
+					"shortcode",
+					"count"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiCommentHead": {
+				"properties": {
+					"id": {
+						"type": "string",
+						"format": "uuid"
+					},
+					"threadId": {
+						"type": "string",
+						"format": "uuid"
+					},
+					"actor": {
+						"$ref": "#/components/schemas/ApiCommentActor"
+					},
+					"body": {
+						"type": "string"
+					},
+					"contentType": {
+						"type": "string",
+						"enum": [
+							"plain_text"
+						],
+						"nullable": false
+					},
+					"commentState": {
+						"$ref": "#/components/schemas/ApiCommentState"
+					},
+					"isPinned": {
+						"type": "boolean"
+					},
+					"anchor": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ApiCommentAnchor"
+							}
+						],
+						"nullable": true
+					},
+					"currentAnchor": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ApiCommentAnchor"
+							}
+						],
+						"nullable": true
+					},
+					"excerpt": {
+						"type": "string",
+						"nullable": true
+					},
+					"reactions": {
+						"items": {
+							"$ref": "#/components/schemas/ApiCommentReactionSummary"
+						},
+						"type": "array"
+					},
+					"createdAt": {
+						"type": "number",
+						"format": "double",
+						"description": "Unix timestamp in milliseconds."
+					},
+					"updatedAt": {
+						"type": "number",
+						"format": "double",
+						"description": "Unix timestamp in milliseconds."
+					},
+					"isThreadHead": {
+						"type": "boolean",
+						"enum": [
+							true
+						],
+						"nullable": false
+					},
+					"replyCount": {
+						"type": "integer",
+						"format": "int32",
+						"minimum": 0
+					},
+					"threadState": {
+						"$ref": "#/components/schemas/ApiCommentThreadState"
+					}
+				},
+				"required": [
+					"id",
+					"threadId",
+					"actor",
+					"body",
+					"contentType",
+					"commentState",
+					"isPinned",
+					"anchor",
+					"currentAnchor",
+					"excerpt",
+					"reactions",
+					"createdAt",
+					"updatedAt",
+					"isThreadHead",
+					"replyCount",
+					"threadState"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiCommentListReply": {
+				"properties": {
+					"id": {
+						"type": "string",
+						"format": "uuid"
+					},
+					"threadId": {
+						"type": "string",
+						"format": "uuid"
+					},
+					"actor": {
+						"$ref": "#/components/schemas/ApiCommentActor"
+					},
+					"body": {
+						"type": "string"
+					},
+					"contentType": {
+						"type": "string",
+						"enum": [
+							"plain_text"
+						],
+						"nullable": false
+					},
+					"commentState": {
+						"$ref": "#/components/schemas/ApiCommentState"
+					},
+					"isPinned": {
+						"type": "boolean"
+					},
+					"anchor": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ApiCommentAnchor"
+							}
+						],
+						"nullable": true
+					},
+					"currentAnchor": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ApiCommentAnchor"
+							}
+						],
+						"nullable": true
+					},
+					"excerpt": {
+						"type": "string",
+						"nullable": true
+					},
+					"reactions": {
+						"items": {
+							"$ref": "#/components/schemas/ApiCommentReactionSummary"
+						},
+						"type": "array"
+					},
+					"createdAt": {
+						"type": "number",
+						"format": "double",
+						"description": "Unix timestamp in milliseconds."
+					},
+					"updatedAt": {
+						"type": "number",
+						"format": "double",
+						"description": "Unix timestamp in milliseconds."
+					},
+					"isThreadHead": {
+						"type": "boolean",
+						"enum": [
+							false
+						],
+						"nullable": false
+					}
+				},
+				"required": [
+					"id",
+					"threadId",
+					"actor",
+					"body",
+					"contentType",
+					"commentState",
+					"isPinned",
+					"anchor",
+					"currentAnchor",
+					"excerpt",
+					"reactions",
+					"createdAt",
+					"updatedAt",
+					"isThreadHead"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiComment": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ApiCommentHead"
+					},
+					{
+						"$ref": "#/components/schemas/ApiCommentListReply"
+					}
+				]
+			},
+			"ApiCommentPagination": {
+				"properties": {
+					"page": {
+						"type": "integer",
+						"format": "int32",
+						"minimum": 1
+					},
+					"limit": {
+						"type": "integer",
+						"format": "int32",
+						"minimum": 1,
+						"maximum": 100
+					},
+					"hasNext": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"page",
+					"limit",
+					"hasNext"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"GetNoteComments": {
+				"properties": {
+					"comments": {
+						"items": {
+							"$ref": "#/components/schemas/ApiComment"
+						},
+						"type": "array"
+					},
+					"pagination": {
+						"$ref": "#/components/schemas/ApiCommentPagination"
+					}
+				},
+				"required": [
+					"comments",
+					"pagination"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiCommentError": {
+				"properties": {
+					"errorCode": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"errorCode",
+					"message"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiCommentPage": {
+				"type": "integer",
+				"format": "int32",
+				"default": 1,
+				"minimum": 1
+			},
+			"ApiCommentLimit": {
+				"type": "integer",
+				"format": "int32",
+				"default": 50,
+				"minimum": 1,
+				"maximum": 100
+			},
+			"ApiCommentThreadId": {
+				"type": "string",
+				"format": "uuid"
+			},
+			"ApiCommentDetailReply": {
+				"properties": {
+					"id": {
+						"type": "string",
+						"format": "uuid"
+					},
+					"threadId": {
+						"type": "string",
+						"format": "uuid"
+					},
+					"actor": {
+						"$ref": "#/components/schemas/ApiCommentActor"
+					},
+					"body": {
+						"type": "string"
+					},
+					"contentType": {
+						"type": "string",
+						"enum": [
+							"plain_text"
+						],
+						"nullable": false
+					},
+					"commentState": {
+						"$ref": "#/components/schemas/ApiCommentState"
+					},
+					"isPinned": {
+						"type": "boolean"
+					},
+					"anchor": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ApiCommentAnchor"
+							}
+						],
+						"nullable": true
+					},
+					"currentAnchor": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ApiCommentAnchor"
+							}
+						],
+						"nullable": true
+					},
+					"excerpt": {
+						"type": "string",
+						"nullable": true
+					},
+					"reactions": {
+						"items": {
+							"$ref": "#/components/schemas/ApiCommentReactionSummary"
+						},
+						"type": "array"
+					},
+					"createdAt": {
+						"type": "number",
+						"format": "double",
+						"description": "Unix timestamp in milliseconds."
+					},
+					"updatedAt": {
+						"type": "number",
+						"format": "double",
+						"description": "Unix timestamp in milliseconds."
+					},
+					"isThreadHead": {
+						"type": "boolean",
+						"enum": [
+							false
+						],
+						"nullable": false
+					},
+					"threadState": {
+						"$ref": "#/components/schemas/ApiCommentThreadState"
+					}
+				},
+				"required": [
+					"id",
+					"threadId",
+					"actor",
+					"body",
+					"contentType",
+					"commentState",
+					"isPinned",
+					"anchor",
+					"currentAnchor",
+					"excerpt",
+					"reactions",
+					"createdAt",
+					"updatedAt",
+					"isThreadHead",
+					"threadState"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiCommentDetail": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ApiCommentHead"
+					},
+					{
+						"$ref": "#/components/schemas/ApiCommentDetailReply"
+					}
+				]
+			},
+			"ApiCommentId": {
+				"type": "string",
+				"format": "uuid"
+			},
+			"ApiCommentResolutionCascade": {
+				"properties": {
+					"threadId": {
+						"type": "string",
+						"format": "uuid"
+					}
+				},
+				"required": [
+					"threadId"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiCommentResolutionResponse": {
+				"properties": {
+					"comment": {
+						"$ref": "#/components/schemas/ApiCommentDetail"
+					},
+					"cascade": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ApiCommentResolutionCascade"
+							}
+						],
+						"nullable": true
+					}
+				},
+				"required": [
+					"comment",
+					"cascade"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiCommentResolutionConflictError": {
+				"properties": {
+					"errorCode": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					},
+					"commentState": {
+						"$ref": "#/components/schemas/ApiCommentState"
+					}
+				},
+				"required": [
+					"errorCode",
+					"message",
+					"commentState"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"User": {
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string",
+						"nullable": true
+					},
+					"name": {
+						"type": "string"
+					},
+					"userPath": {
+						"type": "string"
+					},
+					"photo": {
+						"type": "string"
+					},
+					"teams": {
+						"items": {
+							"$ref": "#/components/schemas/Team"
+						},
+						"type": "array"
+					},
+					"Teams": {
+						"items": {
+							"$ref": "#/components/schemas/Team"
+						},
+						"type": "array"
+					},
+					"upgraded": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"id",
+					"email",
+					"name",
+					"userPath",
+					"photo",
+					"teams",
+					"upgraded"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"Note": {
+				"properties": {
+					"folderPaths": {
+						"items": {
+							"$ref": "#/components/schemas/FolderPath"
+						},
+						"type": "array"
+					},
+					"writePermission": {
+						"$ref": "#/components/schemas/NotePermissionRole"
+					},
+					"readPermission": {
+						"$ref": "#/components/schemas/NotePermissionRole"
+					},
+					"shortId": {
+						"type": "string"
+					},
+					"publishLink": {
+						"type": "string"
+					},
+					"permalink": {
+						"type": "string",
+						"nullable": true
+					},
+					"teamPath": {
+						"type": "string",
+						"nullable": true
+					},
+					"userPath": {
+						"type": "string",
+						"nullable": true
+					},
+					"publishedAt": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"publishType": {
+						"$ref": "#/components/schemas/NotePublishType"
+					},
+					"lastChangeUser": {
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/SimpleUserProfile"
+							}
+						],
+						"nullable": true
+					},
+					"tagsUpdatedAt": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"titleUpdatedAt": {
+						"type": "number",
+						"format": "double",
+						"nullable": true
+					},
+					"createdAt": {
+						"type": "number",
+						"format": "double"
+					},
+					"lastChangedAt": {
+						"type": "number",
+						"format": "double"
+					},
+					"description": {
+						"type": "string"
+					},
+					"tags": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"title": {
+						"type": "string"
+					},
+					"id": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"writePermission",
+					"readPermission",
+					"shortId",
+					"publishLink",
+					"permalink",
+					"teamPath",
+					"userPath",
+					"publishedAt",
+					"publishType",
+					"lastChangeUser",
+					"tagsUpdatedAt",
+					"titleUpdatedAt",
+					"createdAt",
+					"lastChangedAt",
+					"description",
+					"tags",
+					"title",
+					"id"
+				],
+				"type": "object"
+			},
+			"GetUserHistory": {
+				"items": {
+					"$ref": "#/components/schemas/Note"
+				},
+				"type": "array"
+			}
+		},
+		"securitySchemes": {
+			"token": {
+				"type": "http",
+				"scheme": "bearer"
+			}
+		}
+	},
+	"info": {
+		"title": "HackMD OpenAPI",
+		"version": "1.0.0",
+		"description": "HackMD OpenAPI",
+		"license": {
+			"name": "UNLICENSED"
+		},
+		"contact": {
+			"name": "HackMD Team",
+			"email": "support@hackmd.io"
+		}
+	},
+	"paths": {
+		"/webhooks": {
+			"get": {
+				"operationId": "ListWebhooks",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/ApiWebhook"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"description": "List webhooks in the current user's workspace.",
+				"tags": [
+					"Webhooks"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateWebhook",
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/ApiWebhook"
+										},
+										{
+											"properties": {
+												"secret": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"secret"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Folder not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Webhook limit reached",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Create a webhook in the current user's workspace.\nThe signing secret is returned only once and cannot be retrieved later.",
+				"tags": [
+					"Webhooks"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateApiWebhookBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/webhooks/{hookId}": {
+			"get": {
+				"operationId": "GetWebhook",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiWebhook"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid webhook ID",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Webhook not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get a webhook in the current user's workspace.",
+				"tags": [
+					"Webhooks"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "hookId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"patch": {
+				"operationId": "UpdateWebhook",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiWebhook"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Webhook not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Update a webhook. At least one of name, url, or active is required.\nScope and event selection cannot be changed.",
+				"tags": [
+					"Webhooks"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "hookId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateApiWebhookBody"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteWebhook",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"400": {
+						"description": "Invalid webhook ID",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Webhook not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Delete a webhook.",
+				"tags": [
+					"Webhooks"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "hookId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/webhooks/{hookId}/ping": {
+			"post": {
+				"operationId": "PingWebhook",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"400": {
+						"description": "Invalid webhook ID",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Webhook not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Too many ping requests",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Send a test delivery. Read the result from the deliveries endpoint.",
+				"tags": [
+					"Webhooks"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "hookId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/webhooks/{hookId}/deliveries": {
+			"get": {
+				"operationId": "ListWebhookDeliveries",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PaginatedResponse_ApiWebhookDelivery_"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Webhook not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "List webhook deliveries within the workspace plan's retention window.",
+				"tags": [
+					"Webhooks"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "hookId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/ApiWebhookPage"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/ApiWebhookLimit"
+						}
+					}
+				]
+			}
+		},
+		"/webhooks/{hookId}/deliveries/export": {
+			"get": {
+				"operationId": "ExportWebhookDeliveries",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/x-ndjson": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid webhook ID",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Webhook not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Download webhook deliveries as newline-delimited JSON.",
+				"tags": [
+					"Webhooks"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "hookId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/webhooks/{hookId}/deliveries/{deliveryId}": {
+			"get": {
+				"operationId": "GetWebhookDelivery",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiWebhookDelivery"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Delivery not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get a webhook delivery within the workspace plan's retention window.",
+				"tags": [
+					"Webhooks"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "hookId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "deliveryId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/teams/{teampath}/webhooks": {
+			"get": {
+				"operationId": "ListTeamWebhooks",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/ApiWebhook"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"description": "List webhooks in a team workspace.",
+				"tags": [
+					"Team Webhooks"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateTeamWebhook",
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"allOf": [
+										{
+											"$ref": "#/components/schemas/ApiWebhook"
+										},
+										{
+											"properties": {
+												"secret": {
+													"type": "string"
+												}
+											},
+											"required": [
+												"secret"
+											],
+											"type": "object"
+										}
+									]
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Folder not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Webhook limit reached",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Create a webhook in a team workspace.\nThe signing secret is returned only once and cannot be retrieved later.",
+				"tags": [
+					"Team Webhooks"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateApiWebhookBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/teams/{teampath}/webhooks/{hookId}": {
+			"get": {
+				"operationId": "GetTeamWebhook",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiWebhook"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid webhook ID",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Webhook not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get a webhook in a team workspace.",
+				"tags": [
+					"Team Webhooks"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "hookId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"patch": {
+				"operationId": "UpdateTeamWebhook",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiWebhook"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Webhook not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Update a team webhook. At least one of name, url, or active is required.\nScope and event selection cannot be changed.",
+				"tags": [
+					"Team Webhooks"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "hookId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateApiWebhookBody"
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteTeamWebhook",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"400": {
+						"description": "Invalid webhook ID",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Webhook not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Delete a team webhook.",
+				"tags": [
+					"Team Webhooks"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "hookId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/teams/{teampath}/webhooks/{hookId}/ping": {
+			"post": {
+				"operationId": "PingTeamWebhook",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"400": {
+						"description": "Invalid webhook ID",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Webhook not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Too many ping requests",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Send a test delivery for a team webhook.",
+				"tags": [
+					"Team Webhooks"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "hookId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/teams/{teampath}/webhooks/{hookId}/deliveries": {
+			"get": {
+				"operationId": "ListTeamWebhookDeliveries",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/PaginatedResponse_ApiWebhookDelivery_"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Webhook not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "List team webhook deliveries within the plan's retention window.",
+				"tags": [
+					"Team Webhooks"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "hookId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/ApiWebhookPage"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/ApiWebhookLimit"
+						}
+					}
+				]
+			}
+		},
+		"/teams/{teampath}/webhooks/{hookId}/deliveries/export": {
+			"get": {
+				"operationId": "ExportTeamWebhookDeliveries",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/x-ndjson": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid webhook ID",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Webhook not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Download team webhook deliveries as newline-delimited JSON.",
+				"tags": [
+					"Team Webhooks"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "hookId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/teams/{teampath}/webhooks/{hookId}/deliveries/{deliveryId}": {
+			"get": {
+				"operationId": "GetTeamWebhookDelivery",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiWebhookDelivery"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Delivery not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get a team webhook delivery within the plan's retention window.",
+				"tags": [
+					"Team Webhooks"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "hookId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "deliveryId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/notes": {
+			"get": {
+				"operationId": "ListNotes",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/NoteType"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"description": "List all notes for the current user",
+				"tags": [
+					"User Notes"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateNote",
+				"responses": {
+					"201": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/SingleNote"
+								}
+							}
+						}
+					},
+					"207": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/CreateNoteMultiStatusResponse"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiBadRequestResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Create a new note for the current user",
+				"tags": [
+					"User Notes"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "The note content or a JSON object with note properties.",
+					"required": false,
+					"content": {
+						"application/json": {
+							"schema": {
+								"anyOf": [
+									{
+										"properties": {
+											"origin": {
+												"type": "string"
+											},
+											"parentFolderId": {
+												"type": "string"
+											},
+											"permalink": {
+												"type": "string"
+											},
+											"noteFeatures": {
+												"$ref": "#/components/schemas/ApiNoteFeatures"
+											},
+											"suggestEditPermission": {
+												"$ref": "#/components/schemas/SuggestEditPermissionType"
+											},
+											"commentPermission": {
+												"$ref": "#/components/schemas/CommentPermissionType"
+											},
+											"writePermission": {
+												"$ref": "#/components/schemas/NotePermissionRole"
+											},
+											"readPermission": {
+												"$ref": "#/components/schemas/NotePermissionRole"
+											},
+											"content": {
+												"type": "string"
+											},
+											"description": {
+												"type": "string"
+											},
+											"tags": {
+												"items": {
+													"type": "string"
+												},
+												"type": "array"
+											},
+											"title": {
+												"type": "string"
+											}
+										},
+										"type": "object"
+									},
+									{
+										"type": "string"
+									}
+								],
+								"description": "The note content or a JSON object with note properties."
+							}
+						}
+					}
+				}
+			}
+		},
+		"/notes/{noteId}": {
+			"get": {
+				"operationId": "GetNote",
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/SingleNote"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get a single note for the current user (or team note if accessible)",
+				"tags": [
+					"User Notes"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The ID of the note to retrieve.",
+						"in": "path",
+						"name": "noteId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"delete": {
+				"operationId": "DeleteNote",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Delete a note for the current user",
+				"tags": [
+					"User Notes"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The ID of the note to delete.",
+						"in": "path",
+						"name": "noteId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"patch": {
+				"operationId": "UpdateNote",
+				"responses": {
+					"202": {
+						"description": ""
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiBadRequestResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Update a note's content or permissions for the current user",
+				"tags": [
+					"User Notes"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The ID of the note to update.",
+						"in": "path",
+						"name": "noteId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "The properties to update on the note.",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"parentFolderId": {
+										"type": "string",
+										"nullable": true
+									},
+									"permalink": {
+										"type": "string"
+									},
+									"writePermission": {
+										"$ref": "#/components/schemas/NotePermissionRole"
+									},
+									"readPermission": {
+										"$ref": "#/components/schemas/NotePermissionRole"
+									},
+									"content": {
+										"type": "string"
+									},
+									"description": {
+										"type": "string"
+									},
+									"tags": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"title": {
+										"type": "string"
+									}
+								},
+								"type": "object",
+								"description": "The properties to update on the note."
+							}
+						}
+					}
+				}
+			}
+		},
+		"/folders": {
+			"get": {
+				"operationId": "ListFolders",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/ApiFolder"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"description": "List all folders in the current user's workspace",
+				"tags": [
+					"User Folders"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "CreateFolder",
+				"responses": {
+					"201": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiFolder"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiBadRequestResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Create a new folder in the current user's workspace",
+				"tags": [
+					"User Folders"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"description": "The folder properties.",
+					"required": false,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateUserFolderBody",
+								"description": "The folder properties."
+							}
+						}
+					}
+				}
+			}
+		},
+		"/folders/folder-order": {
+			"get": {
+				"operationId": "GetFolderOrder",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiFolderOrder"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get your personal folder ordering for this workspace (parent folder id or `root` → ordered child folder ids).\nUses the same folder UUIDs as    (not internal Yjs clientIds).",
+				"tags": [
+					"User Folders"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": []
+			},
+			"put": {
+				"operationId": "UpdateFolderOrder",
+				"responses": {
+					"204": {
+						"description": ""
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiBadRequestResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Replace your personal folder ordering for this workspace.",
+				"tags": [
+					"User Folders"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": false,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateFolderOrderBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/folders/{folderId}": {
+			"get": {
+				"operationId": "GetFolder",
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiFolder"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get a single folder in the current user's workspace",
+				"tags": [
+					"User Folders"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The ID of the folder to retrieve.",
+						"in": "path",
+						"name": "folderId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"patch": {
+				"operationId": "UpdateFolder",
+				"responses": {
+					"202": {
+						"description": ""
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiBadRequestResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Update a folder in the current user's workspace",
+				"tags": [
+					"User Folders"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The ID of the folder to update.",
+						"in": "path",
+						"name": "folderId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "The properties to update.",
+					"required": false,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateUserFolderBody",
+								"description": "The properties to update."
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteFolder",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Delete a folder in the current user's workspace",
+				"tags": [
+					"User Folders"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The ID of the folder to delete.",
+						"in": "path",
+						"name": "folderId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/trash": {
+			"get": {
+				"operationId": "ListPersonalTrash",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/ApiTrashNote"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"description": "List trashed notes in your personal workspace (same data as the internal trash API).",
+				"tags": [
+					"Trash"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/trash/batch-restore": {
+			"put": {
+				"operationId": "BatchRestore",
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TrashBatchOperationResponse"
+								}
+							}
+						}
+					},
+					"207": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/TrashBatchOperationResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Restore multiple notes from trash in one request.",
+				"tags": [
+					"Trash"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/BatchRestoreTrashBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/trash/{noteId}/restore": {
+			"put": {
+				"operationId": "RestoreNote",
+				"responses": {
+					"204": {
+						"description": ""
+					},
+					"403": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Restore a single note from trash.",
+				"tags": [
+					"Trash"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "Encoded note id of the trashed note.",
+						"in": "path",
+						"name": "noteId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/teams/{teampath}/trash": {
+			"get": {
+				"operationId": "ListTeamTrash",
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/ApiTrashNote"
+									},
+									"type": "array"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										},
+										{
+											"type": "string"
+										}
+									]
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										},
+										{
+											"type": "string"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"description": "List trashed notes in a team workspace (team admin only; same rules as the internal API).",
+				"tags": [
+					"Trash"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The path identifier for the team.",
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/teams": {
+			"get": {
+				"operationId": "ListTeams",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/Team"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"description": "List the teams for the current user",
+				"tags": [
+					"Teams"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/teams/{teampath}/notes": {
+			"get": {
+				"operationId": "ListTeamNotes",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/NoteType"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"description": "List all notes for a team",
+				"tags": [
+					"Team Notes"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The path identifier for the team.",
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateTeamNote",
+				"responses": {
+					"201": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/SingleNote"
+								}
+							}
+						}
+					},
+					"207": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/CreateNoteMultiStatusResponse"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiBadRequestResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Create a new note for a team",
+				"tags": [
+					"Team Notes"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The path identifier for the team.",
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "The note content (string) or a JSON object with note properties (title, content, permissions, etc.).",
+					"required": false,
+					"content": {
+						"application/json": {
+							"schema": {
+								"anyOf": [
+									{
+										"properties": {
+											"origin": {
+												"type": "string"
+											},
+											"parentFolderId": {
+												"type": "string"
+											},
+											"permalink": {
+												"type": "string"
+											},
+											"noteFeatures": {
+												"$ref": "#/components/schemas/ApiNoteFeatures"
+											},
+											"suggestEditPermission": {
+												"$ref": "#/components/schemas/SuggestEditPermissionType"
+											},
+											"commentPermission": {
+												"$ref": "#/components/schemas/CommentPermissionType"
+											},
+											"writePermission": {
+												"$ref": "#/components/schemas/NotePermissionRole"
+											},
+											"readPermission": {
+												"$ref": "#/components/schemas/NotePermissionRole"
+											},
+											"content": {
+												"type": "string"
+											},
+											"description": {
+												"type": "string"
+											},
+											"tags": {
+												"items": {
+													"type": "string"
+												},
+												"type": "array"
+											},
+											"title": {
+												"type": "string"
+											}
+										},
+										"type": "object"
+									},
+									{
+										"type": "string"
+									}
+								],
+								"description": "The note content (string) or a JSON object with note properties (title, content, permissions, etc.)."
+							}
+						}
+					}
+				}
+			}
+		},
+		"/teams/{teampath}/notes/{noteId}": {
+			"get": {
+				"operationId": "GetTeamNote",
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/SingleNote"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get a single note for a team",
+				"tags": [
+					"Team Notes"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The path identifier for the team.",
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The ID of the note to retrieve.",
+						"in": "path",
+						"name": "noteId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"patch": {
+				"operationId": "UpdateTeamNote",
+				"responses": {
+					"202": {
+						"description": ""
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiBadRequestResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Update a team note",
+				"tags": [
+					"Team Notes"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The path identifier for the team.",
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The ID of the note to update.",
+						"in": "path",
+						"name": "noteId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "The properties to update on the team note (e.g., content, permissions, permalink, parentFolderId).",
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"properties": {
+									"parentFolderId": {
+										"type": "string",
+										"nullable": true
+									},
+									"permalink": {
+										"type": "string"
+									},
+									"writePermission": {
+										"$ref": "#/components/schemas/NotePermissionRole"
+									},
+									"readPermission": {
+										"$ref": "#/components/schemas/NotePermissionRole"
+									},
+									"content": {
+										"type": "string"
+									},
+									"description": {
+										"type": "string"
+									},
+									"tags": {
+										"items": {
+											"type": "string"
+										},
+										"type": "array"
+									},
+									"title": {
+										"type": "string"
+									}
+								},
+								"type": "object",
+								"description": "The properties to update on the team note (e.g., content, permissions, permalink, parentFolderId)."
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteTeamNote",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Delete a team note",
+				"tags": [
+					"Team Notes"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The path identifier for the team.",
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The ID of the note to delete.",
+						"in": "path",
+						"name": "noteId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/teams/{teampath}/folders": {
+			"get": {
+				"operationId": "ListTeamFolders",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/ApiFolder"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"description": "List all folders in a team workspace",
+				"tags": [
+					"Team Folders"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The path identifier for the team.",
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateTeamFolder",
+				"responses": {
+					"201": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiFolder"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiBadRequestResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Create a new folder in a team workspace",
+				"tags": [
+					"Team Folders"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The path identifier for the team.",
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "The folder properties.",
+					"required": false,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateTeamFolderBody",
+								"description": "The folder properties."
+							}
+						}
+					}
+				}
+			}
+		},
+		"/teams/{teampath}/folders/folder-order": {
+			"get": {
+				"operationId": "GetTeamFolderOrder",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiFolderOrder"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get your personal folder ordering for this team workspace (parent folder id or `root` → ordered child folder ids).\nUses the same folder UUIDs as    (not internal Yjs clientIds).",
+				"tags": [
+					"Team Folders"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"put": {
+				"operationId": "UpdateTeamFolderOrder",
+				"responses": {
+					"204": {
+						"description": ""
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiBadRequestResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Replace your personal folder ordering for this team workspace.",
+				"tags": [
+					"Team Folders"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": false,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateFolderOrderBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/teams/{teampath}/folders/{folderId}": {
+			"get": {
+				"operationId": "GetTeamFolder",
+				"responses": {
+					"200": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiFolder"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get a single folder in a team workspace",
+				"tags": [
+					"Team Folders"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The path identifier for the team.",
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The ID of the folder to retrieve.",
+						"in": "path",
+						"name": "folderId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			},
+			"patch": {
+				"operationId": "UpdateTeamFolder",
+				"responses": {
+					"202": {
+						"description": ""
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiBadRequestResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation failed",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Update a folder in a team workspace",
+				"tags": [
+					"Team Folders"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The path identifier for the team.",
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The ID of the folder to update.",
+						"in": "path",
+						"name": "folderId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "The properties to update.",
+					"required": false,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateTeamFolderBody",
+								"description": "The properties to update."
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"operationId": "DeleteTeamFolder",
+				"responses": {
+					"204": {
+						"description": "No content"
+					},
+					"400": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Delete a folder in a team workspace",
+				"tags": [
+					"Team Folders"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The path identifier for the team.",
+						"in": "path",
+						"name": "teampath",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "The ID of the folder to delete.",
+						"in": "path",
+						"name": "folderId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/notes/{noteId}/versions": {
+			"get": {
+				"operationId": "ListVersions",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GetNoteVersions"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"description": "List saved versions for a note.",
+				"summary": "List note versions",
+				"tags": [
+					"Versions"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "noteId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "named_only",
+						"required": false,
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					{
+						"in": "query",
+						"name": "q",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "created_by",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Return versions created at or after this ISO-8601 datetime.",
+						"in": "query",
+						"name": "created_after",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Return versions created at or before this ISO-8601 datetime.",
+						"in": "query",
+						"name": "created_before",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"default": 1,
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"default": 50,
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			},
+			"post": {
+				"operationId": "CreateVersion",
+				"responses": {
+					"201": {
+						"description": "Created",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/NoteVersionMetadata"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "No content change or version already named",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/CreateNoteVersionConflictError"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"error_code": "no_content_change",
+											"message": "Current note content has no changes to save.",
+											"latest_version_id": "01234567-89ab-4def-8123-456789abcdef",
+											"latest_name_source": "user"
+										}
+									},
+									"Example 2": {
+										"value": {
+											"error_code": "version_already_named",
+											"message": "The version already has a name.",
+											"version_id": "01234567-89ab-4def-8123-456789abcdef",
+											"name": "Release checkpoint"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "Create a named version from live note content or an existing saved version. When\nlive note content has changed, this creates and names a new saved version. When\nlive content matches the latest system version, that version is named in place and\nreturned with 201. When it matches the latest user-named version, the response is\n409 `no_content_change`. Naming an already named `version:{id}` returns 409\n`version_already_named`.",
+				"summary": "Create a named note version",
+				"tags": [
+					"Versions"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "noteId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/CreateNoteVersionBody"
+							}
+						}
+					}
+				}
+			},
+			"patch": {
+				"operationId": "UpdateVersion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/NoteVersionMetadata"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Version is not named",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/VersionNotNamedError"
+								},
+								"examples": {
+									"Example 1": {
+										"value": {
+											"error_code": "version_not_named",
+											"message": "The version is not named. Use POST with base=version:{id} first.",
+											"version_id": "01234567-89ab-4def-8123-456789abcdef"
+										}
+									}
+								}
+							}
+						}
+					}
+				},
+				"description": "Update an existing named version's metadata with `PATCH /notes/{noteId}/versions`\nand a `base` body field formatted as `version:{id}`. The item path\n`/notes/{noteId}/versions/{versionId}` does not support PATCH.",
+				"summary": "Update named version metadata",
+				"tags": [
+					"Versions"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "noteId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UpdateNoteVersionBody"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/notes/{noteId}/versions/compare": {
+			"get": {
+				"operationId": "CompareVersions",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/CompareNoteVersions"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation failed or version content unavailable",
+						"content": {
+							"application/json": {
+								"schema": {
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ApiError"
+										},
+										{
+											"$ref": "#/components/schemas/ApiValidationError"
+										}
+									]
+								}
+							}
+						}
+					}
+				},
+				"description": "Compare two saved versions or a saved version with live note content.",
+				"summary": "Compare note versions",
+				"tags": [
+					"Versions"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "noteId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Required comparison source. Use note_content or version:{id}.",
+						"in": "query",
+						"name": "base",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"description": "Required comparison target. Use note_content or version:{id}.",
+						"in": "query",
+						"name": "target",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/notes/{noteId}/versions/{versionId}": {
+			"get": {
+				"operationId": "GetVersion",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/NoteVersion"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get one saved version with reconstructed content when available.",
+				"summary": "Get a note version",
+				"tags": [
+					"Versions"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "noteId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "versionId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/notes/{noteId}/images": {
+			"post": {
+				"operationId": "UploadNoteImage",
+				"responses": {
+					"201": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/NoteImageUploadResponse"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"413": {
+						"description": "Payload Too Large",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"415": {
+						"description": "Unsupported Media Type",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Too Many Requests",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					}
+				},
+				"description": "Upload an image for a note.",
+				"tags": [
+					"User Notes"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "noteId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"image": {
+										"type": "string",
+										"format": "binary"
+									}
+								},
+								"required": [
+									"image"
+								]
+							}
+						}
+					}
+				}
+			}
+		},
+		"/notes/{noteId}/comments": {
+			"get": {
+				"operationId": "ListNoteComments",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GetNoteComments"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiCommentError"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Comments not readable",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiCommentError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Note not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiCommentError"
+								}
+							}
+						}
+					}
+				},
+				"description": "List comments and replies visible on a note.",
+				"tags": [
+					"Comments"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "noteId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "query",
+						"name": "page",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/ApiCommentPage"
+						}
+					},
+					{
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/ApiCommentLimit"
+						}
+					},
+					{
+						"in": "query",
+						"name": "sort",
+						"required": false,
+						"schema": {
+							"default": "asc",
+							"type": "string",
+							"enum": [
+								"asc",
+								"desc"
+							]
+						}
+					},
+					{
+						"in": "query",
+						"name": "threadId",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/ApiCommentThreadId"
+						}
+					},
+					{
+						"in": "query",
+						"name": "commentStatus",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/ApiCommentStatus"
+						}
+					},
+					{
+						"in": "query",
+						"name": "threadStatus",
+						"required": false,
+						"schema": {
+							"$ref": "#/components/schemas/ApiCommentStatus"
+						}
+					},
+					{
+						"in": "query",
+						"name": "isThreadHead",
+						"required": false,
+						"schema": {
+							"type": "boolean",
+							"enum": [
+								true
+							]
+						}
+					}
+				]
+			}
+		},
+		"/notes/{noteId}/comments/{commentId}": {
+			"get": {
+				"operationId": "GetNoteComment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiCommentDetail"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Comments not readable",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiCommentError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiCommentError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get one comment or reply from a note.",
+				"tags": [
+					"Comments"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "noteId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "commentId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/ApiCommentId"
+						}
+					}
+				]
+			}
+		},
+		"/notes/{noteId}/comments/{commentId}/resolution": {
+			"put": {
+				"operationId": "ResolveNoteComment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiCommentResolutionResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Comment resolution forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiCommentError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiCommentError"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Comment resolution conflict",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiCommentResolutionConflictError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Resolve a comment or thread.",
+				"tags": [
+					"Comments"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "noteId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "commentId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/ApiCommentId"
+						}
+					}
+				]
+			},
+			"delete": {
+				"operationId": "UnresolveNoteComment",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiCommentResolutionResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Comment resolution forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiCommentError"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiCommentError"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Comment resolution conflict",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiCommentResolutionConflictError"
+								}
+							}
+						}
+					}
+				},
+				"description": "Unresolve a comment or thread.",
+				"tags": [
+					"Comments"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "noteId",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"in": "path",
+						"name": "commentId",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/ApiCommentId"
+						}
+					}
+				]
+			}
+		},
+		"/me": {
+			"get": {
+				"operationId": "GetCurrentUser",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get the current user's profile",
+				"tags": [
+					"Profile"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": []
+			}
+		},
+		"/history": {
+			"get": {
+				"operationId": "GetHistory",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/GetUserHistory"
+								}
+							}
+						}
+					}
+				},
+				"description": "Get note history for the current user",
+				"tags": [
+					"History"
+				],
+				"security": [
+					{
+						"token": []
+					}
+				],
+				"parameters": [
+					{
+						"description": "The maximum number of history items to return.",
+						"in": "query",
+						"name": "limit",
+						"required": false,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	],
+	"tags": [
+		{
+			"name": "Profile",
+			"description": "Operations to retrieve user profile information."
+		},
+		{
+			"name": "Teams",
+			"description": "Operations related to user teams."
+		},
+		{
+			"name": "History",
+			"description": "Operations related to user's note history."
+		},
+		{
+			"name": "Team Notes",
+			"description": "Operations related to notes within a team."
+		},
+		{
+			"name": "User Notes",
+			"description": "Operations related to a user's personal notes."
+		},
+		{
+			"name": "User Folders",
+			"description": "Operations related to a user's personal folders."
+		},
+		{
+			"name": "Team Folders",
+			"description": "Operations related to folders within a team."
+		},
+		{
+			"name": "Trash",
+			"description": "Operations for listing and restoring trashed notes."
+		},
+		{
+			"name": "Comments",
+			"description": "Operations for reading and resolving note comments."
+		},
+		{
+			"name": "Versions",
+			"description": "Operations for listing, retrieving, comparing, creating, and updating note versions."
+		},
+		{
+			"name": "Webhooks",
+			"description": "Operations for managing webhooks in a personal workspace."
+		},
+		{
+			"name": "Team Webhooks",
+			"description": "Operations for managing webhooks in a team workspace."
+		}
+	]
+}
