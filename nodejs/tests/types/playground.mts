@@ -38,6 +38,11 @@ async function exploreFolders (client: API): Promise<number> {
   return folders[0].createdAt
 }
 
+async function exploreTeamFolders (client: API): Promise<number> {
+  const folders = await client.getTeamFolderList('TEAM_PATH')
+  return folders[0].updatedAt
+}
+
 function exploreRawNote (note: RawNote): string {
   return note.content
 }
@@ -48,4 +53,5 @@ void exploreNoteList
 void exploreHistory
 void exploreTeamNotes
 void exploreFolders
+void exploreTeamFolders
 void exploreRawNote
