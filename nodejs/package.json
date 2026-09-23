@@ -34,7 +34,9 @@
     "build": "pnpm run clean && rollup -c && pnpm check:node-types",
     "generate": "openapi-ts",
     "check:generated": "node scripts/check-generated.mjs",
-    "check:node-types": "tsc --noEmit --strict --module NodeNext tests/types/raw.mts tests/types/raw.cts",
+    "check:node-types": "tsc --noEmit --strict --module NodeNext tests/types/raw.mts tests/types/raw.cts tests/types/playground.mts",
+    "docs:build": "typedoc",
+    "docs:dev": "pnpm docs:build && serve .docs-dist --listen tcp://127.0.0.1:3000",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "spec:pull": "curl -fsSL https://api.hackmd.io/v1/docs/swagger.json -o spec/hackmd-openapi.json",
     "watch": "pnpm run clean && rollup -c -w",
@@ -79,8 +81,10 @@
     "msw": "^2.7.3",
     "rimraf": "^4.1.2",
     "rollup": "^4.41.1",
+    "serve": "14.2.6",
     "ts-jest": "^29.4.12",
     "ts-node": "^8.8.2",
+    "typedoc": "0.28.20",
     "typescript": "^5.9.2"
   },
   "dependencies": {

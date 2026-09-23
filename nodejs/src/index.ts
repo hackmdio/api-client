@@ -1,3 +1,5 @@
+/** @module @hackmd/api */
+
 import axios, { AxiosInstance, AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import {
   CreateNoteOptions,
@@ -28,7 +30,7 @@ import {
   UpdateUserFolderBody,
   UploadNoteImageOptions,
   UploadNoteImageResponse,
-} from './type'
+} from './type.js'
 import * as HackMDErrors from './error'
 
 export type RequestOptions = {
@@ -312,6 +314,6 @@ export class API {
   }
 }
 
-export * from './type'
+export * from './type.js'
 
 export default API

@@ -105,16 +105,18 @@ const data = await client.getMe({ unwrapData: true })
 
 ### ETag Support
 
-The client supports ETag-based caching for note retrieval. You can pass an ETag to check if the content has changed:
+The client can send an ETag to check whether a note changed. The server
+generates the ETag and decides whether to return 304; the client does not cache
+the note body for you:
 
 ```javascript
-// First request
-const note = await client.getNote('note-id')
-const etag = note.etag
-
-// Subsequent request with ETag
-const updatedNote = await client.getNote('note-id', { etag })
-// If the note hasn't changed, the response will have status 304
+const first = await client.getNote('note-id', { unwrapData: false })
+const response = await client.getNote('note-id', {
+  etag: first.headers.etag,
+  unwrapData: false,
+})
+// 304 has no body; keep first.data. Otherwise, use response.data.
+const note = response.status === 304 ? first.data : response.data
 ```
 
 ### Image Upload
@@ -156,13 +158,21 @@ const response = await getNote({
 console.log(response.data.content)
 ```
 
-The package root remains the compatibility layer with response unwrapping,
-retries, and ETag handling. Files under `src/generated` are generated from the
-vendored OpenAPI document and must not be edited manually.
+The package root retains the existing `API` class. Files under
+`src/generated` are generated from the vendored OpenAPI document and must not
+be edited manually.
 
 ## API
 
-See the [code](./src/index.ts) and [typings](./src/type.ts). The API client is written in TypeScript, so you can get auto-completion and type checking in any TypeScript Language Server powered editor or IDE.
+The [API reference](https://hackmdio.github.io/api-client/) covers the SDK,
+compatibility API, and every raw operation and DTO. To explore autocomplete
+without a real token, open the [type-only StackBlitz example](https://stackblitz.com/fork/github/hackmdio/api-client/tree/master/nodejs?file=tests/types/playground.mts).
+The Pages site is deployed from `master` only.
+
+Run `pnpm docs:dev` from `nodejs` and open `http://127.0.0.1:3000` to preview
+the reference locally. It builds the HTML once before serving; rerun the
+command after changing source or docs. The output in `.docs-dist` is not
+committed.
 
 ## Regenerating the raw client
 

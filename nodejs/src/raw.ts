@@ -1,4 +1,6 @@
 /**
+ * @module @hackmd/api/raw
+ *
  * Generated, one-to-one HackMD API operations and their wire types.
  *
  * This surface is regenerated from `spec/hackmd-openapi.json`. Use the

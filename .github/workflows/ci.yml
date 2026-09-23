@@ -45,6 +45,10 @@ jobs:
         working-directory: nodejs
         run: pnpm build
 
+      - name: Build API reference
+        working-directory: nodejs
+        run: pnpm docs:build
+
       - name: Run tests
         working-directory: nodejs
         env:
