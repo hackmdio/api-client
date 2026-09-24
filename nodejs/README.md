@@ -161,6 +161,10 @@ console.log(webhook.secret)
 const teamWebhooks = await client.listTeamWebhooks('team-path')
 ```
 
+`listWebhookDeliveries('hook-id', { page: 1, limit: 20 })` returns delivery data
+and pagination metadata. `exportWebhookDeliveries('hook-id')` returns
+newline-delimited JSON as a string; parse the lines yourself if needed.
+
 ### Generated Raw API
 
 The `@hackmd/api/raw` entry point exposes every OpenAPI operation as a generated,

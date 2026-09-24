@@ -92,3 +92,63 @@ test.each(['createWebhook', 'createTeamWebhook'] as const)('%s keeps validation 
     : api.createTeamWebhook('my-team', createBody)
   await expect(request).rejects.toBeInstanceOf(HttpResponseError)
 })
+
+const delivery = {
+  id: 'delivery-1', eventType: 'note.created', attemptKind: 'event', status: 'success',
+  statusCategory: 'delivered', httpStatus: 200, errorCategory: null, errorMessage: null,
+  latencyMs: 42, createdAt: 1700000000000, deliveredAt: 1700000000042,
+}
+const deliveryPage = { data: [delivery], meta: { page: 2, limit: 5, total: 1 } }
+const ndjson = `${JSON.stringify(delivery)}\n`
+
+const deliveryCases = [
+  { name: 'pingWebhook', method: 'POST', path: '/webhooks/hook-1/ping', status: 204, query: '', result: undefined, run: (api: API, raw: boolean) => api.pingWebhook('hook-1', { unwrapData: !raw }) },
+  { name: 'listWebhookDeliveries', method: 'GET', path: '/webhooks/hook-1/deliveries', status: 200, query: '?page=2&limit=5', result: deliveryPage, run: (api: API, raw: boolean) => api.listWebhookDeliveries('hook-1', { page: 2, limit: 5, unwrapData: !raw }) },
+  { name: 'getWebhookDelivery', method: 'GET', path: '/webhooks/hook-1/deliveries/delivery-1', status: 200, query: '', result: delivery, run: (api: API, raw: boolean) => api.getWebhookDelivery('hook-1', 'delivery-1', { unwrapData: !raw }) },
+  { name: 'exportWebhookDeliveries', method: 'GET', path: '/webhooks/hook-1/deliveries/export', status: 200, query: '', result: ndjson, run: (api: API, raw: boolean) => api.exportWebhookDeliveries('hook-1', { unwrapData: !raw }) },
+  { name: 'pingTeamWebhook', method: 'POST', path: '/teams/my-team/webhooks/hook-1/ping', status: 204, query: '', result: undefined, run: (api: API, raw: boolean) => api.pingTeamWebhook('my-team', 'hook-1', { unwrapData: !raw }) },
+  { name: 'listTeamWebhookDeliveries', method: 'GET', path: '/teams/my-team/webhooks/hook-1/deliveries', status: 200, query: '?page=2&limit=5', result: deliveryPage, run: (api: API, raw: boolean) => api.listTeamWebhookDeliveries('my-team', 'hook-1', { page: 2, limit: 5, unwrapData: !raw }) },
+  { name: 'getTeamWebhookDelivery', method: 'GET', path: '/teams/my-team/webhooks/hook-1/deliveries/delivery-1', status: 200, query: '', result: delivery, run: (api: API, raw: boolean) => api.getTeamWebhookDelivery('my-team', 'hook-1', 'delivery-1', { unwrapData: !raw }) },
+  { name: 'exportTeamWebhookDeliveries', method: 'GET', path: '/teams/my-team/webhooks/hook-1/deliveries/export', status: 200, query: '', result: ndjson, run: (api: API, raw: boolean) => api.exportTeamWebhookDeliveries('my-team', 'hook-1', { unwrapData: !raw }) },
+]
+
+test.each(deliveryCases)('$name preserves path, query, status and response shape', async ({ method, path, status, query, result, run }) => {
+  const requests: Array<{ method: string, url: string, authorization: string | null }> = []
+  server.use(http.all(`https://api.hackmd.io/v1${path}`, ({ request }) => {
+    requests.push({ method: request.method, url: request.url, authorization: request.headers.get('Authorization') })
+    if (status === 204) return new HttpResponse(null, { status })
+    if (typeof result === 'string') {
+      return HttpResponse.text(result, { status, headers: { 'Content-Type': 'application/x-ndjson' } })
+    }
+    return HttpResponse.json(result, { status })
+  }))
+
+  const api = new API('test-token', undefined, { wrapResponseErrors: true, retryConfig: undefined })
+  const unwrapped = await run(api, false)
+  const raw = await run(api, true)
+  if (typeof raw !== 'object' || raw === null || !('status' in raw) || !('data' in raw)) {
+    throw new Error('Expected a raw Axios response')
+  }
+
+  expect(raw.status).toBe(status)
+  if (status === 204) {
+    expect([undefined, '']).toContain(unwrapped)
+    expect([undefined, '']).toContain(raw.data)
+  } else {
+    expect(unwrapped).toEqual(result)
+    expect(raw.data).toEqual(result)
+  }
+  expect(requests).toEqual([1, 2].map(() => ({
+    method,
+    url: `https://api.hackmd.io/v1${path}${query}`,
+    authorization: 'Bearer test-token',
+  })))
+})
+
+test('ping errors keep legacy wrapping', async () => {
+  server.use(http.post('https://api.hackmd.io/v1/webhooks/hook-1/ping', () =>
+    HttpResponse.json({ error: { code: 'RATE_LIMITED', message: 'Too many ping requests' } }, { status: 429 })
+  ))
+  const api = new API('test-token', undefined, { wrapResponseErrors: true, retryConfig: undefined })
+  await expect(api.pingWebhook('hook-1')).rejects.toMatchObject({ code: 429 })
+})

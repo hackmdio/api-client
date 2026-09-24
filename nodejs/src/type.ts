@@ -1,6 +1,7 @@
 import type {
   ApiFolder as GeneratedApiFolder,
   ApiWebhook as GeneratedApiWebhook,
+  ApiWebhookDelivery as GeneratedApiWebhookDelivery,
   CreateApiWebhookBody as GeneratedCreateApiWebhookBody,
   CreateNoteData as GeneratedCreateNoteData,
   CreateNoteMultiStatusResponse as GeneratedCreateNoteMultiStatusResponse,
@@ -9,6 +10,7 @@ import type {
   GetUserHistory as GeneratedUserHistory,
   NoteType as GeneratedNote,
   NoteImageUploadResponse as GeneratedNoteImageUploadResponse,
+  PaginatedResponseApiWebhookDelivery as GeneratedWebhookDeliveryPage,
   SimpleUserProfile as GeneratedSimpleUserProfile,
   SingleNote as GeneratedSingleNote,
   Team as GeneratedTeam,
@@ -133,3 +135,5 @@ export type ApiWebhook = GeneratedApiWebhook
 export type CreateWebhookBody = GeneratedCreateApiWebhookBody
 export type CreateWebhookResult = GeneratedCreateWebhookResponse
 export type UpdateWebhookBody = GeneratedUpdateWebhookData
+export type ApiWebhookDelivery = GeneratedApiWebhookDelivery
+export type WebhookDeliveryPage = GeneratedWebhookDeliveryPage

@@ -138,6 +138,19 @@ async function exploreWebhooks (client: API): Promise<string> {
   return updated.id
 }
 
+async function exploreWebhookDeliveries (client: API): Promise<string> {
+  const page = await client.listWebhookDeliveries('HOOK_ID', { page: 2, limit: 5 })
+  const delivery = await client.getTeamWebhookDelivery('TEAM_PATH', 'HOOK_ID', page.data[0].id)
+  const jsonl: string = await client.exportWebhookDeliveries('HOOK_ID')
+  const raw = await client.exportTeamWebhookDeliveries('TEAM_PATH', 'HOOK_ID', { unwrapData: false })
+  const rawJsonl: string = raw.data
+  const pinged: void = await client.pingWebhook('HOOK_ID')
+  void jsonl
+  void rawJsonl
+  void pinged
+  return delivery.id
+}
+
 function exploreRawNote (note: RawNote): string {
   return note.content
 }
@@ -157,4 +170,5 @@ void exploreNoteCreation
 void exploreProfileAndTeams
 void exploreImageUpload
 void exploreWebhooks
+void exploreWebhookDeliveries
 void exploreRawNote
