@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
 
-import { API } from '../src'
+import { API, CommentPermissionType, NotePermissionRole, NotePublishType, TeamVisibilityType } from '../src'
 import * as generatedSdk from '../src/generated/sdk.gen'
 import { createClient, getMe } from '../src/raw'
 import * as openApiDocument from '../spec/hackmd-openapi.json'
@@ -98,6 +98,16 @@ describe('generated raw API', () => {
     expect(expected).toHaveLength(59)
     expect(operationNamesFromSpec()).toEqual(expected)
     expect(Object.keys(generatedSdk).sort()).toEqual(expected)
+  })
+
+  test('keeps the existing runtime enum values', () => {
+    expect(TeamVisibilityType).toEqual({ PUBLIC: 'public', PRIVATE: 'private' })
+    expect(NotePublishType).toEqual({ EDIT: 'edit', VIEW: 'view', SLIDE: 'slide', BOOK: 'book' })
+    expect(CommentPermissionType).toEqual({
+      DISABLED: 'disabled', FORBIDDEN: 'forbidden', OWNERS: 'owners',
+      SIGNED_IN_USERS: 'signed_in_users', EVERYONE: 'everyone',
+    })
+    expect(NotePermissionRole).toEqual({ OWNER: 'owner', SIGNED_IN: 'signed_in', GUEST: 'guest' })
   })
 
   test('the compatibility API covers every raw operation', () => {

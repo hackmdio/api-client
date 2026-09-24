@@ -422,30 +422,30 @@ export class API {
     }), options.unwrapData) as unknown as CreateTeamNoteReturnType<Opt>
   }
 
-  async updateTeamNoteContent (teamPath: string, noteId: string, content?: string): Promise<AxiosResponse> {
+  async updateTeamNoteContent (teamPath: string, noteId: string, content?: string): Promise<AxiosResponse<unknown> & { status: 202 }> {
     return generatedUpdateTeamNote({
       client: this.generatedClient,
       path: { teampath: teamPath, noteId },
       body: { content },
       throwOnError: true,
-    })
+    }) as Promise<AxiosResponse<unknown> & { status: 202 }>
   }
 
-  async updateTeamNote (teamPath: string, noteId: string, options: UpdateNoteOptions): Promise<AxiosResponse> {
+  async updateTeamNote (teamPath: string, noteId: string, options: UpdateNoteOptions): Promise<AxiosResponse<unknown> & { status: 202 }> {
     return generatedUpdateTeamNote({
       client: this.generatedClient,
       path: { teampath: teamPath, noteId },
       body: options,
       throwOnError: true,
-    })
+    }) as Promise<AxiosResponse<unknown> & { status: 202 }>
   }
 
-  async deleteTeamNote (teamPath: string, noteId: string): Promise<AxiosResponse> {
+  async deleteTeamNote (teamPath: string, noteId: string): Promise<AxiosResponse<unknown> & { status: 204 }> {
     return generatedDeleteTeamNote({
       client: this.generatedClient,
       path: { teampath: teamPath, noteId },
       throwOnError: true,
-    })
+    }) as Promise<AxiosResponse<unknown> & { status: 204 }>
   }
 
   async listFolders<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetFolders>> {

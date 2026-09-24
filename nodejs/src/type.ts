@@ -9,6 +9,7 @@ import type {
   BatchRestoreTrashBody as GeneratedBatchRestoreTrashBody,
   CompareNoteVersions as GeneratedCompareNoteVersions,
   CompareVersionsData as GeneratedCompareVersionsData,
+  CommentPermissionType as GeneratedCommentPermissionType,
   CreateNoteVersionBody as GeneratedCreateNoteVersionBody,
   CreateApiWebhookBody as GeneratedCreateApiWebhookBody,
   CreateNoteData as GeneratedCreateNoteData,
@@ -23,11 +24,14 @@ import type {
   NoteVersion as GeneratedNoteVersion,
   NoteVersionMetadata as GeneratedNoteVersionMetadata,
   NoteType as GeneratedNote,
+  NotePermissionRole as GeneratedNotePermissionRole,
+  NotePublishType as GeneratedNotePublishType,
   NoteImageUploadResponse as GeneratedNoteImageUploadResponse,
   PaginatedResponseApiWebhookDelivery as GeneratedWebhookDeliveryPage,
   SimpleUserProfile as GeneratedSimpleUserProfile,
   SingleNote as GeneratedSingleNote,
   Team as GeneratedTeam,
+  TeamVisibilityType as GeneratedTeamVisibilityType,
   TrashBatchOperationResponse as GeneratedTrashBatchOperationResponse,
   UpdateNoteData as GeneratedUpdateNoteData,
   UpdateNoteVersionBody as GeneratedUpdateNoteVersionBody,
@@ -35,25 +39,29 @@ import type {
   User as GeneratedUser,
 } from './generated/types.gen.js'
 
-export enum TeamVisibilityType {
-  PUBLIC = 'public',
-  PRIVATE = 'private',
-}
+/** Preserve the runtime enum-like values while deriving their types from OpenAPI. */
+export const TeamVisibilityType = {
+  PUBLIC: 'public',
+  PRIVATE: 'private',
+} as const satisfies Record<Uppercase<GeneratedTeamVisibilityType>, GeneratedTeamVisibilityType>
+export type TeamVisibilityType = GeneratedTeamVisibilityType
 
-export enum NotePublishType {
-  EDIT = 'edit',
-  VIEW = 'view',
-  SLIDE = 'slide',
-  BOOK = 'book'
-}
+export const NotePublishType = {
+  EDIT: 'edit',
+  VIEW: 'view',
+  SLIDE: 'slide',
+  BOOK: 'book',
+} as const satisfies Record<Uppercase<GeneratedNotePublishType>, GeneratedNotePublishType>
+export type NotePublishType = GeneratedNotePublishType
 
-export enum CommentPermissionType {
-  DISABLED = 'disabled',
-  FORBIDDEN = 'forbidden',
-  OWNERS = 'owners',
-  SIGNED_IN_USERS = 'signed_in_users',
-  EVERYONE = 'everyone'
-}
+export const CommentPermissionType = {
+  DISABLED: 'disabled',
+  FORBIDDEN: 'forbidden',
+  OWNERS: 'owners',
+  SIGNED_IN_USERS: 'signed_in_users',
+  EVERYONE: 'everyone',
+} as const satisfies Record<Uppercase<GeneratedCommentPermissionType>, GeneratedCommentPermissionType>
+export type CommentPermissionType = GeneratedCommentPermissionType
 
 export type CreateNoteOptions = Exclude<NonNullable<GeneratedCreateNoteData['body']>, string>
 export type CreateNoteMultiStatusResponse = GeneratedCreateNoteMultiStatusResponse
@@ -63,11 +71,12 @@ export type User = GeneratedUser
 
 export type SimpleUserProfile = GeneratedSimpleUserProfile
 
-export enum NotePermissionRole {
-  OWNER = 'owner',
-  SIGNED_IN = 'signed_in',
-  GUEST = 'guest'
-}
+export const NotePermissionRole = {
+  OWNER: 'owner',
+  SIGNED_IN: 'signed_in',
+  GUEST: 'guest',
+} as const satisfies Record<Uppercase<GeneratedNotePermissionRole>, GeneratedNotePermissionRole>
+export type NotePermissionRole = GeneratedNotePermissionRole
 
 /** Note response types are generated from the v1 OpenAPI contract. */
 export type FolderPath = GeneratedFolderPath

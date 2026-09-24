@@ -94,9 +94,20 @@ async function exploreNoteMutations (client: API): Promise<void> {
   const raw = await client.updateNoteContent('NOTE_ID', 'Updated', { unwrapData: false })
   const rawStatus: 202 = raw.status
   const deleted: void = await client.deleteNote('NOTE_ID')
+  const teamUpdated = await client.updateTeamNote('TEAM_PATH', 'NOTE_ID', { title: 'Updated' })
+  const teamContentUpdated = await client.updateTeamNoteContent('TEAM_PATH', 'NOTE_ID', 'Updated')
+  const teamDeleted = await client.deleteTeamNote('TEAM_PATH', 'NOTE_ID')
+  const teamUpdateStatus: 202 = teamUpdated.status
+  const teamContentStatus: 202 = teamContentUpdated.status
+  const teamDeleteStatus: 204 = teamDeleted.status
+  // @ts-expect-error A successful team note update has no documented body.
+  teamUpdated.data.content
   void status
   void rawStatus
   void deleted
+  void teamUpdateStatus
+  void teamContentStatus
+  void teamDeleteStatus
 }
 
 async function exploreNoteCreation (client: API): Promise<string> {
