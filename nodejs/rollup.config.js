@@ -38,6 +38,7 @@ export default [
     output: {
       dir: 'dist',
       entryFileNames: '[name].cjs',
+      chunkFileNames: '[name]-[hash].cjs',
       format: 'cjs',
       sourcemap: true,
       exports: 'named'
