@@ -3,6 +3,7 @@ import type {
   ApiCommentDetail as GeneratedApiCommentDetail,
   ApiCommentResolutionResponse as GeneratedApiCommentResolutionResponse,
   ApiFolder as GeneratedApiFolder,
+  ApiFolderOrder as GeneratedApiFolderOrder,
   ApiWebhook as GeneratedApiWebhook,
   ApiWebhookDelivery as GeneratedApiWebhookDelivery,
   ApiTrashNote as GeneratedApiTrashNote,
@@ -10,6 +11,8 @@ import type {
   CompareNoteVersions as GeneratedCompareNoteVersions,
   CompareVersionsData as GeneratedCompareVersionsData,
   CommentPermissionType as GeneratedCommentPermissionType,
+  CreateTeamFolderBody as GeneratedCreateTeamFolderBody,
+  CreateUserFolderBody as GeneratedCreateUserFolderBody,
   CreateNoteVersionBody as GeneratedCreateNoteVersionBody,
   CreateApiWebhookBody as GeneratedCreateApiWebhookBody,
   CreateNoteData as GeneratedCreateNoteData,
@@ -35,6 +38,9 @@ import type {
   TrashBatchOperationResponse as GeneratedTrashBatchOperationResponse,
   UpdateNoteData as GeneratedUpdateNoteData,
   UpdateNoteVersionBody as GeneratedUpdateNoteVersionBody,
+  UpdateFolderOrderBody as GeneratedUpdateFolderOrderBody,
+  UpdateTeamFolderBody as GeneratedUpdateTeamFolderBody,
+  UpdateUserFolderBody as GeneratedUpdateUserFolderBody,
   UpdateWebhookData as GeneratedUpdateWebhookData,
   User as GeneratedUser,
 } from './generated/types.gen.js'
@@ -116,31 +122,12 @@ export type DeleteTeamNote = void
 export type ApiFolder = GeneratedApiFolder
 
 /** Maps each parent folder id or the literal `root` to ordered child folder ids. */
-export type ApiFolderOrder = Record<string, string[]>
-
-export type CreateUserFolderBody = {
-  name?: string
-  description?: string
-  icon?: string
-  color?: string
-  parentFolderId?: string
-}
-
-export type UpdateUserFolderBody = {
-  name?: string
-  description?: string | null
-  icon?: string | null
-  color?: string | null
-  parentFolderId?: string | null
-}
-
-export type CreateTeamFolderBody = CreateUserFolderBody
-
-export type UpdateTeamFolderBody = UpdateUserFolderBody
-
-export type UpdateFolderOrderBody = {
-  order: ApiFolderOrder
-}
+export type ApiFolderOrder = GeneratedApiFolderOrder
+export type CreateUserFolderBody = GeneratedCreateUserFolderBody
+export type UpdateUserFolderBody = GeneratedUpdateUserFolderBody
+export type CreateTeamFolderBody = GeneratedCreateTeamFolderBody
+export type UpdateTeamFolderBody = GeneratedUpdateTeamFolderBody
+export type UpdateFolderOrderBody = GeneratedUpdateFolderOrderBody
 
 export type GetFolders = ApiFolder[]
 export type GetTeamFolders = ApiFolder[]
