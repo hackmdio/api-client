@@ -4,12 +4,19 @@ import type {
   ApiWebhookDelivery as GeneratedApiWebhookDelivery,
   ApiTrashNote as GeneratedApiTrashNote,
   BatchRestoreTrashBody as GeneratedBatchRestoreTrashBody,
+  CompareNoteVersions as GeneratedCompareNoteVersions,
+  CompareVersionsData as GeneratedCompareVersionsData,
+  CreateNoteVersionBody as GeneratedCreateNoteVersionBody,
   CreateApiWebhookBody as GeneratedCreateApiWebhookBody,
   CreateNoteData as GeneratedCreateNoteData,
   CreateNoteMultiStatusResponse as GeneratedCreateNoteMultiStatusResponse,
   CreateWebhookResponse as GeneratedCreateWebhookResponse,
   FolderPath as GeneratedFolderPath,
   GetUserHistory as GeneratedUserHistory,
+  GetNoteVersions as GeneratedGetNoteVersions,
+  ListVersionsData as GeneratedListVersionsData,
+  NoteVersion as GeneratedNoteVersion,
+  NoteVersionMetadata as GeneratedNoteVersionMetadata,
   NoteType as GeneratedNote,
   NoteImageUploadResponse as GeneratedNoteImageUploadResponse,
   PaginatedResponseApiWebhookDelivery as GeneratedWebhookDeliveryPage,
@@ -18,6 +25,7 @@ import type {
   Team as GeneratedTeam,
   TrashBatchOperationResponse as GeneratedTrashBatchOperationResponse,
   UpdateNoteData as GeneratedUpdateNoteData,
+  UpdateNoteVersionBody as GeneratedUpdateNoteVersionBody,
   UpdateWebhookData as GeneratedUpdateWebhookData,
   User as GeneratedUser,
 } from './generated/types.gen.js'
@@ -145,3 +153,13 @@ export type WebhookDeliveryPage = GeneratedWebhookDeliveryPage
 export type ApiTrashNote = GeneratedApiTrashNote
 export type BatchRestoreTrashBody = GeneratedBatchRestoreTrashBody
 export type TrashBatchOperationResponse = GeneratedTrashBatchOperationResponse
+
+// Versions
+export type NoteVersion = GeneratedNoteVersion
+export type NoteVersionMetadata = GeneratedNoteVersionMetadata
+export type GetNoteVersions = GeneratedGetNoteVersions
+export type CreateNoteVersionBody = GeneratedCreateNoteVersionBody
+export type UpdateNoteVersionBody = GeneratedUpdateNoteVersionBody
+export type CompareNoteVersions = GeneratedCompareNoteVersions
+export type CompareVersionsQuery = GeneratedCompareVersionsData['query']
+export type ListVersionsQuery = NonNullable<GeneratedListVersionsData['query']>

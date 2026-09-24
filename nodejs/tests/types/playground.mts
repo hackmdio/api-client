@@ -165,6 +165,21 @@ async function exploreTrash (client: API): Promise<string> {
   return personal[0].id
 }
 
+async function exploreVersions (client: API): Promise<string> {
+  const page = await client.listVersions('NOTE_ID', { named_only: true, page: 1, limit: 20 })
+  const version = await client.getVersion('NOTE_ID', page.data[0].id)
+  const created = await client.createVersion('NOTE_ID', { name: 'Milestone', base: 'note_content' })
+  const updated = await client.updateVersion('NOTE_ID', { base: `version:${created.id}`, name: 'Renamed' })
+  const comparison = await client.compareVersions('NOTE_ID', { base: `version:${version.id}`, target: 'note_content' })
+  const diff: string = comparison.unified_diff
+  const raw = await client.listVersions('NOTE_ID', { unwrapData: false })
+  const status: number = raw.status
+  void updated
+  void diff
+  void status
+  return created.id
+}
+
 function exploreRawNote (note: RawNote): string {
   return note.content
 }
@@ -186,4 +201,5 @@ void exploreImageUpload
 void exploreWebhooks
 void exploreWebhookDeliveries
 void exploreTrash
+void exploreVersions
 void exploreRawNote

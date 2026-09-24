@@ -6,6 +6,7 @@ import {
   batchRestore as generatedBatchRestore,
   createFolder as generatedCreateFolder,
   createNote as generatedCreateNote,
+  createVersion as generatedCreateVersion,
   createTeamFolder as generatedCreateTeamFolder,
   createTeamNote as generatedCreateTeamNote,
   createTeamWebhook as generatedCreateTeamWebhook,
@@ -23,6 +24,7 @@ import {
   getFolderOrder as generatedGetFolderOrder,
   getHistory as generatedGetHistory,
   getNote as generatedGetNote,
+  getVersion as generatedGetVersion,
   getTeamNote as generatedGetTeamNote,
   getTeamFolder as generatedGetTeamFolder,
   getTeamFolderOrder as generatedGetTeamFolderOrder,
@@ -32,6 +34,7 @@ import {
   getWebhookDelivery as generatedGetWebhookDelivery,
   listFolders,
   listNotes,
+  listVersions as generatedListVersions,
   listTrash as generatedListTrash,
   listTeams,
   listTeamFolders,
@@ -44,9 +47,11 @@ import {
   pingTeamWebhook as generatedPingTeamWebhook,
   pingWebhook as generatedPingWebhook,
   restoreNote as generatedRestoreNote,
+  compareVersions as generatedCompareVersions,
   updateFolder as generatedUpdateFolder,
   updateFolderOrder as generatedUpdateFolderOrder,
   updateNote as generatedUpdateNote,
+  updateVersion as generatedUpdateVersion,
   updateTeamFolder as generatedUpdateTeamFolder,
   updateTeamFolderOrder as generatedUpdateTeamFolderOrder,
   updateTeamNote as generatedUpdateTeamNote,
@@ -92,6 +97,14 @@ import {
   ApiTrashNote,
   BatchRestoreTrashBody,
   TrashBatchOperationResponse,
+  CompareNoteVersions,
+  CompareVersionsQuery,
+  CreateNoteVersionBody,
+  GetNoteVersions,
+  ListVersionsQuery,
+  NoteVersion,
+  NoteVersionMetadata,
+  UpdateNoteVersionBody,
 } from './type.js'
 import * as HackMDErrors from './error'
 
@@ -102,6 +115,7 @@ export type RequestOptions = {
 
 export type GetHistoryOptions = RequestOptions & { limit?: number }
 export type WebhookDeliveryListOptions = RequestOptions & { page?: number; limit?: number }
+export type ListVersionsOptions = RequestOptions & ListVersionsQuery
 
 const defaultOption: RequestOptions = {
   unwrapData: true,
@@ -683,6 +697,51 @@ export class API {
       path: { teampath: teamPath },
       throwOnError: true,
     }), options.unwrapData) as unknown as OptionReturnType<Opt, ApiTrashNote[]>
+  }
+
+  async listVersions<Opt extends ListVersionsOptions> (noteId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetNoteVersions>> {
+    const { named_only, q, created_by, created_after, created_before, page, limit } = options
+    return this.unwrapData(generatedListVersions({
+      client: this.generatedClient,
+      path: { noteId },
+      query: { named_only, q, created_by, created_after, created_before, page, limit },
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, GetNoteVersions>
+  }
+
+  async getVersion<Opt extends RequestOptions> (noteId: string, versionId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, NoteVersion>> {
+    return this.unwrapData(generatedGetVersion({
+      client: this.generatedClient,
+      path: { noteId, versionId },
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, NoteVersion>
+  }
+
+  async createVersion<Opt extends RequestOptions> (noteId: string, body: CreateNoteVersionBody, options = defaultOption as Opt): Promise<OptionReturnType<Opt, NoteVersionMetadata>> {
+    return this.unwrapData(generatedCreateVersion({
+      client: this.generatedClient,
+      path: { noteId },
+      body,
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, NoteVersionMetadata>
+  }
+
+  async updateVersion<Opt extends RequestOptions> (noteId: string, body: UpdateNoteVersionBody, options = defaultOption as Opt): Promise<OptionReturnType<Opt, NoteVersionMetadata>> {
+    return this.unwrapData(generatedUpdateVersion({
+      client: this.generatedClient,
+      path: { noteId },
+      body,
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, NoteVersionMetadata>
+  }
+
+  async compareVersions<Opt extends RequestOptions> (noteId: string, query: CompareVersionsQuery, options = defaultOption as Opt): Promise<OptionReturnType<Opt, CompareNoteVersions>> {
+    return this.unwrapData(generatedCompareVersions({
+      client: this.generatedClient,
+      path: { noteId },
+      query,
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, CompareNoteVersions>
   }
 
   private unwrapData<T> (reqP: Promise<AxiosResponse<T>>, unwrap = true, includeEtag = false) {

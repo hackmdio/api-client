@@ -172,6 +172,14 @@ Use `listTrash()` or `listTeamTrash('team-path')` to find deleted notes.
 success or failure for each note. Pass `{ unwrapData: false }` to inspect the
 batch HTTP status (200 or 207).
 
+### Versions
+
+`listVersions('note-id', { named_only: true, page: 1, limit: 20 })` lists saved
+versions. Use `getVersion('note-id', versionId)` for content, or
+`compareVersions('note-id', { base: 'version:<id>', target: 'note_content' })`
+to compare it with the live note. `createVersion` and `updateVersion` accept the
+corresponding OpenAPI request bodies.
+
 ### Generated Raw API
 
 The `@hackmd/api/raw` entry point exposes every OpenAPI operation as a generated,
