@@ -2,6 +2,8 @@ import type {
   ApiFolder as GeneratedApiFolder,
   ApiWebhook as GeneratedApiWebhook,
   ApiWebhookDelivery as GeneratedApiWebhookDelivery,
+  ApiTrashNote as GeneratedApiTrashNote,
+  BatchRestoreTrashBody as GeneratedBatchRestoreTrashBody,
   CreateApiWebhookBody as GeneratedCreateApiWebhookBody,
   CreateNoteData as GeneratedCreateNoteData,
   CreateNoteMultiStatusResponse as GeneratedCreateNoteMultiStatusResponse,
@@ -14,6 +16,7 @@ import type {
   SimpleUserProfile as GeneratedSimpleUserProfile,
   SingleNote as GeneratedSingleNote,
   Team as GeneratedTeam,
+  TrashBatchOperationResponse as GeneratedTrashBatchOperationResponse,
   UpdateNoteData as GeneratedUpdateNoteData,
   UpdateWebhookData as GeneratedUpdateWebhookData,
   User as GeneratedUser,
@@ -137,3 +140,8 @@ export type CreateWebhookResult = GeneratedCreateWebhookResponse
 export type UpdateWebhookBody = GeneratedUpdateWebhookData
 export type ApiWebhookDelivery = GeneratedApiWebhookDelivery
 export type WebhookDeliveryPage = GeneratedWebhookDeliveryPage
+
+// Trash (personal & team workspaces)
+export type ApiTrashNote = GeneratedApiTrashNote
+export type BatchRestoreTrashBody = GeneratedBatchRestoreTrashBody
+export type TrashBatchOperationResponse = GeneratedTrashBatchOperationResponse

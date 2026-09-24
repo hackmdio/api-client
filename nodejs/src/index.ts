@@ -3,6 +3,7 @@
 import axios, { AxiosInstance, AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { createClient, type Client } from './generated/client/index.js'
 import {
+  batchRestore as generatedBatchRestore,
   createFolder as generatedCreateFolder,
   createNote as generatedCreateNote,
   createTeamFolder as generatedCreateTeamFolder,
@@ -31,15 +32,18 @@ import {
   getWebhookDelivery as generatedGetWebhookDelivery,
   listFolders,
   listNotes,
+  listTrash as generatedListTrash,
   listTeams,
   listTeamFolders,
   listTeamNotes,
+  listTeamTrash as generatedListTeamTrash,
   listTeamWebhooks as generatedListTeamWebhooks,
   listTeamWebhookDeliveries as generatedListTeamWebhookDeliveries,
   listWebhooks as generatedListWebhooks,
   listWebhookDeliveries as generatedListWebhookDeliveries,
   pingTeamWebhook as generatedPingTeamWebhook,
   pingWebhook as generatedPingWebhook,
+  restoreNote as generatedRestoreNote,
   updateFolder as generatedUpdateFolder,
   updateFolderOrder as generatedUpdateFolderOrder,
   updateNote as generatedUpdateNote,
@@ -85,6 +89,9 @@ import {
   UpdateWebhookBody,
   ApiWebhookDelivery,
   WebhookDeliveryPage,
+  ApiTrashNote,
+  BatchRestoreTrashBody,
+  TrashBatchOperationResponse,
 } from './type.js'
 import * as HackMDErrors from './error'
 
@@ -648,6 +655,34 @@ export class API {
       responseType: 'text',
       throwOnError: true,
     }), options.unwrapData) as unknown as OptionReturnType<Opt, string>
+  }
+
+  async listTrash<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, ApiTrashNote[]>> {
+    return this.unwrapData(generatedListTrash({ client: this.generatedClient, throwOnError: true }), options.unwrapData) as unknown as OptionReturnType<Opt, ApiTrashNote[]>
+  }
+
+  async batchRestore<Opt extends RequestOptions> (body: BatchRestoreTrashBody, options = defaultOption as Opt): Promise<OptionReturnType<Opt, TrashBatchOperationResponse>> {
+    return this.unwrapData(generatedBatchRestore({
+      client: this.generatedClient,
+      body,
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, TrashBatchOperationResponse>
+  }
+
+  async restoreNote<Opt extends RequestOptions> (noteId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, void>> {
+    return this.unwrapData(generatedRestoreNote({
+      client: this.generatedClient,
+      path: { noteId },
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, void>
+  }
+
+  async listTeamTrash<Opt extends RequestOptions> (teamPath: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, ApiTrashNote[]>> {
+    return this.unwrapData(generatedListTeamTrash({
+      client: this.generatedClient,
+      path: { teampath: teamPath },
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, ApiTrashNote[]>
   }
 
   private unwrapData<T> (reqP: Promise<AxiosResponse<T>>, unwrap = true, includeEtag = false) {

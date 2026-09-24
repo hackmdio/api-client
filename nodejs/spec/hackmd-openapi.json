@@ -4452,7 +4452,7 @@
 		},
 		"/trash": {
 			"get": {
-				"operationId": "ListPersonalTrash",
+				"operationId": "ListTrash",
 				"responses": {
 					"200": {
 						"description": "Ok",

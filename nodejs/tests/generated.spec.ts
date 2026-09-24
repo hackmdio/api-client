@@ -40,7 +40,7 @@ const EXPECTED_OPERATIONS = [
   'listFolders',
   'listNoteComments',
   'listNotes',
-  'listPersonalTrash',
+  'listTrash',
   'listTeamFolders',
   'listTeamNotes',
   'listTeams',

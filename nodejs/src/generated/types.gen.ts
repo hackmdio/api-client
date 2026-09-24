@@ -1534,21 +1534,21 @@ export type UpdateFolderResponses = {
     202: unknown;
 };
 
-export type ListPersonalTrashData = {
+export type ListTrashData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/trash';
 };
 
-export type ListPersonalTrashResponses = {
+export type ListTrashResponses = {
     /**
      * Ok
      */
     200: Array<ApiTrashNote>;
 };
 
-export type ListPersonalTrashResponse = ListPersonalTrashResponses[keyof ListPersonalTrashResponses];
+export type ListTrashResponse = ListTrashResponses[keyof ListTrashResponses];
 
 export type BatchRestoreData = {
     body: BatchRestoreTrashBody;

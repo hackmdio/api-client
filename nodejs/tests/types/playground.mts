@@ -151,6 +151,20 @@ async function exploreWebhookDeliveries (client: API): Promise<string> {
   return delivery.id
 }
 
+async function exploreTrash (client: API): Promise<string> {
+  const personal = await client.listTrash()
+  const team = await client.listTeamTrash('TEAM_PATH')
+  const results = await client.batchRestore({ noteIds: [personal[0].id] })
+  const outcome: 'success' | 'failure' = results[personal[0].id].status
+  const raw = await client.batchRestore({ noteIds: [personal[0].id] }, { unwrapData: false })
+  const status: number = raw.status
+  const restored: void = await client.restoreNote(team[0].id)
+  void outcome
+  void status
+  void restored
+  return personal[0].id
+}
+
 function exploreRawNote (note: RawNote): string {
   return note.content
 }
@@ -171,4 +185,5 @@ void exploreProfileAndTeams
 void exploreImageUpload
 void exploreWebhooks
 void exploreWebhookDeliveries
+void exploreTrash
 void exploreRawNote

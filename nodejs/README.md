@@ -165,6 +165,13 @@ const teamWebhooks = await client.listTeamWebhooks('team-path')
 and pagination metadata. `exportWebhookDeliveries('hook-id')` returns
 newline-delimited JSON as a string; parse the lines yourself if needed.
 
+### Trash
+
+Use `listTrash()` or `listTeamTrash('team-path')` to find deleted notes.
+`restoreNote('note-id')` restores one note; `batchRestore({ noteIds })` reports
+success or failure for each note. Pass `{ unwrapData: false }` to inspect the
+batch HTTP status (200 or 207).
+
 ### Generated Raw API
 
 The `@hackmd/api/raw` entry point exposes every OpenAPI operation as a generated,
