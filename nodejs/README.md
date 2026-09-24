@@ -119,6 +119,16 @@ const response = await client.getNote('note-id', {
 const note = response.status === 304 ? first.data : response.data
 ```
 
+Team notes work the same way through the existing client:
+
+```javascript
+const teamFirst = await client.getTeamNote('team-path', 'note-id')
+const teamResponse = await client.getTeamNote('team-path', 'note-id', {
+  etag: teamFirst.etag,
+})
+const teamNote = teamResponse.status === 304 ? teamFirst : teamResponse
+```
+
 ### Image Upload
 
 Upload an image to a note with `uploadNoteImage`. The API returns the uploaded image link in `data.link`.
@@ -164,8 +174,8 @@ be edited manually.
 
 ## API
 
-The [API reference](https://hackmdio.github.io/api-client/) covers the SDK,
-compatibility API, and every raw operation and DTO. To explore autocomplete
+The [API reference](https://hackmdio.github.io/api-client/) covers the existing
+`API` class and every raw operation and DTO. To explore autocomplete
 without a real token, open the [type-only StackBlitz example](https://stackblitz.com/fork/github/hackmdio/api-client/tree/master/nodejs?file=tests/types/playground.mts).
 The Pages site is deployed from `master` only.
 

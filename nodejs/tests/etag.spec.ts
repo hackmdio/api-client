@@ -256,6 +256,79 @@ describe('Etag support', () => {
       expect(response.content).toBe('retried')
     })
   })
+
+  describe('getTeamNote', () => {
+    test('preserves 200/304 ETags, raw responses, authorization and custom base URL', async () => {
+      const etag = 'W/"team-note-v1"'
+      const conditionalHeaders: Array<string | null> = []
+      const authorizationHeaders: Array<string | null> = []
+      server.use(
+        http.get('https://custom.hackmd.test/v1/teams/my-team/notes/team-note', ({ request }) => {
+          const ifNoneMatch = request.headers.get('If-None-Match')
+          conditionalHeaders.push(ifNoneMatch)
+          authorizationHeaders.push(request.headers.get('Authorization'))
+          if (ifNoneMatch === etag) {
+            return new HttpResponse(null, { status: 304, headers: { ETag: etag } })
+          }
+          return HttpResponse.json(
+            { id: 'team-note', content: 'Team content' },
+            { headers: { ETag: etag } }
+          )
+        })
+      )
+
+      const teamClient = new API('custom-token', 'https://custom.hackmd.test/v1/')
+      const first = await teamClient.getTeamNote('my-team', 'team-note')
+      expect(first).toEqual({ id: 'team-note', content: 'Team content', status: 200, etag })
+
+      const raw200 = await teamClient.getTeamNote('my-team', 'team-note', { unwrapData: false })
+      expect(raw200.status).toBe(200)
+      expect(raw200.data.content).toBe('Team content')
+      expect(raw200.headers.etag).toBe(etag)
+
+      const notModified = await teamClient.getTeamNote('my-team', 'team-note', { etag })
+      expect(notModified).toEqual({ status: 304, etag })
+
+      const raw304 = await teamClient.getTeamNote('my-team', 'team-note', { etag, unwrapData: false })
+      expect(raw304.status).toBe(304)
+      expect(raw304.headers.etag).toBe(etag)
+      expect(conditionalHeaders).toEqual([null, null, etag, etag])
+      expect(authorizationHeaders).toEqual(Array(4).fill('Bearer custom-token'))
+    })
+
+    test('keeps legacy error wrapping for generated team requests', async () => {
+      server.use(
+        http.get('https://api.hackmd.io/v1/teams/my-team/notes/missing-note', () =>
+          HttpResponse.json({ error: 'Note not found' }, { status: 404 })
+        )
+      )
+
+      const teamClient = new API('custom-token', undefined, {
+        wrapResponseErrors: true,
+        retryConfig: undefined,
+      })
+      await expect(teamClient.getTeamNote('my-team', 'missing-note')).rejects.toBeInstanceOf(HttpResponseError)
+    })
+
+    test('uses the existing retry interceptor', async () => {
+      let attempts = 0
+      server.use(
+        http.get('https://api.hackmd.io/v1/teams/my-team/notes/retry-note', () => {
+          attempts++
+          if (attempts === 1) return HttpResponse.json({}, { status: 503 })
+          return HttpResponse.json({ id: 'retry-note', content: 'retried' })
+        })
+      )
+
+      const teamClient = new API('custom-token', undefined, {
+        wrapResponseErrors: true,
+        retryConfig: { maxRetries: 1, baseDelay: 0 },
+      })
+      const note = await teamClient.getTeamNote('my-team', 'retry-note')
+      expect(attempts).toBe(2)
+      expect(note.content).toBe('retried')
+    })
+  })
   
   describe('createNote', () => {
     test('should include etag property in response when creating a note', async () => {

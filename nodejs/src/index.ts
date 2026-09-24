@@ -16,6 +16,7 @@ import {
   getFolderOrder as generatedGetFolderOrder,
   getHistory as generatedGetHistory,
   getNote as generatedGetNote,
+  getTeamNote as generatedGetTeamNote,
   getTeamFolder as generatedGetTeamFolder,
   getTeamFolderOrder as generatedGetTeamFolderOrder,
   listFolders,
@@ -314,6 +315,24 @@ export class API {
 
   async getTeams<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserTeams>> {
     return this.unwrapData(listTeams({ client: this.generatedClient, throwOnError: true }), options.unwrapData) as unknown as OptionReturnType<Opt, GetUserTeams>
+  }
+
+  async getTeamNote (teamPath: string, noteId: string): Promise<GetNoteSuccess>
+  async getTeamNote (teamPath: string, noteId: string, options: { unwrapData: false; etag?: undefined }): Promise<AxiosResponse<GetUserNote> & { status: 200 }>
+  async getTeamNote (teamPath: string, noteId: string, options: { unwrapData: false; etag: string }): Promise<GetNoteRawResult>
+  async getTeamNote (teamPath: string, noteId: string, options: { unwrapData?: true; etag: string }): Promise<GetNoteResult>
+  async getTeamNote (teamPath: string, noteId: string, options: { unwrapData?: true; etag?: undefined }): Promise<GetNoteSuccess>
+  async getTeamNote (teamPath: string, noteId: string, options: RequestOptions): Promise<GetNoteResult | GetNoteRawResult>
+  async getTeamNote (teamPath: string, noteId: string, options: RequestOptions = defaultOption): Promise<GetNoteResult | GetNoteRawResult> {
+    const request = generatedGetTeamNote({
+      client: this.generatedClient,
+      path: { teampath: teamPath, noteId },
+      headers: options.etag ? { 'If-None-Match': options.etag } : undefined,
+      validateStatus: (status: number) =>
+        (status >= 200 && status < 300) || Boolean(options.etag && status === 304),
+      throwOnError: true,
+    })
+    return this.unwrapData(request, options.unwrapData, true) as unknown as Promise<GetNoteResult | GetNoteRawResult>
   }
 
   async getTeamNotes<Opt extends RequestOptions> (teamPath: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetTeamNotes>> {

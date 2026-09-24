@@ -18,6 +18,20 @@ async function exploreConditionalNote (client: API): Promise<string | undefined>
   return response.content
 }
 
+async function exploreConditionalTeamNote (client: API): Promise<string | undefined> {
+  const response = await client.getTeamNote('TEAM_PATH', 'NOTE_ID', { etag: 'W/"cached"' })
+  if (response.status === 304) {
+    // @ts-expect-error A 304 response has no note content.
+    response.content
+    return undefined
+  }
+  const content: string = response.content
+  const raw = await client.getTeamNote('TEAM_PATH', 'NOTE_ID', { etag: 'W/"cached"', unwrapData: false })
+  const status: 200 | 304 = raw.status
+  void status
+  return content
+}
+
 async function exploreNoteList (client: API): Promise<number> {
   const notes = await client.getNoteList()
   return notes[0].createdAt
@@ -114,6 +128,7 @@ function exploreRawNote (note: RawNote): string {
 
 void exploreClient
 void exploreConditionalNote
+void exploreConditionalTeamNote
 void exploreNoteList
 void exploreHistory
 void exploreTeamNotes
