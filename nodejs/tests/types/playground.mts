@@ -180,6 +180,19 @@ async function exploreVersions (client: API): Promise<string> {
   return created.id
 }
 
+async function exploreComments (client: API): Promise<string> {
+  const page = await client.listNoteComments('NOTE_ID', { page: 1, limit: 20, isThreadHead: true })
+  const comment = await client.getNoteComment('NOTE_ID', page.comments[0].id)
+  const resolved = await client.resolveNoteComment('NOTE_ID', comment.id)
+  const reopened = await client.unresolveNoteComment('NOTE_ID', comment.id)
+  const raw = await client.listNoteComments('NOTE_ID', { unwrapData: false })
+  const status: number = raw.status
+  const threadId: string = resolved.comment.threadId
+  void reopened
+  void status
+  return threadId
+}
+
 function exploreRawNote (note: RawNote): string {
   return note.content
 }
@@ -202,4 +215,5 @@ void exploreWebhooks
 void exploreWebhookDeliveries
 void exploreTrash
 void exploreVersions
+void exploreComments
 void exploreRawNote

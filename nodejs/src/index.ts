@@ -24,6 +24,7 @@ import {
   getFolderOrder as generatedGetFolderOrder,
   getHistory as generatedGetHistory,
   getNote as generatedGetNote,
+  getNoteComment as generatedGetNoteComment,
   getVersion as generatedGetVersion,
   getTeamNote as generatedGetTeamNote,
   getTeamFolder as generatedGetTeamFolder,
@@ -34,6 +35,7 @@ import {
   getWebhookDelivery as generatedGetWebhookDelivery,
   listFolders,
   listNotes,
+  listNoteComments as generatedListNoteComments,
   listVersions as generatedListVersions,
   listTrash as generatedListTrash,
   listTeams,
@@ -47,6 +49,7 @@ import {
   pingTeamWebhook as generatedPingTeamWebhook,
   pingWebhook as generatedPingWebhook,
   restoreNote as generatedRestoreNote,
+  resolveNoteComment as generatedResolveNoteComment,
   compareVersions as generatedCompareVersions,
   updateFolder as generatedUpdateFolder,
   updateFolderOrder as generatedUpdateFolderOrder,
@@ -57,6 +60,7 @@ import {
   updateTeamNote as generatedUpdateTeamNote,
   updateTeamWebhook as generatedUpdateTeamWebhook,
   updateWebhook as generatedUpdateWebhook,
+  unresolveNoteComment as generatedUnresolveNoteComment,
   uploadNoteImage as generatedUploadNoteImage,
 } from './generated/sdk.gen.js'
 import {
@@ -105,6 +109,10 @@ import {
   NoteVersion,
   NoteVersionMetadata,
   UpdateNoteVersionBody,
+  ApiCommentDetail,
+  ApiCommentResolutionResponse,
+  GetNoteComments,
+  ListNoteCommentsQuery,
 } from './type.js'
 import * as HackMDErrors from './error'
 
@@ -116,6 +124,7 @@ export type RequestOptions = {
 export type GetHistoryOptions = RequestOptions & { limit?: number }
 export type WebhookDeliveryListOptions = RequestOptions & { page?: number; limit?: number }
 export type ListVersionsOptions = RequestOptions & ListVersionsQuery
+export type ListNoteCommentsOptions = RequestOptions & ListNoteCommentsQuery
 
 const defaultOption: RequestOptions = {
   unwrapData: true,
@@ -742,6 +751,40 @@ export class API {
       query,
       throwOnError: true,
     }), options.unwrapData) as unknown as OptionReturnType<Opt, CompareNoteVersions>
+  }
+
+  async listNoteComments<Opt extends ListNoteCommentsOptions> (noteId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetNoteComments>> {
+    const { page, limit, sort, threadId, commentStatus, threadStatus, isThreadHead } = options
+    return this.unwrapData(generatedListNoteComments({
+      client: this.generatedClient,
+      path: { noteId },
+      query: { page, limit, sort, threadId, commentStatus, threadStatus, isThreadHead },
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, GetNoteComments>
+  }
+
+  async getNoteComment<Opt extends RequestOptions> (noteId: string, commentId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, ApiCommentDetail>> {
+    return this.unwrapData(generatedGetNoteComment({
+      client: this.generatedClient,
+      path: { noteId, commentId },
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, ApiCommentDetail>
+  }
+
+  async resolveNoteComment<Opt extends RequestOptions> (noteId: string, commentId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, ApiCommentResolutionResponse>> {
+    return this.unwrapData(generatedResolveNoteComment({
+      client: this.generatedClient,
+      path: { noteId, commentId },
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, ApiCommentResolutionResponse>
+  }
+
+  async unresolveNoteComment<Opt extends RequestOptions> (noteId: string, commentId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, ApiCommentResolutionResponse>> {
+    return this.unwrapData(generatedUnresolveNoteComment({
+      client: this.generatedClient,
+      path: { noteId, commentId },
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, ApiCommentResolutionResponse>
   }
 
   private unwrapData<T> (reqP: Promise<AxiosResponse<T>>, unwrap = true, includeEtag = false) {

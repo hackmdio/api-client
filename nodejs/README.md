@@ -180,6 +180,13 @@ versions. Use `getVersion('note-id', versionId)` for content, or
 to compare it with the live note. `createVersion` and `updateVersion` accept the
 corresponding OpenAPI request bodies.
 
+### Comments
+
+Use `listNoteComments('note-id', { page: 1, limit: 20, threadStatus: 'open' })`
+to browse comments. `getNoteComment('note-id', commentId)` reads one comment;
+`resolveNoteComment` and `unresolveNoteComment` return the updated comment and
+any affected thread.
+
 ### Generated Raw API
 
 The `@hackmd/api/raw` entry point exposes every OpenAPI operation as a generated,

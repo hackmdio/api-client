@@ -1,4 +1,7 @@
 import type {
+  ApiComment as GeneratedApiComment,
+  ApiCommentDetail as GeneratedApiCommentDetail,
+  ApiCommentResolutionResponse as GeneratedApiCommentResolutionResponse,
   ApiFolder as GeneratedApiFolder,
   ApiWebhook as GeneratedApiWebhook,
   ApiWebhookDelivery as GeneratedApiWebhookDelivery,
@@ -12,9 +15,11 @@ import type {
   CreateNoteMultiStatusResponse as GeneratedCreateNoteMultiStatusResponse,
   CreateWebhookResponse as GeneratedCreateWebhookResponse,
   FolderPath as GeneratedFolderPath,
+  GetNoteComments as GeneratedGetNoteComments,
   GetUserHistory as GeneratedUserHistory,
   GetNoteVersions as GeneratedGetNoteVersions,
   ListVersionsData as GeneratedListVersionsData,
+  ListNoteCommentsData as GeneratedListNoteCommentsData,
   NoteVersion as GeneratedNoteVersion,
   NoteVersionMetadata as GeneratedNoteVersionMetadata,
   NoteType as GeneratedNote,
@@ -163,3 +168,10 @@ export type UpdateNoteVersionBody = GeneratedUpdateNoteVersionBody
 export type CompareNoteVersions = GeneratedCompareNoteVersions
 export type CompareVersionsQuery = GeneratedCompareVersionsData['query']
 export type ListVersionsQuery = NonNullable<GeneratedListVersionsData['query']>
+
+// Comments
+export type ApiComment = GeneratedApiComment
+export type ApiCommentDetail = GeneratedApiCommentDetail
+export type ApiCommentResolutionResponse = GeneratedApiCommentResolutionResponse
+export type GetNoteComments = GeneratedGetNoteComments
+export type ListNoteCommentsQuery = NonNullable<GeneratedListNoteCommentsData['query']>
