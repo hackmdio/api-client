@@ -266,24 +266,23 @@ export class API {
   }
 
   private createRetryInterceptor (axiosInstance: AxiosInstance, maxRetries: number, baseDelay: number): void {
-    let retryCount = 0
-
     axiosInstance.interceptors.response.use(
       response => response,
-      async error => {
-        if (retryCount < maxRetries && this.isRetryableError(error)) {
+      async (error: AxiosError) => {
+        const config = error.config as (InternalAxiosRequestConfig & { __hackmdRetryCount?: number }) | undefined
+        const retryCount = config?.__hackmdRetryCount ?? 0
+        if (config && retryCount < maxRetries && this.isRetryableError(error)) {
           const remainingCredits = parseInt(error.response?.headers['x-ratelimit-userremaining'], 10)
 
           if (isNaN(remainingCredits) || remainingCredits > 0) {
-            retryCount++
-            const delay = this.exponentialBackoff(retryCount, baseDelay)
-            console.warn(`Retrying request... attempt #${retryCount} after delay of ${delay}ms`)
+            config.__hackmdRetryCount = retryCount + 1
+            const delay = this.exponentialBackoff(config.__hackmdRetryCount, baseDelay)
+            console.warn(`Retrying request... attempt #${config.__hackmdRetryCount} after delay of ${delay}ms`)
             await new Promise(resolve => setTimeout(resolve, delay))
-            return axiosInstance(error.config)
+            return axiosInstance(config)
           }
         }
 
-        retryCount = 0 // Reset retry count after a successful request or when not retrying
         return Promise.reject(error)
       }
     )

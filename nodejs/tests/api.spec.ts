@@ -692,6 +692,74 @@ test.each([
   })))
 })
 
+test('retries separate requests independently on the same client', async () => {
+  const attempts = new Map<string, number>()
+  server.use(http.get('https://api.hackmd.io/v1/notes/:noteId', ({ params }) => {
+    const noteId = String(params.noteId)
+    const count = (attempts.get(noteId) ?? 0) + 1
+    attempts.set(noteId, count)
+    if (count === 1) return HttpResponse.json({}, { status: 503 })
+    return HttpResponse.json({ id: noteId })
+  }))
+
+  const retryClient = new API('test-token', undefined, {
+    wrapResponseErrors: true,
+    retryConfig: { maxRetries: 1, baseDelay: 0 },
+  })
+
+  expect((await retryClient.getNote('first')).id).toBe('first')
+  expect((await retryClient.getNote('second')).id).toBe('second')
+  expect([...attempts]).toEqual([['first', 2], ['second', 2]])
+})
+
+test('retries concurrent requests independently', async () => {
+  const attempts = new Map<string, number>()
+  let initialRequests = 0
+  let releaseInitialRequests!: () => void
+  const bothStarted = new Promise<void>(resolve => { releaseInitialRequests = resolve })
+
+  server.use(http.get('https://api.hackmd.io/v1/notes/:noteId', async ({ params }) => {
+    const noteId = String(params.noteId)
+    const count = (attempts.get(noteId) ?? 0) + 1
+    attempts.set(noteId, count)
+    if (count === 1) {
+      initialRequests++
+      if (initialRequests === 2) releaseInitialRequests()
+      await bothStarted
+      return HttpResponse.json({}, { status: 503 })
+    }
+    return HttpResponse.json({ id: noteId })
+  }))
+
+  const retryClient = new API('test-token', undefined, {
+    wrapResponseErrors: true,
+    retryConfig: { maxRetries: 1, baseDelay: 0 },
+  })
+
+  const results = await Promise.allSettled([
+    retryClient.getNote('first'), retryClient.getNote('second'),
+  ])
+  expect(results.map(result => result.status)).toEqual(['fulfilled', 'fulfilled'])
+  expect([...attempts]).toEqual([['first', 2], ['second', 2]])
+})
+
+test('stops retrying after the per-request limit', async () => {
+  let attempts = 0
+  server.use(http.get('https://api.hackmd.io/v1/notes/retry-limit', () => {
+    attempts++
+    if (attempts <= 2) return HttpResponse.json({}, { status: 503 })
+    return HttpResponse.json({ id: 'retry-limit' })
+  }))
+
+  const retryClient = new API('test-token', undefined, {
+    wrapResponseErrors: true,
+    retryConfig: { maxRetries: 1, baseDelay: 0 },
+  })
+
+  await expect(retryClient.getNote('retry-limit')).rejects.toBeInstanceOf(InternalServerError)
+  expect(attempts).toBe(2)
+})
+
 test('should not retry non-idempotent requests when wrapping errors', async () => {
   let requestCount = 0
   const clientWithRetryAndWrap = new API(process.env.HACKMD_ACCESS_TOKEN!, undefined, {
