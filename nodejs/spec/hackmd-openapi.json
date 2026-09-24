@@ -6599,7 +6599,7 @@
 		},
 		"/me": {
 			"get": {
-				"operationId": "GetCurrentUser",
+				"operationId": "GetMe",
 				"responses": {
 					"200": {
 						"description": "Ok",

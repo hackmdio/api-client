@@ -74,9 +74,11 @@ test('getTeams keeps the generated team shape and legacy response forms', async 
   }))
 
   expect(await client.getTeams()).toEqual(teams)
+  expect(await client.listTeams()).toEqual(teams)
   const raw = await client.getTeams({ unwrapData: false })
   expect(raw.status).toBe(200)
   expect(raw.data).toEqual(teams)
+  expect((await client.listTeams({ unwrapData: false })).data).toEqual(teams)
   expect(authorization).toBe(`Bearer ${process.env.HACKMD_ACCESS_TOKEN}`)
 })
 
@@ -103,9 +105,11 @@ test('getNoteList keeps the legacy response shapes and authorization', async () 
   )
 
   expect(await client.getNoteList()).toEqual([note])
+  expect(await client.listNotes()).toEqual([note])
   const raw = await client.getNoteList({ unwrapData: false })
   expect(raw.status).toBe(200)
   expect(raw.data).toEqual([note])
+  expect((await client.listNotes({ unwrapData: false })).data).toEqual([note])
   expect(authorization).toBe(`Bearer ${process.env.HACKMD_ACCESS_TOKEN}`)
 })
 
@@ -168,9 +172,11 @@ test('getTeamNotes keeps the legacy response shapes and team path', async () => 
   )
 
   expect(await client.getTeamNotes('test-team')).toEqual(notes)
+  expect(await client.listTeamNotes('test-team')).toEqual(notes)
   const raw = await client.getTeamNotes('test-team', { unwrapData: false })
   expect(raw.status).toBe(200)
   expect(raw.data).toEqual(notes)
+  expect((await client.listTeamNotes('test-team', { unwrapData: false })).data).toEqual(notes)
   expect(authorization).toBe(`Bearer ${process.env.HACKMD_ACCESS_TOKEN}`)
 })
 
@@ -269,12 +275,14 @@ test('getFolderList returns folders from /folders', async () => {
   )
 
   const folders = await client.getFolderList()
+  expect(await client.listFolders()).toEqual(folders)
 
   expect(folders).toHaveLength(1)
   expect(folders[0]).toMatchObject({ id: 'folder-1', name: 'Research' })
   const raw = await client.getFolderList({ unwrapData: false })
   expect(raw.status).toBe(200)
   expect(raw.data).toEqual(folders)
+  expect((await client.listFolders({ unwrapData: false })).data).toEqual(folders)
   expect(authorization).toBe(`Bearer ${process.env.HACKMD_ACCESS_TOKEN}`)
 })
 
@@ -312,9 +320,11 @@ test('getTeamFolderList keeps the legacy response shapes and team path', async (
   )
 
   expect(await client.getTeamFolderList('test-team')).toEqual(folders)
+  expect(await client.listTeamFolders('test-team')).toEqual(folders)
   const raw = await client.getTeamFolderList('test-team', { unwrapData: false })
   expect(raw.status).toBe(200)
   expect(raw.data).toEqual(folders)
+  expect((await client.listTeamFolders('test-team', { unwrapData: false })).data).toEqual(folders)
   expect(authorization).toBe(`Bearer ${process.env.HACKMD_ACCESS_TOKEN}`)
 })
 

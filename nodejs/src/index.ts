@@ -19,7 +19,7 @@ import {
   deleteWebhook as generatedDeleteWebhook,
   exportTeamWebhookDeliveries as generatedExportTeamWebhookDeliveries,
   exportWebhookDeliveries as generatedExportWebhookDeliveries,
-  getCurrentUser,
+  getMe as generatedGetMe,
   getFolder as generatedGetFolder,
   getFolderOrder as generatedGetFolderOrder,
   getHistory as generatedGetHistory,
@@ -33,14 +33,14 @@ import {
   getTeamWebhookDelivery as generatedGetTeamWebhookDelivery,
   getWebhook as generatedGetWebhook,
   getWebhookDelivery as generatedGetWebhookDelivery,
-  listFolders,
-  listNotes,
+  listFolders as generatedListFolders,
+  listNotes as generatedListNotes,
   listNoteComments as generatedListNoteComments,
   listVersions as generatedListVersions,
   listTrash as generatedListTrash,
-  listTeams,
-  listTeamFolders,
-  listTeamNotes,
+  listTeams as generatedListTeams,
+  listTeamFolders as generatedListTeamFolders,
+  listTeamNotes as generatedListTeamNotes,
   listTeamTrash as generatedListTeamTrash,
   listTeamWebhooks as generatedListTeamWebhooks,
   listTeamWebhookDeliveries as generatedListTeamWebhookDeliveries,
@@ -289,7 +289,7 @@ export class API {
     )
   }
   async getMe<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetMe>> {
-    return this.unwrapData(getCurrentUser({ client: this.generatedClient, throwOnError: true }), options.unwrapData) as unknown as OptionReturnType<Opt, GetMe>
+    return this.unwrapData(generatedGetMe({ client: this.generatedClient, throwOnError: true }), options.unwrapData) as unknown as OptionReturnType<Opt, GetMe>
   }
 
   async getHistory<Opt extends GetHistoryOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserHistory>> {
@@ -300,8 +300,13 @@ export class API {
     }), options.unwrapData) as unknown as OptionReturnType<Opt, GetUserHistory>
   }
 
-  async getNoteList<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserNotes>> {
-    return this.unwrapData(listNotes({ client: this.generatedClient, throwOnError: true }), options.unwrapData) as unknown as OptionReturnType<Opt, GetUserNotes>
+  async listNotes<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserNotes>> {
+    return this.unwrapData(generatedListNotes({ client: this.generatedClient, throwOnError: true }), options.unwrapData) as unknown as OptionReturnType<Opt, GetUserNotes>
+  }
+
+  /** Alias of listNotes; kept for backward compatibility. */
+  getNoteList<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserNotes>> {
+    return this.listNotes(options)
   }
 
   async getNote (noteId: string): Promise<GetNoteSuccess>
@@ -368,8 +373,13 @@ export class API {
     ) as unknown as OptionReturnType<Opt, UploadNoteImageResponse>
   }
 
-  async getTeams<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserTeams>> {
-    return this.unwrapData(listTeams({ client: this.generatedClient, throwOnError: true }), options.unwrapData) as unknown as OptionReturnType<Opt, GetUserTeams>
+  async listTeams<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserTeams>> {
+    return this.unwrapData(generatedListTeams({ client: this.generatedClient, throwOnError: true }), options.unwrapData) as unknown as OptionReturnType<Opt, GetUserTeams>
+  }
+
+  /** Alias of listTeams; kept for backward compatibility. */
+  getTeams<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetUserTeams>> {
+    return this.listTeams(options)
   }
 
   async getTeamNote (teamPath: string, noteId: string): Promise<GetNoteSuccess>
@@ -390,12 +400,17 @@ export class API {
     return this.unwrapData(request, options.unwrapData, true) as unknown as Promise<GetNoteResult | GetNoteRawResult>
   }
 
-  async getTeamNotes<Opt extends RequestOptions> (teamPath: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetTeamNotes>> {
-    return this.unwrapData(listTeamNotes({
+  async listTeamNotes<Opt extends RequestOptions> (teamPath: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetTeamNotes>> {
+    return this.unwrapData(generatedListTeamNotes({
       client: this.generatedClient,
       path: { teampath: teamPath },
       throwOnError: true,
     }), options.unwrapData) as unknown as OptionReturnType<Opt, GetTeamNotes>
+  }
+
+  /** Alias of listTeamNotes; kept for backward compatibility. */
+  getTeamNotes<Opt extends RequestOptions> (teamPath: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetTeamNotes>> {
+    return this.listTeamNotes(teamPath, options)
   }
 
   async createTeamNote<Opt extends RequestOptions> (teamPath: string, payload: CreateNoteOptions, options = defaultOption as Opt): Promise<CreateTeamNoteReturnType<Opt>> {
@@ -433,8 +448,13 @@ export class API {
     })
   }
 
-  async getFolderList<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetFolders>> {
-    return this.unwrapData(listFolders({ client: this.generatedClient, throwOnError: true }), options.unwrapData) as unknown as OptionReturnType<Opt, GetFolders>
+  async listFolders<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetFolders>> {
+    return this.unwrapData(generatedListFolders({ client: this.generatedClient, throwOnError: true }), options.unwrapData) as unknown as OptionReturnType<Opt, GetFolders>
+  }
+
+  /** Alias of listFolders; kept for backward compatibility. */
+  getFolderList<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetFolders>> {
+    return this.listFolders(options)
   }
 
   async createFolder<Opt extends RequestOptions> (payload: CreateUserFolderBody, options = defaultOption as Opt): Promise<OptionReturnType<Opt, CreateFolderResult>> {
@@ -474,12 +494,17 @@ export class API {
     return this.unwrapData(generatedUpdateFolderOrder({ client: this.generatedClient, body: payload, throwOnError: true }), options.unwrapData) as unknown as OptionReturnType<Opt, UpdateFolderResult>
   }
 
-  async getTeamFolderList<Opt extends RequestOptions> (teamPath: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetTeamFolders>> {
-    return this.unwrapData(listTeamFolders({
+  async listTeamFolders<Opt extends RequestOptions> (teamPath: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetTeamFolders>> {
+    return this.unwrapData(generatedListTeamFolders({
       client: this.generatedClient,
       path: { teampath: teamPath },
       throwOnError: true,
     }), options.unwrapData) as unknown as OptionReturnType<Opt, GetTeamFolders>
+  }
+
+  /** Alias of listTeamFolders; kept for backward compatibility. */
+  getTeamFolderList<Opt extends RequestOptions> (teamPath: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, GetTeamFolders>> {
+    return this.listTeamFolders(teamPath, options)
   }
 
   async createTeamFolder<Opt extends RequestOptions> (teamPath: string, payload: CreateTeamFolderBody, options = defaultOption as Opt): Promise<OptionReturnType<Opt, CreateTeamFolderResult>> {

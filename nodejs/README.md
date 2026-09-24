@@ -213,6 +213,11 @@ The package root retains the existing `API` class. Files under
 `src/generated` are generated from the vendored OpenAPI document and must not
 be edited manually.
 
+On `API`, `listNotes`, `listFolders`, `listTeamNotes`, `listTeamFolders`, and
+`listTeams` match the OpenAPI operation names. Existing `getNoteList`,
+`getFolderList`, `getTeamNotes`, `getTeamFolderList`, and `getTeams` remain
+compatible aliases.
+
 ## API
 
 The [API reference](https://hackmdio.github.io/api-client/) covers the existing

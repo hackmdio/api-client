@@ -2410,21 +2410,21 @@ export type ResolveNoteCommentResponses = {
 
 export type ResolveNoteCommentResponse = ResolveNoteCommentResponses[keyof ResolveNoteCommentResponses];
 
-export type GetCurrentUserData = {
+export type GetMeData = {
     body?: never;
     path?: never;
     query?: never;
     url: '/me';
 };
 
-export type GetCurrentUserResponses = {
+export type GetMeResponses = {
     /**
      * Ok
      */
     200: User;
 };
 
-export type GetCurrentUserResponse = GetCurrentUserResponses[keyof GetCurrentUserResponses];
+export type GetMeResponse = GetMeResponses[keyof GetMeResponses];
 
 export type GetHistoryData = {
     body?: never;

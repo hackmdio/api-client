@@ -33,7 +33,11 @@ async function exploreConditionalTeamNote (client: API): Promise<string | undefi
 }
 
 async function exploreNoteList (client: API): Promise<number> {
-  const notes = await client.getNoteList()
+  const notes = await client.listNotes()
+  const legacy = await client.getNoteList()
+  const raw = await client.listNotes({ unwrapData: false })
+  void legacy
+  void raw.status
   return notes[0].createdAt
 }
 
@@ -43,17 +47,20 @@ async function exploreHistory (client: API): Promise<number> {
 }
 
 async function exploreTeamNotes (client: API): Promise<number> {
-  const notes = await client.getTeamNotes('TEAM_PATH')
+  const notes = await client.listTeamNotes('TEAM_PATH')
+  void await client.getTeamNotes('TEAM_PATH')
   return notes[0].createdAt
 }
 
 async function exploreFolders (client: API): Promise<number> {
-  const folders = await client.getFolderList()
+  const folders = await client.listFolders()
+  void await client.getFolderList()
   return folders[0].createdAt
 }
 
 async function exploreTeamFolders (client: API): Promise<number> {
-  const folders = await client.getTeamFolderList('TEAM_PATH')
+  const folders = await client.listTeamFolders('TEAM_PATH')
+  void await client.getTeamFolderList('TEAM_PATH')
   return folders[0].updatedAt
 }
 
@@ -104,7 +111,8 @@ async function exploreNoteCreation (client: API): Promise<string> {
 
 async function exploreProfileAndTeams (client: API): Promise<number> {
   const profile = await client.getMe()
-  const teams = await client.getTeams()
+  const teams = await client.listTeams()
+  void await client.getTeams()
   const createdAt: number = teams[0].createdAt
   const description: string | null = profile.teams[0].description
   const upgraded: boolean = profile.upgraded

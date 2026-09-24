@@ -1,7 +1,8 @@
 import { http, HttpResponse } from 'msw'
 
+import { API } from '../src'
 import * as generatedSdk from '../src/generated/sdk.gen'
-import { createClient, getCurrentUser } from '../src/raw'
+import { createClient, getMe } from '../src/raw'
 import * as openApiDocument from '../spec/hackmd-openapi.json'
 import { server } from './mock'
 
@@ -23,7 +24,7 @@ const EXPECTED_OPERATIONS = [
   'deleteWebhook',
   'exportTeamWebhookDeliveries',
   'exportWebhookDeliveries',
-  'getCurrentUser',
+  'getMe',
   'getFolder',
   'getFolderOrder',
   'getHistory',
@@ -99,6 +100,12 @@ describe('generated raw API', () => {
     expect(Object.keys(generatedSdk).sort()).toEqual(expected)
   })
 
+  test('the compatibility API covers every raw operation', () => {
+    const apiMethods = new Set(Object.getOwnPropertyNames(API.prototype))
+    const missing = operationNamesFromSpec().filter(name => !apiMethods.has(name))
+    expect(missing).toEqual([])
+  })
+
   test('detail GETs have only the documented 200 success response', () => {
     const paths = openApiDocument.paths as Record<string, OpenApiPath>
     for (const path of [
@@ -139,7 +146,7 @@ describe('generated raw API', () => {
       baseURL: 'https://api.hackmd.io/v1',
     })
 
-    const response = await getCurrentUser({ client, throwOnError: true })
+    const response = await getMe({ client, throwOnError: true })
 
     expect(authorization).toBe('Bearer test-token')
     expect(response.status).toBe(200)
