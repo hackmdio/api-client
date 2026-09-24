@@ -146,6 +146,21 @@ const uploadedFromNode = await client.uploadNoteImage('note-id', image, {
 console.log(uploadedFromNode.data.link)
 ```
 
+### Webhooks
+
+Manage personal or team webhooks through the same `API` client. Save the secret
+returned by `createWebhook` when you create a webhook; later reads do not return it.
+
+```javascript
+const webhook = await client.createWebhook({
+  scope: { type: 'workspace' },
+  url: 'https://example.com/webhook',
+})
+console.log(webhook.secret)
+
+const teamWebhooks = await client.listTeamWebhooks('team-path')
+```
+
 ### Generated Raw API
 
 The `@hackmd/api/raw` entry point exposes every OpenAPI operation as a generated,

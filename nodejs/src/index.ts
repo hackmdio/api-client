@@ -7,10 +7,14 @@ import {
   createNote as generatedCreateNote,
   createTeamFolder as generatedCreateTeamFolder,
   createTeamNote as generatedCreateTeamNote,
+  createTeamWebhook as generatedCreateTeamWebhook,
+  createWebhook as generatedCreateWebhook,
   deleteFolder as generatedDeleteFolder,
   deleteNote as generatedDeleteNote,
   deleteTeamFolder as generatedDeleteTeamFolder,
   deleteTeamNote as generatedDeleteTeamNote,
+  deleteTeamWebhook as generatedDeleteTeamWebhook,
+  deleteWebhook as generatedDeleteWebhook,
   getCurrentUser,
   getFolder as generatedGetFolder,
   getFolderOrder as generatedGetFolderOrder,
@@ -19,17 +23,23 @@ import {
   getTeamNote as generatedGetTeamNote,
   getTeamFolder as generatedGetTeamFolder,
   getTeamFolderOrder as generatedGetTeamFolderOrder,
+  getTeamWebhook as generatedGetTeamWebhook,
+  getWebhook as generatedGetWebhook,
   listFolders,
   listNotes,
   listTeams,
   listTeamFolders,
   listTeamNotes,
+  listTeamWebhooks as generatedListTeamWebhooks,
+  listWebhooks as generatedListWebhooks,
   updateFolder as generatedUpdateFolder,
   updateFolderOrder as generatedUpdateFolderOrder,
   updateNote as generatedUpdateNote,
   updateTeamFolder as generatedUpdateTeamFolder,
   updateTeamFolderOrder as generatedUpdateTeamFolderOrder,
   updateTeamNote as generatedUpdateTeamNote,
+  updateTeamWebhook as generatedUpdateTeamWebhook,
+  updateWebhook as generatedUpdateWebhook,
   uploadNoteImage as generatedUploadNoteImage,
 } from './generated/sdk.gen.js'
 import {
@@ -61,6 +71,10 @@ import {
   UpdateUserFolderBody,
   UploadNoteImageOptions,
   UploadNoteImageResponse,
+  ApiWebhook,
+  CreateWebhookBody,
+  CreateWebhookResult,
+  UpdateWebhookBody,
 } from './type.js'
 import * as HackMDErrors from './error'
 
@@ -476,6 +490,85 @@ export class API {
       body: payload,
       throwOnError: true,
     }), options.unwrapData) as unknown as OptionReturnType<Opt, UpdateTeamFolderResult>
+  }
+
+  async listWebhooks<Opt extends RequestOptions> (options = defaultOption as Opt): Promise<OptionReturnType<Opt, ApiWebhook[]>> {
+    return this.unwrapData(generatedListWebhooks({ client: this.generatedClient, throwOnError: true }), options.unwrapData) as unknown as OptionReturnType<Opt, ApiWebhook[]>
+  }
+
+  async getWebhook<Opt extends RequestOptions> (hookId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, ApiWebhook>> {
+    return this.unwrapData(generatedGetWebhook({
+      client: this.generatedClient,
+      path: { hookId },
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, ApiWebhook>
+  }
+
+  async createWebhook<Opt extends RequestOptions> (body: CreateWebhookBody, options = defaultOption as Opt): Promise<OptionReturnType<Opt, CreateWebhookResult>> {
+    return this.unwrapData(generatedCreateWebhook({
+      client: this.generatedClient,
+      body,
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, CreateWebhookResult>
+  }
+
+  async updateWebhook<Opt extends RequestOptions> (hookId: string, body: UpdateWebhookBody, options = defaultOption as Opt): Promise<OptionReturnType<Opt, ApiWebhook>> {
+    return this.unwrapData(generatedUpdateWebhook({
+      client: this.generatedClient,
+      path: { hookId },
+      body,
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, ApiWebhook>
+  }
+
+  async deleteWebhook<Opt extends RequestOptions> (hookId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, void>> {
+    return this.unwrapData(generatedDeleteWebhook({
+      client: this.generatedClient,
+      path: { hookId },
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, void>
+  }
+
+  async listTeamWebhooks<Opt extends RequestOptions> (teamPath: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, ApiWebhook[]>> {
+    return this.unwrapData(generatedListTeamWebhooks({
+      client: this.generatedClient,
+      path: { teampath: teamPath },
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, ApiWebhook[]>
+  }
+
+  async getTeamWebhook<Opt extends RequestOptions> (teamPath: string, hookId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, ApiWebhook>> {
+    return this.unwrapData(generatedGetTeamWebhook({
+      client: this.generatedClient,
+      path: { teampath: teamPath, hookId },
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, ApiWebhook>
+  }
+
+  async createTeamWebhook<Opt extends RequestOptions> (teamPath: string, body: CreateWebhookBody, options = defaultOption as Opt): Promise<OptionReturnType<Opt, CreateWebhookResult>> {
+    return this.unwrapData(generatedCreateTeamWebhook({
+      client: this.generatedClient,
+      path: { teampath: teamPath },
+      body,
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, CreateWebhookResult>
+  }
+
+  async updateTeamWebhook<Opt extends RequestOptions> (teamPath: string, hookId: string, body: UpdateWebhookBody, options = defaultOption as Opt): Promise<OptionReturnType<Opt, ApiWebhook>> {
+    return this.unwrapData(generatedUpdateTeamWebhook({
+      client: this.generatedClient,
+      path: { teampath: teamPath, hookId },
+      body,
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, ApiWebhook>
+  }
+
+  async deleteTeamWebhook<Opt extends RequestOptions> (teamPath: string, hookId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, void>> {
+    return this.unwrapData(generatedDeleteTeamWebhook({
+      client: this.generatedClient,
+      path: { teampath: teamPath, hookId },
+      throwOnError: true,
+    }), options.unwrapData) as unknown as OptionReturnType<Opt, void>
   }
 
   private unwrapData<T> (reqP: Promise<AxiosResponse<T>>, unwrap = true, includeEtag = false) {

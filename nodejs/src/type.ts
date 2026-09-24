@@ -1,7 +1,10 @@
 import type {
   ApiFolder as GeneratedApiFolder,
+  ApiWebhook as GeneratedApiWebhook,
+  CreateApiWebhookBody as GeneratedCreateApiWebhookBody,
   CreateNoteData as GeneratedCreateNoteData,
   CreateNoteMultiStatusResponse as GeneratedCreateNoteMultiStatusResponse,
+  CreateWebhookResponse as GeneratedCreateWebhookResponse,
   FolderPath as GeneratedFolderPath,
   GetUserHistory as GeneratedUserHistory,
   NoteType as GeneratedNote,
@@ -10,6 +13,7 @@ import type {
   SingleNote as GeneratedSingleNote,
   Team as GeneratedTeam,
   UpdateNoteData as GeneratedUpdateNoteData,
+  UpdateWebhookData as GeneratedUpdateWebhookData,
   User as GeneratedUser,
 } from './generated/types.gen.js'
 
@@ -123,3 +127,9 @@ export type DeleteFolderResult = void
 export type DeleteTeamFolderResult = void
 export type GetFolderOrder = ApiFolderOrder
 export type GetTeamFolderOrder = ApiFolderOrder
+
+// Webhooks (personal & team workspaces)
+export type ApiWebhook = GeneratedApiWebhook
+export type CreateWebhookBody = GeneratedCreateApiWebhookBody
+export type CreateWebhookResult = GeneratedCreateWebhookResponse
+export type UpdateWebhookBody = GeneratedUpdateWebhookData

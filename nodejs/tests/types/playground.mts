@@ -122,6 +122,22 @@ async function exploreImageUpload (client: API): Promise<string> {
   return uploaded.data.link
 }
 
+async function exploreWebhooks (client: API): Promise<string> {
+  const personal = await client.listWebhooks()
+  const team = await client.listTeamWebhooks('TEAM_PATH')
+  const created = await client.createWebhook({
+    scope: { type: 'workspace' },
+    url: 'https://example.test/webhook',
+  })
+  const secret: string = created.secret
+  const updated = await client.updateTeamWebhook('TEAM_PATH', team[0].id, { active: false })
+  const raw = await client.deleteWebhook(personal[0].id, { unwrapData: false })
+  const status: number = raw.status
+  void secret
+  void status
+  return updated.id
+}
+
 function exploreRawNote (note: RawNote): string {
   return note.content
 }
@@ -140,4 +156,5 @@ void exploreNoteMutations
 void exploreNoteCreation
 void exploreProfileAndTeams
 void exploreImageUpload
+void exploreWebhooks
 void exploreRawNote
