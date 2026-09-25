@@ -1,5 +1,6 @@
 import { server } from './mock'
 import { API } from '../src'
+import { HttpResponseError } from '../src/error'
 import { http, HttpResponse } from 'msw'
 
 let client: API
@@ -55,6 +56,7 @@ describe('Etag support', () => {
       // Verify data properties still exist
       expect(response).toHaveProperty('id', 'test-note-id')
       expect(response).toHaveProperty('title', 'Test Note')
+      expect(response.status).toBe(200)
     })
     
     test('should include etag in response headers when unwrapData is false', async () => {
@@ -199,6 +201,132 @@ describe('Etag support', () => {
       // With unwrapData: true and a 304 response, we just get the etag
       expect(response).toHaveProperty('etag', mockEtag)
       expect(response).toHaveProperty('status', 304)
+      expect(response).not.toHaveProperty('content')
+    })
+
+    test('uses the legacy Axios instance for custom base URL and authorization', async () => {
+      let authorization: string | null = null
+      server.use(
+        http.get('https://custom.hackmd.test/v1/notes/test-note-id', ({ request }) => {
+          authorization = request.headers.get('Authorization')
+          return HttpResponse.json({ id: 'test-note-id', content: 'hello' })
+        })
+      )
+
+      const customClient = new API('custom-token', 'https://custom.hackmd.test/v1/')
+      const response = await customClient.getNote('test-note-id')
+
+      expect(authorization).toBe('Bearer custom-token')
+      expect(response.status).toBe(200)
+      expect(response.content).toBe('hello')
+    })
+
+    test('keeps legacy error wrapping for generated requests', async () => {
+      server.use(
+        http.get('https://api.hackmd.io/v1/notes/missing-note', () =>
+          HttpResponse.json({ error: 'Note not found' }, { status: 404 })
+        )
+      )
+
+      const customClient = new API('custom-token', undefined, {
+        wrapResponseErrors: true,
+        retryConfig: undefined,
+      })
+
+      await expect(customClient.getNote('missing-note')).rejects.toBeInstanceOf(HttpResponseError)
+    })
+
+    test('keeps legacy retry behavior for generated requests', async () => {
+      let attempts = 0
+      server.use(
+        http.get('https://api.hackmd.io/v1/notes/retry-note', () => {
+          attempts++
+          if (attempts === 1) return HttpResponse.json({}, { status: 503 })
+          return HttpResponse.json({ id: 'retry-note', content: 'retried' })
+        })
+      )
+
+      const retryClient = new API('custom-token', undefined, {
+        wrapResponseErrors: true,
+        retryConfig: { maxRetries: 1, baseDelay: 0 },
+      })
+      const response = await retryClient.getNote('retry-note')
+
+      expect(attempts).toBe(2)
+      expect(response.content).toBe('retried')
+    })
+  })
+
+  describe('getTeamNote', () => {
+    test('preserves 200/304 ETags, raw responses, authorization and custom base URL', async () => {
+      const etag = 'W/"team-note-v1"'
+      const conditionalHeaders: Array<string | null> = []
+      const authorizationHeaders: Array<string | null> = []
+      server.use(
+        http.get('https://custom.hackmd.test/v1/teams/my-team/notes/team-note', ({ request }) => {
+          const ifNoneMatch = request.headers.get('If-None-Match')
+          conditionalHeaders.push(ifNoneMatch)
+          authorizationHeaders.push(request.headers.get('Authorization'))
+          if (ifNoneMatch === etag) {
+            return new HttpResponse(null, { status: 304, headers: { ETag: etag } })
+          }
+          return HttpResponse.json(
+            { id: 'team-note', content: 'Team content' },
+            { headers: { ETag: etag } }
+          )
+        })
+      )
+
+      const teamClient = new API('custom-token', 'https://custom.hackmd.test/v1/')
+      const first = await teamClient.getTeamNote('my-team', 'team-note')
+      expect(first).toEqual({ id: 'team-note', content: 'Team content', status: 200, etag })
+
+      const raw200 = await teamClient.getTeamNote('my-team', 'team-note', { unwrapData: false })
+      expect(raw200.status).toBe(200)
+      expect(raw200.data.content).toBe('Team content')
+      expect(raw200.headers.etag).toBe(etag)
+
+      const notModified = await teamClient.getTeamNote('my-team', 'team-note', { etag })
+      expect(notModified).toEqual({ status: 304, etag })
+
+      const raw304 = await teamClient.getTeamNote('my-team', 'team-note', { etag, unwrapData: false })
+      expect(raw304.status).toBe(304)
+      expect(raw304.headers.etag).toBe(etag)
+      expect(conditionalHeaders).toEqual([null, null, etag, etag])
+      expect(authorizationHeaders).toEqual(Array(4).fill('Bearer custom-token'))
+    })
+
+    test('keeps legacy error wrapping for generated team requests', async () => {
+      server.use(
+        http.get('https://api.hackmd.io/v1/teams/my-team/notes/missing-note', () =>
+          HttpResponse.json({ error: 'Note not found' }, { status: 404 })
+        )
+      )
+
+      const teamClient = new API('custom-token', undefined, {
+        wrapResponseErrors: true,
+        retryConfig: undefined,
+      })
+      await expect(teamClient.getTeamNote('my-team', 'missing-note')).rejects.toBeInstanceOf(HttpResponseError)
+    })
+
+    test('uses the existing retry interceptor', async () => {
+      let attempts = 0
+      server.use(
+        http.get('https://api.hackmd.io/v1/teams/my-team/notes/retry-note', () => {
+          attempts++
+          if (attempts === 1) return HttpResponse.json({}, { status: 503 })
+          return HttpResponse.json({ id: 'retry-note', content: 'retried' })
+        })
+      )
+
+      const teamClient = new API('custom-token', undefined, {
+        wrapResponseErrors: true,
+        retryConfig: { maxRetries: 1, baseDelay: 0 },
+      })
+      const note = await teamClient.getTeamNote('my-team', 'retry-note')
+      expect(attempts).toBe(2)
+      expect(note.content).toBe('retried')
     })
   })
   
@@ -215,6 +343,7 @@ describe('Etag support', () => {
               title: 'New Test Note'
             },
             {
+              status: 201,
               headers: {
                 'ETag': mockEtag
               }
@@ -228,6 +357,8 @@ describe('Etag support', () => {
 
       // Verify response has etag property
       expect(response).toHaveProperty('etag', mockEtag)
+      expect(response.status).toBe(201)
+      if (response.status !== 201) throw new Error('Expected 201')
       
       // Verify data properties still exist
       expect(response).toHaveProperty('id', 'new-note-id')
@@ -242,31 +373,14 @@ describe('Etag support', () => {
       
       server.use(
         http.patch('https://api.hackmd.io/v1/notes/test-note-id', () => {
-          return HttpResponse.json(
-            { 
-              id: 'test-note-id',
-              title: 'Updated Test Note',
-              content: 'Updated content via updateNote'
-            },
-            {
-              headers: {
-                'ETag': mockEtag
-              }
-            }
-          )
+          return new HttpResponse(null, { status: 202, headers: { ETag: mockEtag } })
         })
       )
 
       // Make request with default unwrapData: true
       const response = await client.updateNoteContent('test-note-id', 'Updated content')
 
-      // Verify response has etag property
-      expect(response).toHaveProperty('etag', mockEtag)
-      
-      // Verify data properties still exist
-      expect(response).toHaveProperty('id', 'test-note-id')
-      expect(response).toHaveProperty('title', 'Updated Test Note')
-      expect(response).toHaveProperty('content', 'Updated content via updateNote')
+      expect(response).toEqual({ status: 202, etag: mockEtag })
     })
 
     test('should support updating note title and tags metadata', async () => {
@@ -278,19 +392,7 @@ describe('Etag support', () => {
         http.patch('https://api.hackmd.io/v1/notes/test-note-id', async ({ request }) => {
           requestBody = await request.json()
 
-          return HttpResponse.json(
-            {
-              id: 'test-note-id',
-              title: 'Updated Metadata Title',
-              tags: updatedTags,
-              content: 'Updated content via updateNote'
-            },
-            {
-              headers: {
-                'ETag': mockEtag
-              }
-            }
-          )
+          return new HttpResponse(null, { status: 202, headers: { ETag: mockEtag } })
         })
       )
 
@@ -303,9 +405,7 @@ describe('Etag support', () => {
         title: 'Updated Metadata Title',
         tags: updatedTags
       })
-      expect(response).toHaveProperty('etag', mockEtag)
-      expect(response).toHaveProperty('title', 'Updated Metadata Title')
-      expect(response.tags).toEqual(updatedTags)
+      expect(response).toEqual({ status: 202, etag: mockEtag })
     })
   })
 })

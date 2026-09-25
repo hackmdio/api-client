@@ -1,107 +1,95 @@
-export enum TeamVisibilityType {
-  PUBLIC = 'public',
-  PRIVATE = 'private',
-}
+import type {
+  ApiComment as GeneratedApiComment,
+  ApiCommentDetail as GeneratedApiCommentDetail,
+  ApiCommentResolutionResponse as GeneratedApiCommentResolutionResponse,
+  ApiFolder as GeneratedApiFolder,
+  ApiFolderOrder as GeneratedApiFolderOrder,
+  ApiWebhook as GeneratedApiWebhook,
+  ApiWebhookDelivery as GeneratedApiWebhookDelivery,
+  ApiTrashNote as GeneratedApiTrashNote,
+  BatchRestoreTrashBody as GeneratedBatchRestoreTrashBody,
+  CompareNoteVersions as GeneratedCompareNoteVersions,
+  CompareVersionsData as GeneratedCompareVersionsData,
+  CommentPermissionType as GeneratedCommentPermissionType,
+  CreateTeamFolderBody as GeneratedCreateTeamFolderBody,
+  CreateUserFolderBody as GeneratedCreateUserFolderBody,
+  CreateNoteVersionBody as GeneratedCreateNoteVersionBody,
+  CreateApiWebhookBody as GeneratedCreateApiWebhookBody,
+  CreateNoteData as GeneratedCreateNoteData,
+  CreateNoteMultiStatusResponse as GeneratedCreateNoteMultiStatusResponse,
+  CreateWebhookResponse as GeneratedCreateWebhookResponse,
+  FolderPath as GeneratedFolderPath,
+  GetNoteComments as GeneratedGetNoteComments,
+  GetUserHistory as GeneratedUserHistory,
+  GetNoteVersions as GeneratedGetNoteVersions,
+  ListVersionsData as GeneratedListVersionsData,
+  ListNoteCommentsData as GeneratedListNoteCommentsData,
+  NoteVersion as GeneratedNoteVersion,
+  NoteVersionMetadata as GeneratedNoteVersionMetadata,
+  NoteType as GeneratedNote,
+  NotePermissionRole as GeneratedNotePermissionRole,
+  NotePublishType as GeneratedNotePublishType,
+  NoteImageUploadResponse as GeneratedNoteImageUploadResponse,
+  PaginatedResponseApiWebhookDelivery as GeneratedWebhookDeliveryPage,
+  SimpleUserProfile as GeneratedSimpleUserProfile,
+  SingleNote as GeneratedSingleNote,
+  Team as GeneratedTeam,
+  TeamVisibilityType as GeneratedTeamVisibilityType,
+  TrashBatchOperationResponse as GeneratedTrashBatchOperationResponse,
+  UpdateNoteData as GeneratedUpdateNoteData,
+  UpdateNoteVersionBody as GeneratedUpdateNoteVersionBody,
+  UpdateFolderOrderBody as GeneratedUpdateFolderOrderBody,
+  UpdateTeamFolderBody as GeneratedUpdateTeamFolderBody,
+  UpdateUserFolderBody as GeneratedUpdateUserFolderBody,
+  UpdateWebhookData as GeneratedUpdateWebhookData,
+  User as GeneratedUser,
+} from './generated/types.gen.js'
 
-export enum NotePublishType {
-  EDIT = 'edit',
-  VIEW = 'view',
-  SLIDE = 'slide',
-  BOOK = 'book'
-}
+/** Preserve the runtime enum-like values while deriving their types from OpenAPI. */
+export const TeamVisibilityType = {
+  PUBLIC: 'public',
+  PRIVATE: 'private',
+} as const satisfies Record<Uppercase<GeneratedTeamVisibilityType>, GeneratedTeamVisibilityType>
+export type TeamVisibilityType = GeneratedTeamVisibilityType
 
-export enum CommentPermissionType {
-  DISABLED = 'disabled',
-  FORBIDDEN = 'forbidden',
-  OWNERS = 'owners',
-  SIGNED_IN_USERS = 'signed_in_users',
-  EVERYONE = 'everyone'
-}
+export const NotePublishType = {
+  EDIT: 'edit',
+  VIEW: 'view',
+  SLIDE: 'slide',
+  BOOK: 'book',
+} as const satisfies Record<Uppercase<GeneratedNotePublishType>, GeneratedNotePublishType>
+export type NotePublishType = GeneratedNotePublishType
 
-export type CreateNoteOptions = {
-  title?: string
-  content?: string
-  description?: string
-  tags?: string[]
-  readPermission?: NotePermissionRole,
-  writePermission?: NotePermissionRole,
-  commentPermission?: CommentPermissionType,
-  permalink?: string
-  parentFolderId?: string
-}
+export const CommentPermissionType = {
+  DISABLED: 'disabled',
+  FORBIDDEN: 'forbidden',
+  OWNERS: 'owners',
+  SIGNED_IN_USERS: 'signed_in_users',
+  EVERYONE: 'everyone',
+} as const satisfies Record<Uppercase<GeneratedCommentPermissionType>, GeneratedCommentPermissionType>
+export type CommentPermissionType = GeneratedCommentPermissionType
 
-export type Team = {
-  id: string
-  ownerId: string
-  name: string
-  logo: string
-  path: string
-  description: string
-  hardBreaks: boolean
-  visibility: TeamVisibilityType
-  createdAt: Date
-}
+export type CreateNoteOptions = Exclude<NonNullable<GeneratedCreateNoteData['body']>, string>
+export type CreateNoteMultiStatusResponse = GeneratedCreateNoteMultiStatusResponse
 
-export type User = {
-  id: string
-  email: string | null
-  name: string
-  userPath: string
-  photo: string
-  teams: Team[]
-}
+export type Team = GeneratedTeam
+export type User = GeneratedUser
 
-export type SimpleUserProfile = {
-  name: string,
-  userPath: string
-  photo: string
-  biography: string | null
-  createdAt: Date
-}
+export type SimpleUserProfile = GeneratedSimpleUserProfile
 
-export enum NotePermissionRole {
-  OWNER = 'owner',
-  SIGNED_IN = 'signed_in',
-  GUEST = 'guest'
-}
+export const NotePermissionRole = {
+  OWNER: 'owner',
+  SIGNED_IN: 'signed_in',
+  GUEST: 'guest',
+} as const satisfies Record<Uppercase<GeneratedNotePermissionRole>, GeneratedNotePermissionRole>
+export type NotePermissionRole = GeneratedNotePermissionRole
 
-/** Folder breadcrumb segment as returned on notes (OpenAPI `FolderPath`). */
-export type FolderPath = {
-  id: string
-  name: string
-  icon: string | null
-  color: string | null
-  parentId: string | null
-  clientId: string
-}
+/** Note response types are generated from the v1 OpenAPI contract. */
+export type FolderPath = GeneratedFolderPath
+export type Note = GeneratedNote
+export type SingleNote = GeneratedSingleNote
 
-export type Note = {
-  id: string
-  title: string
-  tags: string[]
-  lastChangedAt: string
-  createdAt: string
-  lastChangeUser: SimpleUserProfile | null
-  publishType: NotePublishType
-  publishedAt: string | null
-  userPath: string | null
-  teamPath: string | null
-  permalink: string | null
-  shortId: string
-  publishLink: string
-
-  readPermission: NotePermissionRole
-  writePermission: NotePermissionRole
-  folderPaths?: FolderPath[]
-}
-
-export type SingleNote = Note & {
-  content: string
-}
-
-export type UpdateNoteOptions = Partial<Pick<SingleNote, 'content' | 'title' | 'tags' | 'readPermission' | 'writePermission' | 'permalink'>> & {
-  parentFolderId?: string
-}
+export type UpdateNoteOptions = GeneratedUpdateNoteData['body']
 
 // User
 export type GetMe = User
@@ -109,16 +97,12 @@ export type GetMe = User
 // User notes
 export type GetUserNotes = Note[]
 export type GetUserNote = SingleNote
-export type GetUserHistory = Note[]
-export type CreateUserNote = SingleNote
+export type GetUserHistory = GeneratedUserHistory
+export type CreateUserNote = SingleNote | CreateNoteMultiStatusResponse
 export type UpdateUserNote = void
 export type DeleteUserNote = void
 
-export type UploadNoteImageResponse = {
-  data: {
-    link: string
-  }
-}
+export type UploadNoteImageResponse = GeneratedNoteImageUploadResponse
 
 export type UploadNoteImageOptions = {
   unwrapData?: boolean
@@ -130,48 +114,20 @@ export type GetUserTeams = Team[]
 
 // Team notes
 export type GetTeamNotes = Note[]
-export type CreateTeamNote = SingleNote
+export type CreateTeamNote = SingleNote | CreateNoteMultiStatusResponse
 export type UpdateTeamNote = void
 export type DeleteTeamNote = void
 
 // Folders (user & team workspaces)
-export type ApiFolder = {
-  id: string
-  name: string
-  description: string | null
-  icon: string | null
-  color: string | null
-  parentFolderId: string | null
-  createdAt: number
-  updatedAt: number
-}
+export type ApiFolder = GeneratedApiFolder
 
 /** Maps each parent folder id or the literal `root` to ordered child folder ids. */
-export type ApiFolderOrder = Record<string, string[]>
-
-export type CreateUserFolderBody = {
-  name?: string
-  description?: string
-  icon?: string
-  color?: string
-  parentFolderId?: string
-}
-
-export type UpdateUserFolderBody = {
-  name?: string
-  description?: string | null
-  icon?: string | null
-  color?: string | null
-  parentFolderId?: string | null
-}
-
-export type CreateTeamFolderBody = CreateUserFolderBody
-
-export type UpdateTeamFolderBody = UpdateUserFolderBody
-
-export type UpdateFolderOrderBody = {
-  order: ApiFolderOrder
-}
+export type ApiFolderOrder = GeneratedApiFolderOrder
+export type CreateUserFolderBody = GeneratedCreateUserFolderBody
+export type UpdateUserFolderBody = GeneratedUpdateUserFolderBody
+export type CreateTeamFolderBody = GeneratedCreateTeamFolderBody
+export type UpdateTeamFolderBody = GeneratedUpdateTeamFolderBody
+export type UpdateFolderOrderBody = GeneratedUpdateFolderOrderBody
 
 export type GetFolders = ApiFolder[]
 export type GetTeamFolders = ApiFolder[]
@@ -179,10 +135,39 @@ export type GetFolder = ApiFolder
 export type GetTeamFolder = ApiFolder
 export type CreateFolderResult = ApiFolder
 export type CreateTeamFolderResult = ApiFolder
-export type UpdateFolderResult = ApiFolder
-export type UpdateTeamFolderResult = ApiFolder
+export type UpdateFolderResult = void
+export type UpdateTeamFolderResult = void
 export type DeleteFolderResult = void
 export type DeleteTeamFolderResult = void
 export type GetFolderOrder = ApiFolderOrder
 export type GetTeamFolderOrder = ApiFolderOrder
 
+// Webhooks (personal & team workspaces)
+export type ApiWebhook = GeneratedApiWebhook
+export type CreateWebhookBody = GeneratedCreateApiWebhookBody
+export type CreateWebhookResult = GeneratedCreateWebhookResponse
+export type UpdateWebhookBody = GeneratedUpdateWebhookData
+export type ApiWebhookDelivery = GeneratedApiWebhookDelivery
+export type WebhookDeliveryPage = GeneratedWebhookDeliveryPage
+
+// Trash (personal & team workspaces)
+export type ApiTrashNote = GeneratedApiTrashNote
+export type BatchRestoreTrashBody = GeneratedBatchRestoreTrashBody
+export type TrashBatchOperationResponse = GeneratedTrashBatchOperationResponse
+
+// Versions
+export type NoteVersion = GeneratedNoteVersion
+export type NoteVersionMetadata = GeneratedNoteVersionMetadata
+export type GetNoteVersions = GeneratedGetNoteVersions
+export type CreateNoteVersionBody = GeneratedCreateNoteVersionBody
+export type UpdateNoteVersionBody = GeneratedUpdateNoteVersionBody
+export type CompareNoteVersions = GeneratedCompareNoteVersions
+export type CompareVersionsQuery = GeneratedCompareVersionsData['query']
+export type ListVersionsQuery = NonNullable<GeneratedListVersionsData['query']>
+
+// Comments
+export type ApiComment = GeneratedApiComment
+export type ApiCommentDetail = GeneratedApiCommentDetail
+export type ApiCommentResolutionResponse = GeneratedApiCommentResolutionResponse
+export type GetNoteComments = GeneratedGetNoteComments
+export type ListNoteCommentsQuery = NonNullable<GeneratedListNoteCommentsData['query']>
