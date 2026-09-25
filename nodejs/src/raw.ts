@@ -19,3 +19,5 @@ export type {
   RequestOptions as RawRequestOptions,
   RequestResult as RawRequestResult,
 } from './generated/client/index.js'
+export { operationRegistry } from './generated/operationRegistry.gen.js'
+export type { OperationId } from './generated/operationRegistry.gen.js'

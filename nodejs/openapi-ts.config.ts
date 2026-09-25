@@ -5,7 +5,7 @@ export default defineConfig({
   output: {
     path: './src/generated',
     module: { extension: '.js' },
-    postProcess: [],
+    postProcess: [{ command: 'node', args: ['scripts/generate-operation-registry.mjs'] }],
   },
   plugins: [
     '@hey-api/client-axios',

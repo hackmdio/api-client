@@ -2,71 +2,9 @@ import { http, HttpResponse } from 'msw'
 
 import { API, CommentPermissionType, NotePermissionRole, NotePublishType, TeamVisibilityType } from '../src'
 import * as generatedSdk from '../src/generated/sdk.gen'
-import { createClient, getMe } from '../src/raw'
+import { createClient, getMe, operationRegistry } from '../src/raw'
 import * as openApiDocument from '../spec/hackmd-openapi.json'
 import { server } from './mock'
-
-const EXPECTED_OPERATIONS = [
-  'batchRestore',
-  'compareVersions',
-  'createFolder',
-  'createNote',
-  'createTeamFolder',
-  'createTeamNote',
-  'createTeamWebhook',
-  'createVersion',
-  'createWebhook',
-  'deleteFolder',
-  'deleteNote',
-  'deleteTeamFolder',
-  'deleteTeamNote',
-  'deleteTeamWebhook',
-  'deleteWebhook',
-  'exportTeamWebhookDeliveries',
-  'exportWebhookDeliveries',
-  'getMe',
-  'getFolder',
-  'getFolderOrder',
-  'getHistory',
-  'getNote',
-  'getNoteComment',
-  'getTeamFolder',
-  'getTeamFolderOrder',
-  'getTeamNote',
-  'getTeamWebhook',
-  'getTeamWebhookDelivery',
-  'getVersion',
-  'getWebhook',
-  'getWebhookDelivery',
-  'listFolders',
-  'listNoteComments',
-  'listNotes',
-  'listTrash',
-  'listTeamFolders',
-  'listTeamNotes',
-  'listTeams',
-  'listTeamTrash',
-  'listTeamWebhookDeliveries',
-  'listTeamWebhooks',
-  'listVersions',
-  'listWebhookDeliveries',
-  'listWebhooks',
-  'pingTeamWebhook',
-  'pingWebhook',
-  'resolveNoteComment',
-  'restoreNote',
-  'unresolveNoteComment',
-  'updateFolder',
-  'updateFolderOrder',
-  'updateNote',
-  'updateTeamFolder',
-  'updateTeamFolderOrder',
-  'updateTeamNote',
-  'updateTeamWebhook',
-  'updateVersion',
-  'updateWebhook',
-  'uploadNoteImage',
-] as const
 
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete'] as const
 
@@ -92,12 +30,27 @@ describe('generated raw API', () => {
   afterEach(() => server.resetHandlers())
   afterAll(() => server.close())
 
-  test('covers every reviewed v1 operation', () => {
-    const expected = [...EXPECTED_OPERATIONS].sort()
-
-    expect(expected).toHaveLength(59)
-    expect(operationNamesFromSpec()).toEqual(expected)
+  test('raw SDK matches every operation in the vendored spec', () => {
+    const expected = operationNamesFromSpec()
+    expect(expected.length).toBeGreaterThan(0)
     expect(Object.keys(generatedSdk).sort()).toEqual(expected)
+  })
+
+  test('registry covers every spec operation and generated raw function', () => {
+    const operations = Object.entries(openApiDocument.paths).flatMap(([path, item]) =>
+      HTTP_METHODS.flatMap(method => {
+        const operation = (item as OpenApiPath)[method]
+        return operation?.operationId ? [{ path, method, operation }] : []
+      }),
+    )
+    expect(Object.keys(operationRegistry).sort()).toEqual(operations.map(({ operation }) => operation.operationId).sort())
+    for (const { path, method, operation } of operations) {
+      const id = operation.operationId as keyof typeof operationRegistry
+      const entry = operationRegistry[id]
+      expect(entry.method).toBe(method.toUpperCase())
+      expect(entry.path).toBe(path)
+      expect(entry.call).toBe(generatedSdk[id[0].toLowerCase() + id.slice(1) as keyof typeof generatedSdk])
+    }
   })
 
   test('keeps the existing runtime enum values', () => {

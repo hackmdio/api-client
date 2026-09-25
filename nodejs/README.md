@@ -87,6 +87,7 @@ const client = new HackMDAPI('YOUR_ACCESS_TOKEN', 'https://api.hackmd.io/v1', {
 ```
 
 The client will automatically retry requests that fail with:
+
 - 5xx server errors
 - 429 Too Many Requests errors
 - Network errors
@@ -248,12 +249,12 @@ deterministic.
 
 Integration tests call a real HackMD API (staging or production). They are **not** run by `pnpm test` or the default CI job.
 
-**Requirements**
+## Requirements
 
 - `HACKMD_ACCESS_TOKEN` — a valid personal access token for the environment you target.
 - Optional: `HACKMD_API_ENDPOINT` — defaults to `https://api.hackmd.io/v1`. For staging, use `https://api-stage.hackmd.io/v1`.
 
-**Read-only (default e2e)**
+## Read-only (default e2e)
 
 ```bash
 cd nodejs
@@ -262,7 +263,7 @@ export HACKMD_API_ENDPOINT=https://api-stage.hackmd.io/v1   # optional
 pnpm test:e2e
 ```
 
-**With CRUD / mutations**
+## With CRUD / mutations
 
 Set `HACKMD_E2E_MUTATIONS=1` to run write tests against your account:
 
