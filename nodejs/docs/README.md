@@ -33,7 +33,8 @@ Use the raw reference for the full OpenAPI operation and DTO catalog.
 
 ## Explore the types
 
-[Open the type-only example in StackBlitz](https://stackblitz.com/fork/github/hackmdio/api-client/tree/master/nodejs?file=tests/types/playground.mts).
-The example makes no requests and requires no real token. It is useful for
-autocomplete and type inspection; run real API calls only with your own token
-in a trusted local environment.
+The type-only example makes no requests and requires no real token. Open it to
+explore autocomplete and type inspection; run real API calls only with your own
+token in a trusted local environment.
+
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/fork/github/hackmdio/api-client/tree/master/nodejs?file=tests/types/playground.mts)

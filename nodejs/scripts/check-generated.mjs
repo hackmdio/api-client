@@ -30,7 +30,7 @@ async function manifest () {
 }
 
 const before = await manifest()
-const generation = spawnSync('pnpm', ['run', 'generate'], {
+const generation = spawnSync('pnpm', ['run', 'codegen'], {
   cwd: packageRoot,
   stdio: 'inherit',
 })

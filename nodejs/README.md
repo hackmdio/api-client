@@ -223,7 +223,10 @@ compatible aliases.
 
 The [API reference](https://hackmdio.github.io/api-client/) covers the existing
 `API` class and every raw operation and DTO. To explore autocomplete
-without a real token, open the [type-only StackBlitz example](https://stackblitz.com/fork/github/hackmdio/api-client/tree/master/nodejs?file=tests/types/playground.mts).
+without a real token, open the type-only example:
+
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/fork/github/hackmdio/api-client/tree/master/nodejs?file=tests/types/playground.mts)
+
 The Pages site is deployed from `master` only.
 
 Run `pnpm docs:dev` from `nodejs` and open `http://127.0.0.1:3000` to preview
@@ -237,7 +240,7 @@ Generation requires Node.js 22.18 or newer.
 
 ```bash
 pnpm spec:pull
-pnpm generate
+pnpm codegen
 pnpm check:generated
 ```
 

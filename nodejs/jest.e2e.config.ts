@@ -6,6 +6,9 @@ const e2eJestConfig: JestConfigWithTsJest = {
   testEnvironment: "node",
   transformIgnorePatterns: ["<rootDir>/node_modules/"],
   extensionsToTreatAsEsm: [".ts"],
+  moduleNameMapper: {
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+  },
   setupFiles: ["dotenv/config"],
   testMatch: ["<rootDir>/tests/e2e/**/*.spec.ts"],
   testTimeout: 60_000,

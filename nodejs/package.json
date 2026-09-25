@@ -32,9 +32,9 @@
   "scripts": {
     "clean": "rimraf dist",
     "build": "pnpm run clean && rollup -c && pnpm check:node-types",
-    "generate": "openapi-ts",
+    "codegen": "openapi-ts",
     "check:generated": "node scripts/check-generated.mjs",
-    "check:node-types": "tsc --noEmit --strict --module NodeNext tests/types/raw.mts tests/types/raw.cts tests/types/playground.mts",
+    "check:node-types": "tsc -p tests/types/tsconfig.json",
     "docs:build": "typedoc",
     "docs:dev": "pnpm docs:build && serve .docs-dist --listen tcp://127.0.0.1:3000",
     "typecheck": "tsc --noEmit -p tsconfig.json",
