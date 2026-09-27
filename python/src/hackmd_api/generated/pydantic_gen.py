@@ -431,7 +431,7 @@ class TeamVisibilityType(str, Enum):
 class Team(BaseModel):
     model_config = ConfigDict(populate_by_name=True, extra="forbid")
     id: str
-    owner_id: str = Field(..., alias="ownerId")
+    owner_id: Optional[str] = Field(default=None, alias="ownerId")
     name: str
     logo: str
     path: str

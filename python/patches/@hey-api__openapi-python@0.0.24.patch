@@ -1,5 +1,5 @@
 diff --git a/dist/clients/httpx/client.py b/dist/clients/httpx/client.py
-index 2980b579df301513f3a9940b4a1af66946e27bb3..e1e786192c118d0e9a02923b6cbcb2ce95f89ef7 100644
+index 2980b579df301513f3a9940b4a1af66946e27bb3..acf8110e65dd62bc9bd276b0daf0a706fdb7b9bc 100644
 --- a/dist/clients/httpx/client.py
 +++ b/dist/clients/httpx/client.py
 @@ -1,6 +1,7 @@
@@ -43,7 +43,7 @@ index 2980b579df301513f3a9940b4a1af66946e27bb3..e1e786192c118d0e9a02923b6cbcb2ce
              del result[slot]
  
      return result
-@@ -86,6 +87,25 @@ class BaseClient:
+@@ -86,6 +87,29 @@ class BaseClient:
          """Make an HTTP request."""
          return self._client.request(method, url, **kwargs)
  
@@ -52,17 +52,21 @@ index 2980b579df301513f3a9940b4a1af66946e27bb3..e1e786192c118d0e9a02923b6cbcb2ce
 +        method: str,
 +        url: str,
 +        options: Optional[dict[str, Any]] = None,
++        overrides: Optional[dict[str, Any]] = None,
 +        **kwargs,
 +    ) -> httpx.Response:
 +        """Make an HTTP request."""
 +        request_options = dict(options or {})
++        request_options.update(overrides or {})
++        if "files" in request_options or "content" in request_options:
++            request_options.pop("json", None)
 +        path = request_options.pop("path", {})
 +        for key, value in path.items():
 +            url = url.replace(f"{{{key}}}", quote(str(value), safe=""))
 +
 +        body = request_options.get("json")
 +        if hasattr(body, "model_dump"):
-+            request_options["json"] = body.model_dump(mode="json", by_alias=True)
++            request_options["json"] = body.model_dump(mode="json", by_alias=True, exclude_unset=True)
 +
 +        return self.request(method, url, **request_options, **kwargs)
 +
@@ -70,7 +74,7 @@ index 2980b579df301513f3a9940b4a1af66946e27bb3..e1e786192c118d0e9a02923b6cbcb2ce
          """Make a GET request."""
          return self._client.get(url, **kwargs)
 diff --git a/dist/src-DaXm5pxY.mjs b/dist/src-DaXm5pxY.mjs
-index e4cdd77904daa50dc220b0abaa4ebb390e34ecff..7b024dd366c0384d4f3b5a4cf8ab55cbbf74f0a1 100644
+index e4cdd77904daa50dc220b0abaa4ebb390e34ecff..175e17904bb0425037f3f44d8f86a874f3b7a08d 100644
 --- a/dist/src-DaXm5pxY.mjs
 +++ b/dist/src-DaXm5pxY.mjs
 @@ -4290,7 +4290,7 @@ function implementFn(args) {
@@ -78,7 +82,7 @@ index e4cdd77904daa50dc220b0abaa4ebb390e34ecff..7b024dd366c0384d4f3b5a4cf8ab55cb
  			fieldsList.element(fieldDict);
  		}
 -		return node.params(...opParameters.parameters).do($$1.var("params").assign($$1(plugin.imports.buildClientParams).call(fieldsList, ...paramNames.map((name) => $$1.kwarg(name, name))))).do($$1("self").attr("client").attr(method).call($$1.literal(operation.path), $$1.kwarg("params", $$1("params"))).return());
-+		return node.params(...opParameters.parameters).do($$1.var("params").assign($$1(plugin.imports.buildClientParams).call(fieldsList, ...paramNames.map((name) => $$1.kwarg(name, $$1(name)))))).do($$1("self").attr("request_options").call($$1.literal(method), $$1.literal(operation.path), $$1("params")).return());
++		return node.params(...opParameters.parameters, $$1.param("request_overrides").type($$1.type.or($$1("dict").slice("str", plugin.imports.typing.Any), "None")).default("None")).do($$1.var("params").assign($$1(plugin.imports.buildClientParams).call(fieldsList, ...paramNames.map((name) => $$1.kwarg(name, $$1(name)))))).do($$1("self").attr("request_options").call($$1.literal(method), $$1.literal(operation.path), $$1("params"), $$1("request_overrides")).return());
  	}
  	return node.params(...opParameters.parameters).do($$1("self").attr("client").attr(method).call($$1.literal(operation.path)).return());
  }
