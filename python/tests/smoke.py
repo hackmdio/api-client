@@ -86,7 +86,7 @@ class GeneratedClientSmokeTest(unittest.TestCase):
         request = self.requests[0]
         self.assertEqual(request.method, "POST")
         self.assertEqual(request.headers["Content-Type"], "application/json")
-        self.assertEqual(json.loads(request.content), body.model_dump(mode="json", by_alias=True))
+        self.assertEqual(json.loads(request.content), body.model_dump(mode="json", by_alias=True, exclude_unset=True))
         self.assertEqual(json.loads(request.content)["parentFolderId"], "folder-1")
         self.assertEqual(response.status_code, 207)
         self.assertEqual(response.json(), result)

@@ -94,17 +94,21 @@ class BaseClient:
         method: str,
         url: str,
         options: Optional[dict[str, Any]] = None,
+        overrides: Optional[dict[str, Any]] = None,
         **kwargs,
     ) -> httpx.Response:
         """Make an HTTP request."""
         request_options = dict(options or {})
+        request_options.update(overrides or {})
+        if "files" in request_options or "content" in request_options:
+            request_options.pop("json", None)
         path = request_options.pop("path", {})
         for key, value in path.items():
             url = url.replace(f"{{{key}}}", quote(str(value), safe=""))
 
         body = request_options.get("json")
         if hasattr(body, "model_dump"):
-            request_options["json"] = body.model_dump(mode="json", by_alias=True)
+            request_options["json"] = body.model_dump(mode="json", by_alias=True, exclude_unset=True)
 
         return self.request(method, url, **request_options, **kwargs)
 
