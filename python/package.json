@@ -7,7 +7,8 @@
     "codegen": "openapi-python",
     "check:generated": "node scripts/check-generated.mjs",
     "check": "python3 -m compileall -q src/hackmd_api",
-    "test": "uv run --frozen python tests/smoke.py"
+    "test": "uv run --frozen python -m unittest discover -s tests -p '*.py'",
+    "test:e2e": "uv run --frozen --env-file ../nodejs/.env python tests/e2e/live.py"
   },
   "devDependencies": {
     "@hey-api/openapi-python": "0.0.24"
