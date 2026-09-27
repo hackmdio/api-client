@@ -49,7 +49,7 @@ pnpm test                   # offline tests; no token needed
 
 The custom layer lives in `src/hackmd_api/api.py`. Commit generated files under `src/hackmd_api/generated/`; never edit them by hand. Use these scripts rather than `npx` so the temporary [generator patch](./patches/README.md) is applied.
 
-Python CI runs generation checks, compilation, and offline tests on Python 3.10 and 3.13. It does not run live tests.
+Python CI runs generation checks, compilation, and offline tests on Python 3.13. It does not run live tests.
 
 ## Live E2E
 
