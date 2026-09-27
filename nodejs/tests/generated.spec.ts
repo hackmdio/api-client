@@ -53,6 +53,12 @@ describe('generated raw API', () => {
     }
   })
 
+  test('team ownerId is required but nullable in the shared spec', () => {
+    const team = openApiDocument.components.schemas.Team
+    expect(team.required).toContain('ownerId')
+    expect(team.properties.ownerId).toEqual({ type: 'string', nullable: true })
+  })
+
   test('keeps the existing runtime enum values', () => {
     expect(TeamVisibilityType).toEqual({ PUBLIC: 'public', PRIVATE: 'private' })
     expect(NotePublishType).toEqual({ EDIT: 'edit', VIEW: 'view', SLIDE: 'slide', BOOK: 'book' })

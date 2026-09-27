@@ -280,7 +280,7 @@ export type TeamVisibilityType = 'public' | 'private';
 
 export type Team = {
     id: string;
-    ownerId: string;
+    ownerId: string | null;
     name: string;
     logo: string;
     path: string;

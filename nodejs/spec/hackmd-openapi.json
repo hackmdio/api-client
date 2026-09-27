@@ -1051,7 +1051,8 @@
 						"type": "string"
 					},
 					"ownerId": {
-						"type": "string"
+						"type": "string",
+						"nullable": true
 					},
 					"name": {
 						"type": "string"

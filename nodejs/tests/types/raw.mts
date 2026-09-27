@@ -1,4 +1,11 @@
 import { createClient, getNote } from '@hackmd/api/raw'
+import type { Team } from '@hackmd/api/raw'
+
+const ownerlessTeam: Pick<Team, 'ownerId'> = { ownerId: null }
+const ownedTeam: Pick<Team, 'ownerId'> = { ownerId: 'user-id' }
+// @ts-expect-error ownerId is nullable, not optional.
+const missingOwner: Pick<Team, 'ownerId'> = {}
+void [ownerlessTeam, ownedTeam, missingOwner]
 
 const client = createClient({
   auth: 'test-token',
