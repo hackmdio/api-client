@@ -1,0 +1,96 @@
+diff --git a/dist/clients/httpx/client.py b/dist/clients/httpx/client.py
+index 2980b579df301513f3a9940b4a1af66946e27bb3..e1e786192c118d0e9a02923b6cbcb2ce95f89ef7 100644
+--- a/dist/clients/httpx/client.py
++++ b/dist/clients/httpx/client.py
+@@ -1,6 +1,7 @@
+ from typing import Any, Optional
+-import httpx
++from urllib.parse import quote
+ 
++import httpx
+ 
+ EXTRA_PREFIXES_MAP = {
+     "$body_": "json",
+@@ -10,7 +11,7 @@ EXTRA_PREFIXES_MAP = {
+ }
+ 
+ 
+-def build_client_params(fields: list[dict[str, Any]], **kwargs) -> dict[str, Any]:
++def build_client_params(fields: list[dict[str, Any]], /, **kwargs) -> dict[str, Any]:
+     """Build client parameters from flat keyword arguments.
+ 
+     Args:
+@@ -40,9 +41,9 @@ def build_client_params(fields: list[dict[str, Any]], **kwargs) -> dict[str, Any
+         if field:
+             in_slot = field["in"]
+             map_key = field["map"]
+-            slot = "json" if in_slot == "body" else in_slot
++            slot = {"body": "json", "query": "params"}.get(in_slot, in_slot)
+ 
+-            if in_slot == "body":
++            if in_slot == "body" and map_key == "body":
+                 result[slot] = value
+             else:
+                 if slot not in result:
+@@ -61,8 +62,8 @@ def build_client_params(fields: list[dict[str, Any]], **kwargs) -> dict[str, Any
+                     result["params"] = {}
+                 result["params"][key] = value
+ 
+-    for slot in list(result.keys()):
+-        if not result[slot]:
++    for slot in ("headers", "params", "path"):
++        if slot in result and not result[slot]:
+             del result[slot]
+ 
+     return result
+@@ -86,6 +87,25 @@ class BaseClient:
+         """Make an HTTP request."""
+         return self._client.request(method, url, **kwargs)
+ 
++    def request_options(
++        self,
++        method: str,
++        url: str,
++        options: Optional[dict[str, Any]] = None,
++        **kwargs,
++    ) -> httpx.Response:
++        """Make an HTTP request."""
++        request_options = dict(options or {})
++        path = request_options.pop("path", {})
++        for key, value in path.items():
++            url = url.replace(f"{{{key}}}", quote(str(value), safe=""))
++
++        body = request_options.get("json")
++        if hasattr(body, "model_dump"):
++            request_options["json"] = body.model_dump(mode="json", by_alias=True)
++
++        return self.request(method, url, **request_options, **kwargs)
++
+     def get(self, url: str, **kwargs) -> httpx.Response:
+         """Make a GET request."""
+         return self._client.get(url, **kwargs)
+diff --git a/dist/src-DaXm5pxY.mjs b/dist/src-DaXm5pxY.mjs
+index e4cdd77904daa50dc220b0abaa4ebb390e34ecff..7b024dd366c0384d4f3b5a4cf8ab55cbbf74f0a1 100644
+--- a/dist/src-DaXm5pxY.mjs
++++ b/dist/src-DaXm5pxY.mjs
+@@ -4290,7 +4290,7 @@ function implementFn(args) {
+ 			if (field.map) fieldDict.entry($$1.literal("map"), $$1.literal(field.map));
+ 			fieldsList.element(fieldDict);
+ 		}
+-		return node.params(...opParameters.parameters).do($$1.var("params").assign($$1(plugin.imports.buildClientParams).call(fieldsList, ...paramNames.map((name) => $$1.kwarg(name, name))))).do($$1("self").attr("client").attr(method).call($$1.literal(operation.path), $$1.kwarg("params", $$1("params"))).return());
++		return node.params(...opParameters.parameters).do($$1.var("params").assign($$1(plugin.imports.buildClientParams).call(fieldsList, ...paramNames.map((name) => $$1.kwarg(name, $$1(name)))))).do($$1("self").attr("request_options").call($$1.literal(method), $$1.literal(operation.path), $$1("params")).return());
+ 	}
+ 	return node.params(...opParameters.parameters).do($$1("self").attr("client").attr(method).call($$1.literal(operation.path)).return());
+ }
+@@ -5245,8 +5245,9 @@ function booleanToType({ path, plugin, schema }) {
+ //#region src/plugins/pydantic/v2/toAst/enum.ts
+ function toEnumMemberName(value) {
+ 	if (typeof value === "boolean") return toCase(String(value), "SCREAMING_SNAKE_CASE");
+-	if (typeof value === "number") return `VALUE_${value}`.replace(/-/g, "_NEG_").replace(/\./g, "_DOT_");
+-	return toCase(value, "SCREAMING_SNAKE_CASE");
++	if (typeof value === "number") return safeRuntimeName(`VALUE_${value}`.replace(/-/g, "_NEG_").replace(/\./g, "_DOT_"));
++	const name = toCase(value, "SCREAMING_SNAKE_CASE");
++	return safeRuntimeName(/^[A-Z_]/.test(name) ? name : `VALUE_${name || "EMPTY"}`);
+ }
+ function itemsNode(ctx) {
+ 	const { plugin, schema } = ctx;
