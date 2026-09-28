@@ -1326,7 +1326,7 @@ export type GetNoteResponse = GetNoteResponses[keyof GetNoteResponses];
 
 export type UpdateNoteData = {
     /**
-     * The properties to update on the note.
+     * The properties to update on the note. Omit description to leave it unchanged, use a string (including an empty string) to set it, or null to remove its metadata.
      */
     body: {
         parentFolderId?: string | null;
@@ -1334,7 +1334,7 @@ export type UpdateNoteData = {
         writePermission?: NotePermissionRole;
         readPermission?: NotePermissionRole;
         content?: string;
-        description?: string;
+        description?: string | null;
         tags?: Array<string>;
         title?: string;
     };
@@ -1771,7 +1771,7 @@ export type GetTeamNoteResponse = GetTeamNoteResponses[keyof GetTeamNoteResponse
 
 export type UpdateTeamNoteData = {
     /**
-     * The properties to update on the team note (e.g., content, permissions, permalink, parentFolderId).
+     * The properties to update on the team note. Omit description to leave it unchanged, use a string (including an empty string) to set it, or null to remove its metadata.
      */
     body: {
         parentFolderId?: string | null;
@@ -1779,7 +1779,7 @@ export type UpdateTeamNoteData = {
         writePermission?: NotePermissionRole;
         readPermission?: NotePermissionRole;
         content?: string;
-        description?: string;
+        description?: string | null;
         tags?: Array<string>;
         title?: string;
     };

@@ -610,6 +610,22 @@ test('updateNote keeps the legacy status/etag wrapper and raw response', async (
   expect(requests).toEqual([JSON.stringify(payload), JSON.stringify(payload)])
 })
 
+test('personal and team note updates preserve null descriptions', async () => {
+  const requests: unknown[] = []
+  const record = async ({ request }: { request: Request }) => {
+    requests.push(await request.json())
+    return new HttpResponse(null, { status: 202 })
+  }
+  server.use(
+    http.patch('https://api.hackmd.io/v1/notes/test-note-id', record),
+    http.patch('https://api.hackmd.io/v1/teams/test-team/notes/test-note-id', record)
+  )
+
+  expect((await client.updateNote('test-note-id', { description: null })).status).toBe(202)
+  expect((await client.updateTeamNote('test-team', 'test-note-id', { description: null })).status).toBe(202)
+  expect(requests).toEqual([{ description: null }, { description: null }])
+})
+
 test('updateTeamNoteContent keeps the team path and raw response', async () => {
   let requestBody: unknown
   server.use(

@@ -89,12 +89,12 @@ async function exploreFolderWrites (client: API): Promise<void> {
 }
 
 async function exploreNoteMutations (client: API): Promise<void> {
-  const updated = await client.updateNote('NOTE_ID', { description: 'Updated', parentFolderId: null })
+  const updated = await client.updateNote('NOTE_ID', { description: null, parentFolderId: null })
   const status: 202 = updated.status
   const raw = await client.updateNoteContent('NOTE_ID', 'Updated', { unwrapData: false })
   const rawStatus: 202 = raw.status
   const deleted: void = await client.deleteNote('NOTE_ID')
-  const teamUpdated = await client.updateTeamNote('TEAM_PATH', 'NOTE_ID', { title: 'Updated' })
+  const teamUpdated = await client.updateTeamNote('TEAM_PATH', 'NOTE_ID', { title: 'Updated', description: null })
   const teamContentUpdated = await client.updateTeamNoteContent('TEAM_PATH', 'NOTE_ID', 'Updated')
   const teamDeleted = await client.deleteTeamNote('TEAM_PATH', 'NOTE_ID')
   const teamUpdateStatus: 202 = teamUpdated.status
