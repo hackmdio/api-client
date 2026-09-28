@@ -91,6 +91,19 @@ class GeneratedClientSmokeTest(unittest.TestCase):
         self.assertEqual(response.status_code, 207)
         self.assertEqual(response.json(), result)
 
+    def test_team_note_description_omitted_string_and_null(self):
+        self.response = httpx.Response(202)
+        for fields in [{}, {"description": "Changed"}, {"description": ""}, {"description": None}]:
+            with self.subTest(fields=fields):
+                body = models.UpdateTeamNoteBody.model_validate(fields)
+                response = self.sdk.update_team_note(
+                    teampath="docs", noteId="note-1", request_overrides={"json": body},
+                )
+                self.assertEqual(self.requests[-1].method, "PATCH")
+                self.assertEqual(self.requests[-1].url.path, "/custom/v1/teams/docs/notes/note-1")
+                self.assertEqual(json.loads(self.requests[-1].content), fields)
+                self.assertEqual(response.status_code, 202)
+
     def test_no_content_conditional_request_and_error_response(self):
         self.response = httpx.Response(204)
         response = self.sdk.delete_note(noteId="note-1")

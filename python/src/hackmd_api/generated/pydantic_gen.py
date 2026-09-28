@@ -1158,7 +1158,7 @@ class GetNoteResponse(RootModel[SingleNote]):
 
 
 class UpdateNoteBody(BaseModel):
-    """The properties to update on the note."""
+    """The properties to update on the note. Omit description to leave it unchanged, use a string (including an empty string) to set it, or null to remove its metadata."""
 
     parent_folder_id: Optional[str] = Field(default=None, alias="parentFolderId")
     permalink: Optional[str] = None
@@ -1328,7 +1328,7 @@ class GetTeamNoteResponse(RootModel[SingleNote]):
 
 
 class UpdateTeamNoteBody(BaseModel):
-    """The properties to update on the team note (e.g., content, permissions, permalink, parentFolderId)."""
+    """The properties to update on the team note. Omit description to leave it unchanged, use a string (including an empty string) to set it, or null to remove its metadata."""
 
     parent_folder_id: Optional[str] = Field(default=None, alias="parentFolderId")
     permalink: Optional[str] = None

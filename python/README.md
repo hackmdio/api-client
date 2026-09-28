@@ -37,6 +37,7 @@ with API(os.environ["HACKMD_ACCESS_TOKEN"]) as api:
 - Set `base_url` for a custom server or `retries=0` to disable retries. Only reads, PUT, and DELETE retry network errors, 429, or 5xx; POST/PATCH never retry.
 - HTTP failures raise `HttpResponseError`. Raw operations do not parse responses, retry, or automatically raise HTTP errors.
 - Use the exported `models` for request bodies. A create-note 207 returns `CreateNoteMultiStatusResponse`: the note was created, so do not retry creation.
+- Clear a note description with `api.update_note(note_id, models.UpdateNoteBody(description=None))`; omitting the field leaves it unchanged.
 
 ## Development
 

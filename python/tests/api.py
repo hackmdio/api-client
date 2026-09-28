@@ -79,6 +79,16 @@ class APITest(unittest.TestCase):
         self.api.update_folder("folder-1", models.UpdateUserFolderBody.model_validate({"description": None}))
         self.assertEqual(json.loads(self.requests[-1].content), {"description": None})
 
+    def test_note_description_omitted_string_and_null(self):
+        for fields in [{}, {"description": "Changed"}, {"description": ""}, {"description": None}]:
+            with self.subTest(fields=fields):
+                self.respond(202)
+                body = models.UpdateNoteBody.model_validate(fields)
+                self.assertIsNone(self.api.update_note("note-1", body))
+                self.assertEqual(json.loads(self.requests[-1].content), fields)
+        with self.assertRaises(ValidationError):
+            models.SingleNote.model_validate({**NOTE, "description": None})
+
     def test_multipart_is_bytes_not_json(self):
         self.respond(201, {"data": {"link": "https://example.test/image.png"}})
         result = self.api.upload_note_image("note-1", b"\x89PNG\x00\xff", filename="test.png")
