@@ -62,6 +62,12 @@ class GeneratedClientSmokeTest(unittest.TestCase):
         self.assertIsInstance(response, httpx.Response)
         self.assertEqual(response.json(), {"content": "hello"})
 
+    def test_conditional_note_header_keeps_its_wire_name(self):
+        self.sdk.get_note(noteId="note-1", If_None_Match='W/"cached"')
+        self.assertEqual(self.requests[-1].headers["If-None-Match"], 'W/"cached"')
+        self.sdk.get_team_note(teampath="docs", noteId="note-1", If_None_Match='W/"team"')
+        self.assertEqual(self.requests[-1].headers["If-None-Match"], 'W/"team"')
+
     def test_team_path_and_query(self):
         self.sdk.get_team_note(teampath="docs", noteId="note-1")
         self.assertEqual(self.requests[-1].url.path, "/custom/v1/teams/docs/notes/note-1")

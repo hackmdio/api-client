@@ -77,6 +77,15 @@ diff --git a/dist/src-DaXm5pxY.mjs b/dist/src-DaXm5pxY.mjs
 index e4cdd77904daa50dc220b0abaa4ebb390e34ecff..175e17904bb0425037f3f44d8f86a874f3b7a08d 100644
 --- a/dist/src-DaXm5pxY.mjs
 +++ b/dist/src-DaXm5pxY.mjs
+@@ -4102,7 +4102,7 @@ function getSignatureParameters({ operation }) {
+ 		if (parameters) for (const key in parameters) {
+ 			const parameter = parameters[key];
+ 			const originalName = parameter.name;
+-			const name = conflicts.has(originalName) ? `${location}_${originalName}` : originalName;
++			const name = safeRuntimeName(conflicts.has(originalName) ? `${location}_${originalName}` : originalName);
+ 			const signatureParameter = {
+ 				in: location,
+ 				isRequired: parameter.required ?? false,
 @@ -4290,7 +4290,7 @@ function implementFn(args) {
  			if (field.map) fieldDict.entry($$1.literal("map"), $$1.literal(field.map));
  			fieldsList.element(fieldDict);
