@@ -110,6 +110,10 @@ describe('HackMD API (live e2e)', () => {
           tags: ['e2e'],
         })
 
+        if (created.status === 207) {
+          noteId = created.note.id
+          throw new Error(`Note created, but folder placement failed: ${created.error}`)
+        }
         expect(created.id).toEqual(expect.any(String))
         expect(created.title).toBe(title)
         expect(created.tags).toContain('e2e')
@@ -131,11 +135,7 @@ describe('HackMD API (live e2e)', () => {
           tags: ['e2e', 'updated'],
         }, { unwrapData: false })
 
-        expect([200, 202]).toContain(patch.status)
-        const patchedBody = patch.data as { content?: string }
-        if (typeof patchedBody.content === 'string' && patchedBody.content.length > 0) {
-          expect(patchedBody.content).toContain('patched')
-        }
+        expect(patch.status).toBe(202)
 
         const n = await client.getNote(noteId)
         expect(n.title).toBe(title)

@@ -87,6 +87,7 @@ const client = new HackMDAPI('YOUR_ACCESS_TOKEN', 'https://api.hackmd.io/v1', {
 ```
 
 The client will automatically retry requests that fail with:
+
 - 5xx server errors
 - 429 Too Many Requests errors
 - Network errors
@@ -105,16 +106,28 @@ const data = await client.getMe({ unwrapData: true })
 
 ### ETag Support
 
-The client supports ETag-based caching for note retrieval. You can pass an ETag to check if the content has changed:
+The client can send an ETag to check whether a note changed. The server
+generates the ETag and decides whether to return 304; the client does not cache
+the note body for you:
 
 ```javascript
-// First request
-const note = await client.getNote('note-id')
-const etag = note.etag
+const first = await client.getNote('note-id', { unwrapData: false })
+const response = await client.getNote('note-id', {
+  etag: first.headers.etag,
+  unwrapData: false,
+})
+// 304 has no body; keep first.data. Otherwise, use response.data.
+const note = response.status === 304 ? first.data : response.data
+```
 
-// Subsequent request with ETag
-const updatedNote = await client.getNote('note-id', { etag })
-// If the note hasn't changed, the response will have status 304
+Team notes work the same way through the existing client:
+
+```javascript
+const teamFirst = await client.getTeamNote('team-path', 'note-id')
+const teamResponse = await client.getTeamNote('team-path', 'note-id', {
+  etag: teamFirst.etag,
+})
+const teamNote = teamResponse.status === 304 ? teamFirst : teamResponse
 ```
 
 ### Image Upload
@@ -134,20 +147,117 @@ const uploadedFromNode = await client.uploadNoteImage('note-id', image, {
 console.log(uploadedFromNode.data.link)
 ```
 
+### Webhooks
+
+Manage personal or team webhooks through the same `API` client. Save the secret
+returned by `createWebhook` when you create a webhook; later reads do not return it.
+
+```javascript
+const webhook = await client.createWebhook({
+  scope: { type: 'workspace' },
+  url: 'https://example.com/webhook',
+})
+console.log(webhook.secret)
+
+const teamWebhooks = await client.listTeamWebhooks('team-path')
+```
+
+`listWebhookDeliveries('hook-id', { page: 1, limit: 20 })` returns delivery data
+and pagination metadata. `exportWebhookDeliveries('hook-id')` returns
+newline-delimited JSON as a string; parse the lines yourself if needed.
+
+### Trash
+
+Use `listTrash()` or `listTeamTrash('team-path')` to find deleted notes.
+`restoreNote('note-id')` restores one note; `batchRestore({ noteIds })` reports
+success or failure for each note. Pass `{ unwrapData: false }` to inspect the
+batch HTTP status (200 or 207).
+
+### Versions
+
+`listVersions('note-id', { named_only: true, page: 1, limit: 20 })` lists saved
+versions. Use `getVersion('note-id', versionId)` for content, or
+`compareVersions('note-id', { base: 'version:<id>', target: 'note_content' })`
+to compare it with the live note. `createVersion` and `updateVersion` accept the
+corresponding OpenAPI request bodies.
+
+### Comments
+
+Use `listNoteComments('note-id', { page: 1, limit: 20, threadStatus: 'open' })`
+to browse comments. `getNoteComment('note-id', commentId)` reads one comment;
+`resolveNoteComment` and `unresolveNoteComment` return the updated comment and
+any affected thread.
+
+### Generated Raw API
+
+The `@hackmd/api/raw` entry point exposes every OpenAPI operation as a generated,
+one-to-one function. Create a client to share authentication and the API endpoint:
+
+```typescript
+import { createClient, getNote } from '@hackmd/api/raw'
+
+const client = createClient({
+  auth: 'YOUR_ACCESS_TOKEN',
+  baseURL: 'https://api.hackmd.io/v1',
+})
+
+const response = await getNote({
+  client,
+  path: { noteId: 'NOTE_ID' },
+  throwOnError: true,
+})
+
+console.log(response.data.content)
+```
+
+The package root retains the existing `API` class. Files under
+`src/generated` are generated from the vendored OpenAPI document and must not
+be edited manually.
+
+On `API`, `listNotes`, `listFolders`, `listTeamNotes`, `listTeamFolders`, and
+`listTeams` match the OpenAPI operation names. Existing `getNoteList`,
+`getFolderList`, `getTeamNotes`, `getTeamFolderList`, and `getTeams` remain
+compatible aliases.
+
 ## API
 
-See the [code](./src/index.ts) and [typings](./src/type.ts). The API client is written in TypeScript, so you can get auto-completion and type checking in any TypeScript Language Server powered editor or IDE.
+The [API reference](https://hackmdio.github.io/api-client/) covers the existing
+`API` class and every raw operation and DTO. To explore autocomplete
+without a real token, open the type-only example:
+
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/fork/github/hackmdio/api-client/tree/master/nodejs?file=tests/types/playground.mts)
+
+The Pages site is deployed from `master` only.
+
+Run `pnpm docs:dev` from `nodejs` and open `http://127.0.0.1:3000` to preview
+the reference locally. It builds the HTML once before serving; rerun the
+command after changing source or docs. The output in `.docs-dist` is not
+committed.
+
+## Regenerating the raw client
+
+Generation requires Node.js 22.18 or newer.
+
+```bash
+pnpm spec:pull
+pnpm codegen
+pnpm check:generated
+```
+
+The OpenAPI document is committed at `spec/hackmd-openapi.json`, and generated
+sources are committed under `src/generated` so package builds remain offline and
+deterministic.
 
 ## E2E tests (live API)
 
 Integration tests call a real HackMD API (staging or production). They are **not** run by `pnpm test` or the default CI job.
 
-**Requirements**
+## Requirements
 
 - `HACKMD_ACCESS_TOKEN` — a valid personal access token for the environment you target.
 - Optional: `HACKMD_API_ENDPOINT` — defaults to `https://api.hackmd.io/v1`. For staging, use `https://api-stage.hackmd.io/v1`.
 
-**Read-only (default e2e)**
+## Read-only (default e2e)
 
 ```bash
 cd nodejs
@@ -156,7 +266,7 @@ export HACKMD_API_ENDPOINT=https://api-stage.hackmd.io/v1   # optional
 pnpm test:e2e
 ```
 
-**With CRUD / mutations**
+## With CRUD / mutations
 
 Set `HACKMD_E2E_MUTATIONS=1` to run write tests against your account:
 
