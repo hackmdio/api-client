@@ -7,6 +7,40 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 
+class ApiRequestErrorResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    message: str
+
+
+class ApiErrorResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    error: str
+
+
+class ApiQuotaErrorResponseErrorCode(str, Enum):
+    QUOTA_EXCEEDED = "quota_exceeded"
+
+
+class ApiQuotaErrorResponseError(BaseModel):
+    upgrade_url: str = Field(..., alias="upgradeUrl")
+    help_url: str = Field(..., alias="helpUrl")
+    message: str
+    code: ApiQuotaErrorResponseErrorCode
+
+
+class ApiQuotaErrorResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    error: ApiQuotaErrorResponseError
+
+
+class ApiRateLimitErrorResponse(RootModel[Union[ApiErrorResponse, ApiQuotaErrorResponse]]):
+    root: Union[ApiErrorResponse, ApiQuotaErrorResponse]
+
+
+class ApiServerErrorResponse(RootModel[Union[ApiErrorResponse, ApiRequestErrorResponse]]):
+    root: Union[ApiErrorResponse, ApiRequestErrorResponse]
+
+
 class ApiWebhookScopeType(str, Enum):
     WORKSPACE = "workspace"
 
@@ -268,24 +302,14 @@ class SingleNote(BaseModel):
     content: str
 
 
-class ApiErrorResponse(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    error: str
+class ApiBadRequestResponse(RootModel[Union[ApiErrorResponse, ApiRequestErrorResponse]]):
+    root: Union[ApiErrorResponse, ApiRequestErrorResponse]
 
 
 class CreateNoteMultiStatusResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
     note: SingleNote
     error: str
-
-
-class ApiRequestErrorResponse(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    message: str
-
-
-class ApiBadRequestResponse(RootModel[Union[ApiErrorResponse, ApiRequestErrorResponse]]):
-    root: Union[ApiErrorResponse, ApiRequestErrorResponse]
 
 
 class CommentPermissionType(str, Enum):
@@ -1149,6 +1173,10 @@ class DeleteNoteResponse(RootModel[None]):
     root: None
 
 
+class GetNoteHeaders(BaseModel):
+    if_none_match: Optional[str] = Field(default=None, alias="If-None-Match", description="Return 304 when this ETag matches the current note.")
+
+
 class GetNotePath(BaseModel):
     note_id: str = Field(..., alias="noteId", description="The ID of the note to retrieve.")
 
@@ -1316,6 +1344,10 @@ class DeleteTeamNoteResponse(RootModel[None]):
     """No content"""
 
     root: None
+
+
+class GetTeamNoteHeaders(BaseModel):
+    if_none_match: Optional[str] = Field(default=None, alias="If-None-Match", description="Return 304 when this ETag matches the current note.")
 
 
 class GetTeamNotePath(BaseModel):

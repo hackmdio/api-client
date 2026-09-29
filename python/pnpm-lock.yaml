@@ -6,7 +6,7 @@ settings:
 
 patchedDependencies:
   '@hey-api/openapi-python@0.0.24':
-    hash: 40dd7e88947df8f6d2c67034e45c96a1ad1311b91a94acd8f9d2769c4bb1dc96
+    hash: 114fd4e94fe33389adc54efd02dc8b17fcc9846ecd01c9c61e7b486357d6972d
     path: patches/@hey-api__openapi-python@0.0.24.patch
 
 importers:
@@ -15,7 +15,7 @@ importers:
     devDependencies:
       '@hey-api/openapi-python':
         specifier: 0.0.24
-        version: 0.0.24(patch_hash=40dd7e88947df8f6d2c67034e45c96a1ad1311b91a94acd8f9d2769c4bb1dc96)
+        version: 0.0.24(patch_hash=114fd4e94fe33389adc54efd02dc8b17fcc9846ecd01c9c61e7b486357d6972d)
 
 packages:
 
@@ -225,7 +225,7 @@ snapshots:
       '@types/json-schema': 7.0.15
       js-yaml: 4.2.0
 
-  '@hey-api/openapi-python@0.0.24(patch_hash=40dd7e88947df8f6d2c67034e45c96a1ad1311b91a94acd8f9d2769c4bb1dc96)':
+  '@hey-api/openapi-python@0.0.24(patch_hash=114fd4e94fe33389adc54efd02dc8b17fcc9846ecd01c9c61e7b486357d6972d)':
     dependencies:
       '@hey-api/codegen-core': 0.9.1
       '@hey-api/json-schema-ref-parser': 1.4.4

@@ -199,10 +199,15 @@ class Sdk(Client):
         params = build_client_params([{"in": "path", "key": "noteId"}], noteId=noteId)
         return self.request_options("delete", "/notes/{noteId}", params, request_overrides)
 
-    def get_note(self, noteId: str, request_overrides: Optional[dict[str, Any]] = None):
+    def get_note(
+        self,
+        noteId: str,
+        If_None_Match: Optional[str] = None,
+        request_overrides: Optional[dict[str, Any]] = None,
+    ):
         """Get a single note for the current user (or team note if accessible)"""
 
-        params = build_client_params([{"in": "path", "key": "noteId"}], noteId=noteId)
+        params = build_client_params([{"in": "headers", "key": "If_None_Match", "map": "If-None-Match"}, {"in": "path", "key": "noteId"}], noteId=noteId, If_None_Match=If_None_Match)
         return self.request_options("get", "/notes/{noteId}", params, request_overrides)
 
     def update_note(
@@ -330,11 +335,12 @@ class Sdk(Client):
         self,
         teampath: str,
         noteId: str,
+        If_None_Match: Optional[str] = None,
         request_overrides: Optional[dict[str, Any]] = None,
     ):
         """Get a single note for a team"""
 
-        params = build_client_params([{"in": "path", "key": "teampath"}, {"in": "path", "key": "noteId"}], teampath=teampath, noteId=noteId)
+        params = build_client_params([{"in": "headers", "key": "If_None_Match", "map": "If-None-Match"}, {"in": "path", "key": "teampath"}, {"in": "path", "key": "noteId"}], teampath=teampath, noteId=noteId, If_None_Match=If_None_Match)
         return self.request_options("get", "/teams/{teampath}/notes/{noteId}", params, request_overrides)
 
     def update_team_note(
