@@ -7,6 +7,86 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"ApiRequestErrorResponse": {
+				"properties": {
+					"message": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"message"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiErrorResponse": {
+				"properties": {
+					"error": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiQuotaErrorResponse": {
+				"properties": {
+					"error": {
+						"properties": {
+							"upgradeUrl": {
+								"type": "string"
+							},
+							"helpUrl": {
+								"type": "string"
+							},
+							"message": {
+								"type": "string"
+							},
+							"code": {
+								"type": "string",
+								"enum": [
+									"quota_exceeded"
+								],
+								"nullable": false
+							}
+						},
+						"required": [
+							"upgradeUrl",
+							"helpUrl",
+							"message",
+							"code"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"error"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ApiRateLimitErrorResponse": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ApiErrorResponse"
+					},
+					{
+						"$ref": "#/components/schemas/ApiQuotaErrorResponse"
+					}
+				]
+			},
+			"ApiServerErrorResponse": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ApiErrorResponse"
+					},
+					{
+						"$ref": "#/components/schemas/ApiRequestErrorResponse"
+					}
+				]
+			},
 			"ApiWebhookScope": {
 				"anyOf": [
 					{
@@ -709,17 +789,15 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"ApiErrorResponse": {
-				"properties": {
-					"error": {
-						"type": "string"
+			"ApiBadRequestResponse": {
+				"anyOf": [
+					{
+						"$ref": "#/components/schemas/ApiErrorResponse"
+					},
+					{
+						"$ref": "#/components/schemas/ApiRequestErrorResponse"
 					}
-				},
-				"required": [
-					"error"
-				],
-				"type": "object",
-				"additionalProperties": false
+				]
 			},
 			"CreateNoteMultiStatusResponse": {
 				"properties": {
@@ -736,28 +814,6 @@
 				],
 				"type": "object",
 				"additionalProperties": false
-			},
-			"ApiRequestErrorResponse": {
-				"properties": {
-					"message": {
-						"type": "string"
-					}
-				},
-				"required": [
-					"message"
-				],
-				"type": "object",
-				"additionalProperties": false
-			},
-			"ApiBadRequestResponse": {
-				"anyOf": [
-					{
-						"$ref": "#/components/schemas/ApiErrorResponse"
-					},
-					{
-						"$ref": "#/components/schemas/ApiRequestErrorResponse"
-					}
-				]
 			},
 			"CommentPermissionType": {
 				"enum": [
@@ -2461,6 +2517,46 @@
 								}
 							}
 						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
+								}
+							}
+						}
 					}
 				},
 				"description": "List webhooks in the current user's workspace.",
@@ -2507,7 +2603,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -2517,7 +2630,14 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										}
+									]
 								}
 							}
 						}
@@ -2537,7 +2657,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -2584,7 +2721,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -2594,7 +2748,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -2638,7 +2819,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -2648,7 +2846,14 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										}
+									]
 								}
 							}
 						}
@@ -2659,6 +2864,26 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -2705,7 +2930,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -2715,7 +2957,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -2754,7 +3023,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -2764,7 +3050,14 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										}
+									]
 								}
 							}
 						}
@@ -2774,7 +3067,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -2820,7 +3130,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -2830,7 +3157,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -2892,7 +3246,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -2902,7 +3273,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -2948,7 +3346,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -2958,7 +3373,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -3006,6 +3448,66 @@
 										"$ref": "#/components/schemas/ApiWebhook"
 									},
 									"type": "array"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -3064,7 +3566,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -3074,7 +3603,14 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										}
+									]
 								}
 							}
 						}
@@ -3094,7 +3630,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -3150,7 +3703,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -3160,7 +3740,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -3212,7 +3819,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -3222,7 +3856,14 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										}
+									]
 								}
 							}
 						}
@@ -3233,6 +3874,26 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -3287,7 +3948,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -3297,7 +3985,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -3344,7 +4059,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -3354,7 +4096,14 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										}
+									]
 								}
 							}
 						}
@@ -3364,7 +4113,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -3418,7 +4184,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -3428,7 +4221,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -3498,7 +4318,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -3508,7 +4355,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -3562,7 +4436,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -3572,7 +4473,34 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/WebhookApiErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/WebhookApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -3631,6 +4559,46 @@
 								}
 							}
 						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
+								}
+							}
+						}
 					}
 				},
 				"description": "List all notes for the current user",
@@ -3677,6 +4645,16 @@
 							}
 						}
 					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
 					"403": {
 						"description": "",
 						"content": {
@@ -3713,6 +4691,26 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -3823,6 +4821,26 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
 					"403": {
 						"description": "",
 						"content": {
@@ -3843,12 +4861,22 @@
 							}
 						}
 					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiErrorResponse"
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -3872,6 +4900,15 @@
 						"schema": {
 							"type": "string"
 						}
+					},
+					{
+						"description": "Return 304 when this ETag matches the current note.",
+						"in": "header",
+						"name": "If-None-Match",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
 					}
 				]
 			},
@@ -3883,6 +4920,16 @@
 					},
 					"400": {
 						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiBadRequestResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
 						"content": {
 							"application/json": {
 								"schema": {
@@ -3911,12 +4958,22 @@
 							}
 						}
 					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiErrorResponse"
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -3955,6 +5012,16 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ApiBadRequestResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -3999,12 +5066,22 @@
 							}
 						}
 					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiErrorResponse"
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -4091,6 +5168,46 @@
 								}
 							}
 						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
+								}
+							}
+						}
 					}
 				},
 				"description": "List all folders in the current user's workspace",
@@ -4127,6 +5244,16 @@
 							}
 						}
 					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
@@ -4147,12 +5274,22 @@
 							}
 						}
 					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiErrorResponse"
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -4195,6 +5332,46 @@
 								}
 							}
 						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
+								}
+							}
+						}
 					}
 				},
 				"description": "Get your personal folder ordering for this workspace (parent folder id or `root` → ordered child folder ids).\nUses the same folder UUIDs as    (not internal Yjs clientIds).",
@@ -4224,12 +5401,42 @@
 							}
 						}
 					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
 					"422": {
 						"description": "Validation failed",
 						"content": {
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -4276,6 +5483,16 @@
 						"content": {
 							"application/json": {
 								"schema": {
+									"$ref": "#/components/schemas/ApiBadRequestResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
 									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
@@ -4287,6 +5504,26 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -4329,6 +5566,16 @@
 							}
 						}
 					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
@@ -4349,12 +5596,22 @@
 							}
 						}
 					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiErrorResponse"
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -4404,6 +5661,16 @@
 						"content": {
 							"application/json": {
 								"schema": {
+									"$ref": "#/components/schemas/ApiBadRequestResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
 									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
@@ -4419,12 +5686,22 @@
 							}
 						}
 					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiErrorResponse"
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -4468,6 +5745,46 @@
 								}
 							}
 						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
+								}
+							}
+						}
 					}
 				},
 				"description": "List trashed notes in your personal workspace (same data as the internal trash API).",
@@ -4506,12 +5823,52 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -4546,6 +5903,26 @@
 					"204": {
 						"description": ""
 					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
 					"403": {
 						"description": "",
 						"content": {
@@ -4566,12 +5943,22 @@
 							}
 						}
 					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiErrorResponse"
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -4616,19 +6003,32 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
 					"403": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/ApiErrorResponse"
-										},
-										{
-											"type": "string"
-										}
-									]
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -4638,14 +6038,27 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"anyOf": [
-										{
-											"$ref": "#/components/schemas/ApiErrorResponse"
-										},
-										{
-											"type": "string"
-										}
-									]
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -4689,6 +6102,66 @@
 								}
 							}
 						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
+								}
+							}
+						}
 					}
 				},
 				"description": "List the teams for the current user",
@@ -4716,6 +6189,66 @@
 										"$ref": "#/components/schemas/NoteType"
 									},
 									"type": "array"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -4775,6 +6308,16 @@
 							}
 						}
 					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
 					"403": {
 						"description": "",
 						"content": {
@@ -4811,6 +6354,26 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -4931,6 +6494,26 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
 					"403": {
 						"description": "",
 						"content": {
@@ -4947,6 +6530,26 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -4979,6 +6582,15 @@
 						"schema": {
 							"type": "string"
 						}
+					},
+					{
+						"description": "Return 304 when this ETag matches the current note.",
+						"in": "header",
+						"name": "If-None-Match",
+						"required": false,
+						"schema": {
+							"type": "string"
+						}
 					}
 				]
 			},
@@ -4994,6 +6606,16 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ApiBadRequestResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -5038,12 +6660,22 @@
 							}
 						}
 					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiErrorResponse"
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -5133,6 +6765,16 @@
 						"content": {
 							"application/json": {
 								"schema": {
+									"$ref": "#/components/schemas/ApiBadRequestResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
 									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
@@ -5158,12 +6800,22 @@
 							}
 						}
 					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiErrorResponse"
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -5216,6 +6868,66 @@
 								}
 							}
 						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
+								}
+							}
+						}
 					}
 				},
 				"description": "List all folders in a team workspace",
@@ -5262,6 +6974,26 @@
 							}
 						}
 					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
@@ -5282,12 +7014,22 @@
 							}
 						}
 					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiErrorResponse"
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -5340,6 +7082,66 @@
 								}
 							}
 						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
+								}
+							}
+						}
 					}
 				},
 				"description": "Get your personal folder ordering for this team workspace (parent folder id or `root` → ordered child folder ids).\nUses the same folder UUIDs as    (not internal Yjs clientIds).",
@@ -5378,12 +7180,62 @@
 							}
 						}
 					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Not Found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
 					"422": {
 						"description": "Validation failed",
 						"content": {
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ApiValidationError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -5439,6 +7291,26 @@
 						"content": {
 							"application/json": {
 								"schema": {
+									"$ref": "#/components/schemas/ApiBadRequestResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
 									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
@@ -5450,6 +7322,26 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -5501,6 +7393,26 @@
 							}
 						}
 					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
 					"404": {
 						"description": "",
 						"content": {
@@ -5521,12 +7433,22 @@
 							}
 						}
 					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiErrorResponse"
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -5585,6 +7507,26 @@
 						"content": {
 							"application/json": {
 								"schema": {
+									"$ref": "#/components/schemas/ApiBadRequestResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"403": {
+						"description": "Forbidden",
+						"content": {
+							"application/json": {
+								"schema": {
 									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
@@ -5600,12 +7542,22 @@
 							}
 						}
 					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
 					"500": {
 						"description": "",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiErrorResponse"
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -5661,7 +7613,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiError"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ApiError"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -5682,6 +7651,26 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -5788,7 +7777,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiError"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ApiError"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -5837,6 +7843,26 @@
 											"name": "Release checkpoint"
 										}
 									}
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -5891,7 +7917,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiError"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ApiError"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -5931,6 +7974,26 @@
 											"version_id": "01234567-89ab-4def-8123-456789abcdef"
 										}
 									}
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -5987,7 +8050,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiError"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ApiError"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -6025,6 +8105,26 @@
 											"$ref": "#/components/schemas/ApiValidationError"
 										}
 									]
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -6084,6 +8184,26 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
 					"403": {
 						"description": "Forbidden",
 						"content": {
@@ -6100,6 +8220,26 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ApiError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -6164,7 +8304,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"type": "string"
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -6174,7 +8314,14 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ApiErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
 								}
 							}
 						}
@@ -6214,7 +8361,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -6279,7 +8443,24 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ApiCommentError"
+									"anyOf": [
+										{
+											"$ref": "#/components/schemas/ApiCommentError"
+										},
+										{
+											"$ref": "#/components/schemas/ApiRequestErrorResponse"
+										}
+									]
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
 								}
 							}
 						}
@@ -6300,6 +8481,26 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ApiCommentError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -6404,6 +8605,26 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
 					"403": {
 						"description": "Comments not readable",
 						"content": {
@@ -6420,6 +8641,26 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ApiCommentError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -6468,6 +8709,26 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
 					"403": {
 						"description": "Comment resolution forbidden",
 						"content": {
@@ -6494,6 +8755,26 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ApiCommentResolutionConflictError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -6540,6 +8821,26 @@
 							}
 						}
 					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
 					"403": {
 						"description": "Comment resolution forbidden",
 						"content": {
@@ -6566,6 +8867,26 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/ApiCommentResolutionConflictError"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}
@@ -6613,6 +8934,46 @@
 								}
 							}
 						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
+								}
+							}
+						}
 					}
 				},
 				"description": "Get the current user's profile",
@@ -6637,6 +8998,46 @@
 							"application/json": {
 								"schema": {
 									"$ref": "#/components/schemas/GetUserHistory"
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRequestErrorResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "Unauthorized",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiErrorResponse"
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "Rate limit or workspace quota exceeded",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiRateLimitErrorResponse"
+								}
+							}
+						}
+					},
+					"500": {
+						"description": "Internal Server Error",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ApiServerErrorResponse"
 								}
 							}
 						}

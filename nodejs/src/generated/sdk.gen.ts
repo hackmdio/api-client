@@ -2,7 +2,7 @@
 
 import { client } from './client.gen.js';
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client/index.js';
-import type { BatchRestoreData, BatchRestoreErrors, BatchRestoreResponses, CompareVersionsData, CompareVersionsErrors, CompareVersionsResponses, CreateFolderData, CreateFolderErrors, CreateFolderResponses, CreateNoteData, CreateNoteErrors, CreateNoteResponses, CreateTeamFolderData, CreateTeamFolderErrors, CreateTeamFolderResponses, CreateTeamNoteData, CreateTeamNoteErrors, CreateTeamNoteResponses, CreateTeamWebhookData, CreateTeamWebhookErrors, CreateTeamWebhookResponses, CreateVersionData, CreateVersionErrors, CreateVersionResponses, CreateWebhookData2, CreateWebhookErrors, CreateWebhookResponses, DeleteFolderData, DeleteFolderErrors, DeleteFolderResponses, DeleteNoteData, DeleteNoteErrors, DeleteNoteResponses, DeleteTeamFolderData, DeleteTeamFolderErrors, DeleteTeamFolderResponses, DeleteTeamNoteData, DeleteTeamNoteErrors, DeleteTeamNoteResponses, DeleteTeamWebhookData, DeleteTeamWebhookErrors, DeleteTeamWebhookResponses, DeleteWebhookData, DeleteWebhookErrors, DeleteWebhookResponses, ExportTeamWebhookDeliveriesData, ExportTeamWebhookDeliveriesErrors, ExportTeamWebhookDeliveriesResponses, ExportWebhookDeliveriesData, ExportWebhookDeliveriesErrors, ExportWebhookDeliveriesResponses, GetFolderData, GetFolderErrors, GetFolderOrderData, GetFolderOrderResponses, GetFolderResponses, GetHistoryData, GetHistoryResponses, GetMeData, GetMeResponses, GetNoteCommentData, GetNoteCommentErrors, GetNoteCommentResponses, GetNoteData, GetNoteErrors, GetNoteResponses, GetTeamFolderData, GetTeamFolderErrors, GetTeamFolderOrderData, GetTeamFolderOrderResponses, GetTeamFolderResponses, GetTeamNoteData, GetTeamNoteErrors, GetTeamNoteResponses, GetTeamWebhookData, GetTeamWebhookDeliveryData, GetTeamWebhookDeliveryErrors, GetTeamWebhookDeliveryResponses, GetTeamWebhookErrors, GetTeamWebhookResponses, GetVersionData, GetVersionErrors, GetVersionResponses, GetWebhookData, GetWebhookDeliveryData, GetWebhookDeliveryErrors, GetWebhookDeliveryResponses, GetWebhookErrors, GetWebhookResponses, ListFoldersData, ListFoldersResponses, ListNoteCommentsData, ListNoteCommentsErrors, ListNoteCommentsResponses, ListNotesData, ListNotesResponses, ListTeamFoldersData, ListTeamFoldersResponses, ListTeamNotesData, ListTeamNotesResponses, ListTeamsData, ListTeamsResponses, ListTeamTrashData, ListTeamTrashErrors, ListTeamTrashResponses, ListTeamWebhookDeliveriesData, ListTeamWebhookDeliveriesErrors, ListTeamWebhookDeliveriesResponses, ListTeamWebhooksData, ListTeamWebhooksResponses, ListTrashData, ListTrashResponses, ListVersionsData, ListVersionsErrors, ListVersionsResponses, ListWebhookDeliveriesData, ListWebhookDeliveriesErrors, ListWebhookDeliveriesResponses, ListWebhooksData, ListWebhooksResponses, PingTeamWebhookData, PingTeamWebhookErrors, PingTeamWebhookResponses, PingWebhookData, PingWebhookErrors, PingWebhookResponses, ResolveNoteCommentData, ResolveNoteCommentErrors, ResolveNoteCommentResponses, RestoreNoteData, RestoreNoteErrors, RestoreNoteResponses, UnresolveNoteCommentData, UnresolveNoteCommentErrors, UnresolveNoteCommentResponses, UpdateFolderData, UpdateFolderErrors, UpdateFolderOrderData, UpdateFolderOrderErrors, UpdateFolderOrderResponses, UpdateFolderResponses, UpdateNoteData, UpdateNoteErrors, UpdateNoteResponses, UpdateTeamFolderData, UpdateTeamFolderErrors, UpdateTeamFolderOrderData, UpdateTeamFolderOrderErrors, UpdateTeamFolderOrderResponses, UpdateTeamFolderResponses, UpdateTeamNoteData, UpdateTeamNoteErrors, UpdateTeamNoteResponses, UpdateTeamWebhookData, UpdateTeamWebhookErrors, UpdateTeamWebhookResponses, UpdateVersionData, UpdateVersionErrors, UpdateVersionResponses, UpdateWebhookData2, UpdateWebhookErrors, UpdateWebhookResponses, UploadNoteImageData, UploadNoteImageErrors, UploadNoteImageResponses } from './types.gen.js';
+import type { BatchRestoreData, BatchRestoreErrors, BatchRestoreResponses, CompareVersionsData, CompareVersionsErrors, CompareVersionsResponses, CreateFolderData, CreateFolderErrors, CreateFolderResponses, CreateNoteData, CreateNoteErrors, CreateNoteResponses, CreateTeamFolderData, CreateTeamFolderErrors, CreateTeamFolderResponses, CreateTeamNoteData, CreateTeamNoteErrors, CreateTeamNoteResponses, CreateTeamWebhookData, CreateTeamWebhookErrors, CreateTeamWebhookResponses, CreateVersionData, CreateVersionErrors, CreateVersionResponses, CreateWebhookData2, CreateWebhookErrors, CreateWebhookResponses, DeleteFolderData, DeleteFolderErrors, DeleteFolderResponses, DeleteNoteData, DeleteNoteErrors, DeleteNoteResponses, DeleteTeamFolderData, DeleteTeamFolderErrors, DeleteTeamFolderResponses, DeleteTeamNoteData, DeleteTeamNoteErrors, DeleteTeamNoteResponses, DeleteTeamWebhookData, DeleteTeamWebhookErrors, DeleteTeamWebhookResponses, DeleteWebhookData, DeleteWebhookErrors, DeleteWebhookResponses, ExportTeamWebhookDeliveriesData, ExportTeamWebhookDeliveriesErrors, ExportTeamWebhookDeliveriesResponses, ExportWebhookDeliveriesData, ExportWebhookDeliveriesErrors, ExportWebhookDeliveriesResponses, GetFolderData, GetFolderErrors, GetFolderOrderData, GetFolderOrderErrors, GetFolderOrderResponses, GetFolderResponses, GetHistoryData, GetHistoryErrors, GetHistoryResponses, GetMeData, GetMeErrors, GetMeResponses, GetNoteCommentData, GetNoteCommentErrors, GetNoteCommentResponses, GetNoteData, GetNoteErrors, GetNoteResponses, GetTeamFolderData, GetTeamFolderErrors, GetTeamFolderOrderData, GetTeamFolderOrderErrors, GetTeamFolderOrderResponses, GetTeamFolderResponses, GetTeamNoteData, GetTeamNoteErrors, GetTeamNoteResponses, GetTeamWebhookData, GetTeamWebhookDeliveryData, GetTeamWebhookDeliveryErrors, GetTeamWebhookDeliveryResponses, GetTeamWebhookErrors, GetTeamWebhookResponses, GetVersionData, GetVersionErrors, GetVersionResponses, GetWebhookData, GetWebhookDeliveryData, GetWebhookDeliveryErrors, GetWebhookDeliveryResponses, GetWebhookErrors, GetWebhookResponses, ListFoldersData, ListFoldersErrors, ListFoldersResponses, ListNoteCommentsData, ListNoteCommentsErrors, ListNoteCommentsResponses, ListNotesData, ListNotesErrors, ListNotesResponses, ListTeamFoldersData, ListTeamFoldersErrors, ListTeamFoldersResponses, ListTeamNotesData, ListTeamNotesErrors, ListTeamNotesResponses, ListTeamsData, ListTeamsErrors, ListTeamsResponses, ListTeamTrashData, ListTeamTrashErrors, ListTeamTrashResponses, ListTeamWebhookDeliveriesData, ListTeamWebhookDeliveriesErrors, ListTeamWebhookDeliveriesResponses, ListTeamWebhooksData, ListTeamWebhooksErrors, ListTeamWebhooksResponses, ListTrashData, ListTrashErrors, ListTrashResponses, ListVersionsData, ListVersionsErrors, ListVersionsResponses, ListWebhookDeliveriesData, ListWebhookDeliveriesErrors, ListWebhookDeliveriesResponses, ListWebhooksData, ListWebhooksErrors, ListWebhooksResponses, PingTeamWebhookData, PingTeamWebhookErrors, PingTeamWebhookResponses, PingWebhookData, PingWebhookErrors, PingWebhookResponses, ResolveNoteCommentData, ResolveNoteCommentErrors, ResolveNoteCommentResponses, RestoreNoteData, RestoreNoteErrors, RestoreNoteResponses, UnresolveNoteCommentData, UnresolveNoteCommentErrors, UnresolveNoteCommentResponses, UpdateFolderData, UpdateFolderErrors, UpdateFolderOrderData, UpdateFolderOrderErrors, UpdateFolderOrderResponses, UpdateFolderResponses, UpdateNoteData, UpdateNoteErrors, UpdateNoteResponses, UpdateTeamFolderData, UpdateTeamFolderErrors, UpdateTeamFolderOrderData, UpdateTeamFolderOrderErrors, UpdateTeamFolderOrderResponses, UpdateTeamFolderResponses, UpdateTeamNoteData, UpdateTeamNoteErrors, UpdateTeamNoteResponses, UpdateTeamWebhookData, UpdateTeamWebhookErrors, UpdateTeamWebhookResponses, UpdateVersionData, UpdateVersionErrors, UpdateVersionResponses, UpdateWebhookData2, UpdateWebhookErrors, UpdateWebhookResponses, UploadNoteImageData, UploadNoteImageErrors, UploadNoteImageResponses } from './types.gen.js';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -21,7 +21,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 /**
  * List webhooks in the current user's workspace.
  */
-export const listWebhooks = <ThrowOnError extends boolean = false>(options?: Options<ListWebhooksData, ThrowOnError>): RequestResult<ListWebhooksResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ListWebhooksResponses, unknown, ThrowOnError>({
+export const listWebhooks = <ThrowOnError extends boolean = false>(options?: Options<ListWebhooksData, ThrowOnError>): RequestResult<ListWebhooksResponses, ListWebhooksErrors, ThrowOnError> => (options?.client ?? client).get<ListWebhooksResponses, ListWebhooksErrors, ThrowOnError>({
     responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/webhooks',
@@ -119,7 +119,7 @@ export const getWebhookDelivery = <ThrowOnError extends boolean = false>(options
 /**
  * List webhooks in a team workspace.
  */
-export const listTeamWebhooks = <ThrowOnError extends boolean = false>(options: Options<ListTeamWebhooksData, ThrowOnError>): RequestResult<ListTeamWebhooksResponses, unknown, ThrowOnError> => (options.client ?? client).get<ListTeamWebhooksResponses, unknown, ThrowOnError>({
+export const listTeamWebhooks = <ThrowOnError extends boolean = false>(options: Options<ListTeamWebhooksData, ThrowOnError>): RequestResult<ListTeamWebhooksResponses, ListTeamWebhooksErrors, ThrowOnError> => (options.client ?? client).get<ListTeamWebhooksResponses, ListTeamWebhooksErrors, ThrowOnError>({
     responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/teams/{teampath}/webhooks',
@@ -217,7 +217,7 @@ export const getTeamWebhookDelivery = <ThrowOnError extends boolean = false>(opt
 /**
  * List all notes for the current user
  */
-export const listNotes = <ThrowOnError extends boolean = false>(options?: Options<ListNotesData, ThrowOnError>): RequestResult<ListNotesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ListNotesResponses, unknown, ThrowOnError>({
+export const listNotes = <ThrowOnError extends boolean = false>(options?: Options<ListNotesData, ThrowOnError>): RequestResult<ListNotesResponses, ListNotesErrors, ThrowOnError> => (options?.client ?? client).get<ListNotesResponses, ListNotesErrors, ThrowOnError>({
     responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/notes',
@@ -273,7 +273,7 @@ export const updateNote = <ThrowOnError extends boolean = false>(options: Option
 /**
  * List all folders in the current user's workspace
  */
-export const listFolders = <ThrowOnError extends boolean = false>(options?: Options<ListFoldersData, ThrowOnError>): RequestResult<ListFoldersResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ListFoldersResponses, unknown, ThrowOnError>({
+export const listFolders = <ThrowOnError extends boolean = false>(options?: Options<ListFoldersData, ThrowOnError>): RequestResult<ListFoldersResponses, ListFoldersErrors, ThrowOnError> => (options?.client ?? client).get<ListFoldersResponses, ListFoldersErrors, ThrowOnError>({
     responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/folders',
@@ -298,7 +298,7 @@ export const createFolder = <ThrowOnError extends boolean = false>(options?: Opt
  * Get your personal folder ordering for this workspace (parent folder id or `root` → ordered child folder ids).
  * Uses the same folder UUIDs as    (not internal Yjs clientIds).
  */
-export const getFolderOrder = <ThrowOnError extends boolean = false>(options?: Options<GetFolderOrderData, ThrowOnError>): RequestResult<GetFolderOrderResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetFolderOrderResponses, unknown, ThrowOnError>({
+export const getFolderOrder = <ThrowOnError extends boolean = false>(options?: Options<GetFolderOrderData, ThrowOnError>): RequestResult<GetFolderOrderResponses, GetFolderOrderErrors, ThrowOnError> => (options?.client ?? client).get<GetFolderOrderResponses, GetFolderOrderErrors, ThrowOnError>({
     responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/folders/folder-order',
@@ -353,7 +353,7 @@ export const updateFolder = <ThrowOnError extends boolean = false>(options: Opti
 /**
  * List trashed notes in your personal workspace (same data as the internal trash API).
  */
-export const listTrash = <ThrowOnError extends boolean = false>(options?: Options<ListTrashData, ThrowOnError>): RequestResult<ListTrashResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ListTrashResponses, unknown, ThrowOnError>({
+export const listTrash = <ThrowOnError extends boolean = false>(options?: Options<ListTrashData, ThrowOnError>): RequestResult<ListTrashResponses, ListTrashErrors, ThrowOnError> => (options?.client ?? client).get<ListTrashResponses, ListTrashErrors, ThrowOnError>({
     responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/trash',
@@ -396,7 +396,7 @@ export const listTeamTrash = <ThrowOnError extends boolean = false>(options: Opt
 /**
  * List the teams for the current user
  */
-export const listTeams = <ThrowOnError extends boolean = false>(options?: Options<ListTeamsData, ThrowOnError>): RequestResult<ListTeamsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ListTeamsResponses, unknown, ThrowOnError>({
+export const listTeams = <ThrowOnError extends boolean = false>(options?: Options<ListTeamsData, ThrowOnError>): RequestResult<ListTeamsResponses, ListTeamsErrors, ThrowOnError> => (options?.client ?? client).get<ListTeamsResponses, ListTeamsErrors, ThrowOnError>({
     responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/teams',
@@ -406,7 +406,7 @@ export const listTeams = <ThrowOnError extends boolean = false>(options?: Option
 /**
  * List all notes for a team
  */
-export const listTeamNotes = <ThrowOnError extends boolean = false>(options: Options<ListTeamNotesData, ThrowOnError>): RequestResult<ListTeamNotesResponses, unknown, ThrowOnError> => (options.client ?? client).get<ListTeamNotesResponses, unknown, ThrowOnError>({
+export const listTeamNotes = <ThrowOnError extends boolean = false>(options: Options<ListTeamNotesData, ThrowOnError>): RequestResult<ListTeamNotesResponses, ListTeamNotesErrors, ThrowOnError> => (options.client ?? client).get<ListTeamNotesResponses, ListTeamNotesErrors, ThrowOnError>({
     responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/teams/{teampath}/notes',
@@ -462,7 +462,7 @@ export const updateTeamNote = <ThrowOnError extends boolean = false>(options: Op
 /**
  * List all folders in a team workspace
  */
-export const listTeamFolders = <ThrowOnError extends boolean = false>(options: Options<ListTeamFoldersData, ThrowOnError>): RequestResult<ListTeamFoldersResponses, unknown, ThrowOnError> => (options.client ?? client).get<ListTeamFoldersResponses, unknown, ThrowOnError>({
+export const listTeamFolders = <ThrowOnError extends boolean = false>(options: Options<ListTeamFoldersData, ThrowOnError>): RequestResult<ListTeamFoldersResponses, ListTeamFoldersErrors, ThrowOnError> => (options.client ?? client).get<ListTeamFoldersResponses, ListTeamFoldersErrors, ThrowOnError>({
     responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/teams/{teampath}/folders',
@@ -487,7 +487,7 @@ export const createTeamFolder = <ThrowOnError extends boolean = false>(options: 
  * Get your personal folder ordering for this team workspace (parent folder id or `root` → ordered child folder ids).
  * Uses the same folder UUIDs as    (not internal Yjs clientIds).
  */
-export const getTeamFolderOrder = <ThrowOnError extends boolean = false>(options: Options<GetTeamFolderOrderData, ThrowOnError>): RequestResult<GetTeamFolderOrderResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetTeamFolderOrderResponses, unknown, ThrowOnError>({
+export const getTeamFolderOrder = <ThrowOnError extends boolean = false>(options: Options<GetTeamFolderOrderData, ThrowOnError>): RequestResult<GetTeamFolderOrderResponses, GetTeamFolderOrderErrors, ThrowOnError> => (options.client ?? client).get<GetTeamFolderOrderResponses, GetTeamFolderOrderErrors, ThrowOnError>({
     responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/teams/{teampath}/folders/folder-order',
@@ -672,7 +672,7 @@ export const resolveNoteComment = <ThrowOnError extends boolean = false>(options
 /**
  * Get the current user's profile
  */
-export const getMe = <ThrowOnError extends boolean = false>(options?: Options<GetMeData, ThrowOnError>): RequestResult<GetMeResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetMeResponses, unknown, ThrowOnError>({
+export const getMe = <ThrowOnError extends boolean = false>(options?: Options<GetMeData, ThrowOnError>): RequestResult<GetMeResponses, GetMeErrors, ThrowOnError> => (options?.client ?? client).get<GetMeResponses, GetMeErrors, ThrowOnError>({
     responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/me',
@@ -682,7 +682,7 @@ export const getMe = <ThrowOnError extends boolean = false>(options?: Options<Ge
 /**
  * Get note history for the current user
  */
-export const getHistory = <ThrowOnError extends boolean = false>(options?: Options<GetHistoryData, ThrowOnError>): RequestResult<GetHistoryResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetHistoryResponses, unknown, ThrowOnError>({
+export const getHistory = <ThrowOnError extends boolean = false>(options?: Options<GetHistoryData, ThrowOnError>): RequestResult<GetHistoryResponses, GetHistoryErrors, ThrowOnError> => (options?.client ?? client).get<GetHistoryResponses, GetHistoryErrors, ThrowOnError>({
     responseType: 'json',
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/history',

@@ -4,6 +4,27 @@ export type ClientOptions = {
     baseURL: `${string}://${string}` | (string & {});
 };
 
+export type ApiRequestErrorResponse = {
+    message: string;
+};
+
+export type ApiErrorResponse = {
+    error: string;
+};
+
+export type ApiQuotaErrorResponse = {
+    error: {
+        upgradeUrl: string;
+        helpUrl: string;
+        message: string;
+        code: 'quota_exceeded';
+    };
+};
+
+export type ApiRateLimitErrorResponse = ApiErrorResponse | ApiQuotaErrorResponse;
+
+export type ApiServerErrorResponse = ApiErrorResponse | ApiRequestErrorResponse;
+
 export type ApiWebhookScope = {
     type: 'workspace';
 } | {
@@ -170,20 +191,12 @@ export type SingleNote = {
     content: string;
 };
 
-export type ApiErrorResponse = {
-    error: string;
-};
+export type ApiBadRequestResponse = ApiErrorResponse | ApiRequestErrorResponse;
 
 export type CreateNoteMultiStatusResponse = {
     note: SingleNote;
     error: string;
 };
-
-export type ApiRequestErrorResponse = {
-    message: string;
-};
-
-export type ApiBadRequestResponse = ApiErrorResponse | ApiRequestErrorResponse;
 
 export type CommentPermissionType = 'disabled' | 'forbidden' | 'owners' | 'signed_in_users' | 'everyone';
 
@@ -637,6 +650,27 @@ export type ListWebhooksData = {
     url: '/webhooks';
 };
 
+export type ListWebhooksErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
+};
+
+export type ListWebhooksError = ListWebhooksErrors[keyof ListWebhooksErrors];
+
 export type ListWebhooksResponses = {
     /**
      * Ok
@@ -657,11 +691,15 @@ export type CreateWebhookErrors = {
     /**
      * Invalid request
      */
-    400: WebhookApiErrorResponse;
+    400: WebhookApiErrorResponse | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     /**
      * Folder not found
      */
-    404: WebhookApiErrorResponse;
+    404: WebhookApiErrorResponse | ApiErrorResponse;
     /**
      * Validation failed
      */
@@ -669,7 +707,11 @@ export type CreateWebhookErrors = {
     /**
      * Webhook limit reached
      */
-    429: WebhookApiErrorResponse;
+    429: WebhookApiErrorResponse | ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type CreateWebhookError = CreateWebhookErrors[keyof CreateWebhookErrors];
@@ -698,11 +740,23 @@ export type DeleteWebhookErrors = {
     /**
      * Invalid webhook ID
      */
-    400: WebhookApiErrorResponse;
+    400: WebhookApiErrorResponse | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     /**
      * Webhook not found
      */
-    404: WebhookApiErrorResponse;
+    404: WebhookApiErrorResponse | ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type DeleteWebhookError = DeleteWebhookErrors[keyof DeleteWebhookErrors];
@@ -729,11 +783,23 @@ export type GetWebhookErrors = {
     /**
      * Invalid webhook ID
      */
-    400: WebhookApiErrorResponse;
+    400: WebhookApiErrorResponse | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     /**
      * Webhook not found
      */
-    404: WebhookApiErrorResponse;
+    404: WebhookApiErrorResponse | ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type GetWebhookError = GetWebhookErrors[keyof GetWebhookErrors];
@@ -760,15 +826,27 @@ export type UpdateWebhookErrors = {
     /**
      * Invalid request
      */
-    400: WebhookApiErrorResponse;
+    400: WebhookApiErrorResponse | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     /**
      * Webhook not found
      */
-    404: WebhookApiErrorResponse;
+    404: WebhookApiErrorResponse | ApiErrorResponse;
     /**
      * Validation failed
      */
     422: ApiValidationError;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type UpdateWebhookError = UpdateWebhookErrors[keyof UpdateWebhookErrors];
@@ -795,15 +873,23 @@ export type PingWebhookErrors = {
     /**
      * Invalid webhook ID
      */
-    400: WebhookApiErrorResponse;
+    400: WebhookApiErrorResponse | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     /**
      * Webhook not found
      */
-    404: WebhookApiErrorResponse;
+    404: WebhookApiErrorResponse | ApiErrorResponse;
     /**
      * Too many ping requests
      */
-    429: WebhookApiErrorResponse;
+    429: WebhookApiErrorResponse | ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type PingWebhookError = PingWebhookErrors[keyof PingWebhookErrors];
@@ -833,11 +919,23 @@ export type ListWebhookDeliveriesErrors = {
     /**
      * Invalid request
      */
-    400: WebhookApiErrorResponse;
+    400: WebhookApiErrorResponse | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     /**
      * Webhook not found
      */
-    404: WebhookApiErrorResponse;
+    404: WebhookApiErrorResponse | ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type ListWebhookDeliveriesError = ListWebhookDeliveriesErrors[keyof ListWebhookDeliveriesErrors];
@@ -864,11 +962,23 @@ export type ExportWebhookDeliveriesErrors = {
     /**
      * Invalid webhook ID
      */
-    400: WebhookApiErrorResponse;
+    400: WebhookApiErrorResponse | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     /**
      * Webhook not found
      */
-    404: WebhookApiErrorResponse;
+    404: WebhookApiErrorResponse | ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type ExportWebhookDeliveriesError = ExportWebhookDeliveriesErrors[keyof ExportWebhookDeliveriesErrors];
@@ -896,11 +1006,23 @@ export type GetWebhookDeliveryErrors = {
     /**
      * Invalid request
      */
-    400: WebhookApiErrorResponse;
+    400: WebhookApiErrorResponse | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     /**
      * Delivery not found
      */
-    404: WebhookApiErrorResponse;
+    404: WebhookApiErrorResponse | ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type GetWebhookDeliveryError = GetWebhookDeliveryErrors[keyof GetWebhookDeliveryErrors];
@@ -922,6 +1044,35 @@ export type ListTeamWebhooksData = {
     query?: never;
     url: '/teams/{teampath}/webhooks';
 };
+
+export type ListTeamWebhooksErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ApiErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
+};
+
+export type ListTeamWebhooksError = ListTeamWebhooksErrors[keyof ListTeamWebhooksErrors];
 
 export type ListTeamWebhooksResponses = {
     /**
@@ -945,11 +1096,19 @@ export type CreateTeamWebhookErrors = {
     /**
      * Invalid request
      */
-    400: WebhookApiErrorResponse;
+    400: WebhookApiErrorResponse | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ApiErrorResponse;
     /**
      * Folder not found
      */
-    404: WebhookApiErrorResponse;
+    404: WebhookApiErrorResponse | ApiErrorResponse;
     /**
      * Validation failed
      */
@@ -957,7 +1116,11 @@ export type CreateTeamWebhookErrors = {
     /**
      * Webhook limit reached
      */
-    429: WebhookApiErrorResponse;
+    429: WebhookApiErrorResponse | ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type CreateTeamWebhookError = CreateTeamWebhookErrors[keyof CreateTeamWebhookErrors];
@@ -987,11 +1150,27 @@ export type DeleteTeamWebhookErrors = {
     /**
      * Invalid webhook ID
      */
-    400: WebhookApiErrorResponse;
+    400: WebhookApiErrorResponse | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ApiErrorResponse;
     /**
      * Webhook not found
      */
-    404: WebhookApiErrorResponse;
+    404: WebhookApiErrorResponse | ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type DeleteTeamWebhookError = DeleteTeamWebhookErrors[keyof DeleteTeamWebhookErrors];
@@ -1019,11 +1198,27 @@ export type GetTeamWebhookErrors = {
     /**
      * Invalid webhook ID
      */
-    400: WebhookApiErrorResponse;
+    400: WebhookApiErrorResponse | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ApiErrorResponse;
     /**
      * Webhook not found
      */
-    404: WebhookApiErrorResponse;
+    404: WebhookApiErrorResponse | ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type GetTeamWebhookError = GetTeamWebhookErrors[keyof GetTeamWebhookErrors];
@@ -1051,15 +1246,31 @@ export type UpdateTeamWebhookErrors = {
     /**
      * Invalid request
      */
-    400: WebhookApiErrorResponse;
+    400: WebhookApiErrorResponse | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ApiErrorResponse;
     /**
      * Webhook not found
      */
-    404: WebhookApiErrorResponse;
+    404: WebhookApiErrorResponse | ApiErrorResponse;
     /**
      * Validation failed
      */
     422: ApiValidationError;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type UpdateTeamWebhookError = UpdateTeamWebhookErrors[keyof UpdateTeamWebhookErrors];
@@ -1087,15 +1298,27 @@ export type PingTeamWebhookErrors = {
     /**
      * Invalid webhook ID
      */
-    400: WebhookApiErrorResponse;
+    400: WebhookApiErrorResponse | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ApiErrorResponse;
     /**
      * Webhook not found
      */
-    404: WebhookApiErrorResponse;
+    404: WebhookApiErrorResponse | ApiErrorResponse;
     /**
      * Too many ping requests
      */
-    429: WebhookApiErrorResponse;
+    429: WebhookApiErrorResponse | ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type PingTeamWebhookError = PingTeamWebhookErrors[keyof PingTeamWebhookErrors];
@@ -1126,11 +1349,27 @@ export type ListTeamWebhookDeliveriesErrors = {
     /**
      * Invalid request
      */
-    400: WebhookApiErrorResponse;
+    400: WebhookApiErrorResponse | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ApiErrorResponse;
     /**
      * Webhook not found
      */
-    404: WebhookApiErrorResponse;
+    404: WebhookApiErrorResponse | ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type ListTeamWebhookDeliveriesError = ListTeamWebhookDeliveriesErrors[keyof ListTeamWebhookDeliveriesErrors];
@@ -1158,11 +1397,27 @@ export type ExportTeamWebhookDeliveriesErrors = {
     /**
      * Invalid webhook ID
      */
-    400: WebhookApiErrorResponse;
+    400: WebhookApiErrorResponse | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ApiErrorResponse;
     /**
      * Webhook not found
      */
-    404: WebhookApiErrorResponse;
+    404: WebhookApiErrorResponse | ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type ExportTeamWebhookDeliveriesError = ExportTeamWebhookDeliveriesErrors[keyof ExportTeamWebhookDeliveriesErrors];
@@ -1191,11 +1446,27 @@ export type GetTeamWebhookDeliveryErrors = {
     /**
      * Invalid request
      */
-    400: WebhookApiErrorResponse;
+    400: WebhookApiErrorResponse | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ApiErrorResponse;
     /**
      * Delivery not found
      */
-    404: WebhookApiErrorResponse;
+    404: WebhookApiErrorResponse | ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type GetTeamWebhookDeliveryError = GetTeamWebhookDeliveryErrors[keyof GetTeamWebhookDeliveryErrors];
@@ -1215,6 +1486,27 @@ export type ListNotesData = {
     query?: never;
     url: '/notes';
 };
+
+export type ListNotesErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
+};
+
+export type ListNotesError = ListNotesErrors[keyof ListNotesErrors];
 
 export type ListNotesResponses = {
     /**
@@ -1250,6 +1542,10 @@ export type CreateNoteData = {
 
 export type CreateNoteErrors = {
     400: ApiBadRequestResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     403: ApiErrorResponse;
     404: ApiErrorResponse;
     409: ApiErrorResponse;
@@ -1257,6 +1553,14 @@ export type CreateNoteErrors = {
      * Validation failed
      */
     422: ApiValidationError;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type CreateNoteError = CreateNoteErrors[keyof CreateNoteErrors];
@@ -1281,10 +1585,18 @@ export type DeleteNoteData = {
 };
 
 export type DeleteNoteErrors = {
-    400: ApiErrorResponse;
+    400: ApiBadRequestResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     403: ApiErrorResponse;
     404: ApiErrorResponse;
-    500: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    500: ApiServerErrorResponse;
 };
 
 export type DeleteNoteError = DeleteNoteErrors[keyof DeleteNoteErrors];
@@ -1300,6 +1612,12 @@ export type DeleteNoteResponse = DeleteNoteResponses[keyof DeleteNoteResponses];
 
 export type GetNoteData = {
     body?: never;
+    headers?: {
+        /**
+         * Return 304 when this ETag matches the current note.
+         */
+        'If-None-Match'?: string;
+    };
     path: {
         /**
          * The ID of the note to retrieve.
@@ -1311,9 +1629,21 @@ export type GetNoteData = {
 };
 
 export type GetNoteErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     403: ApiErrorResponse;
     404: ApiErrorResponse;
-    500: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    500: ApiServerErrorResponse;
 };
 
 export type GetNoteError = GetNoteErrors[keyof GetNoteErrors];
@@ -1350,6 +1680,10 @@ export type UpdateNoteData = {
 
 export type UpdateNoteErrors = {
     400: ApiBadRequestResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     403: ApiErrorResponse;
     404: ApiErrorResponse;
     409: ApiErrorResponse;
@@ -1357,7 +1691,11 @@ export type UpdateNoteErrors = {
      * Validation failed
      */
     422: ApiValidationError;
-    500: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    500: ApiServerErrorResponse;
 };
 
 export type UpdateNoteError = UpdateNoteErrors[keyof UpdateNoteErrors];
@@ -1372,6 +1710,27 @@ export type ListFoldersData = {
     query?: never;
     url: '/folders';
 };
+
+export type ListFoldersErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
+};
+
+export type ListFoldersError = ListFoldersErrors[keyof ListFoldersErrors];
 
 export type ListFoldersResponses = {
     /**
@@ -1394,12 +1753,20 @@ export type CreateFolderData = {
 
 export type CreateFolderErrors = {
     400: ApiBadRequestResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     404: ApiErrorResponse;
     /**
      * Validation failed
      */
     422: ApiValidationError;
-    500: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    500: ApiServerErrorResponse;
 };
 
 export type CreateFolderError = CreateFolderErrors[keyof CreateFolderErrors];
@@ -1416,6 +1783,27 @@ export type GetFolderOrderData = {
     query?: never;
     url: '/folders/folder-order';
 };
+
+export type GetFolderOrderErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
+};
+
+export type GetFolderOrderError = GetFolderOrderErrors[keyof GetFolderOrderErrors];
 
 export type GetFolderOrderResponses = {
     /**
@@ -1436,9 +1824,21 @@ export type UpdateFolderOrderData = {
 export type UpdateFolderOrderErrors = {
     400: ApiBadRequestResponse;
     /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
      * Validation failed
      */
     422: ApiValidationError;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type UpdateFolderOrderError = UpdateFolderOrderErrors[keyof UpdateFolderOrderErrors];
@@ -1462,9 +1862,17 @@ export type DeleteFolderData = {
 };
 
 export type DeleteFolderErrors = {
-    400: ApiErrorResponse;
+    400: ApiBadRequestResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     404: ApiErrorResponse;
-    500: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    500: ApiServerErrorResponse;
 };
 
 export type DeleteFolderError = DeleteFolderErrors[keyof DeleteFolderErrors];
@@ -1491,8 +1899,20 @@ export type GetFolderData = {
 };
 
 export type GetFolderErrors = {
-    400: ApiErrorResponse;
+    400: ApiBadRequestResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     404: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type GetFolderError = GetFolderErrors[keyof GetFolderErrors];
@@ -1520,12 +1940,20 @@ export type UpdateFolderData = {
 
 export type UpdateFolderErrors = {
     400: ApiBadRequestResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     404: ApiErrorResponse;
     /**
      * Validation failed
      */
     422: ApiValidationError;
-    500: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    500: ApiServerErrorResponse;
 };
 
 export type UpdateFolderError = UpdateFolderErrors[keyof UpdateFolderErrors];
@@ -1540,6 +1968,27 @@ export type ListTrashData = {
     query?: never;
     url: '/trash';
 };
+
+export type ListTrashErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
+};
+
+export type ListTrashError = ListTrashErrors[keyof ListTrashErrors];
 
 export type ListTrashResponses = {
     /**
@@ -1558,7 +2007,23 @@ export type BatchRestoreData = {
 };
 
 export type BatchRestoreErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     404: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type BatchRestoreError = BatchRestoreErrors[keyof BatchRestoreErrors];
@@ -1583,9 +2048,21 @@ export type RestoreNoteData = {
 };
 
 export type RestoreNoteErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     403: ApiErrorResponse;
     404: ApiErrorResponse;
-    500: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    500: ApiServerErrorResponse;
 };
 
 export type RestoreNoteError = RestoreNoteErrors[keyof RestoreNoteErrors];
@@ -1609,8 +2086,24 @@ export type ListTeamTrashData = {
 };
 
 export type ListTeamTrashErrors = {
-    403: ApiErrorResponse | string;
-    404: ApiErrorResponse | string;
+    /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    403: ApiErrorResponse;
+    404: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type ListTeamTrashError = ListTeamTrashErrors[keyof ListTeamTrashErrors];
@@ -1627,6 +2120,35 @@ export type ListTeamsData = {
     query?: never;
     url: '/teams';
 };
+
+export type ListTeamsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ApiErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
+};
+
+export type ListTeamsError = ListTeamsErrors[keyof ListTeamsErrors];
 
 export type ListTeamsResponses = {
     /**
@@ -1648,6 +2170,35 @@ export type ListTeamNotesData = {
     query?: never;
     url: '/teams/{teampath}/notes';
 };
+
+export type ListTeamNotesErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ApiErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
+};
+
+export type ListTeamNotesError = ListTeamNotesErrors[keyof ListTeamNotesErrors];
 
 export type ListTeamNotesResponses = {
     /**
@@ -1688,6 +2239,10 @@ export type CreateTeamNoteData = {
 
 export type CreateTeamNoteErrors = {
     400: ApiBadRequestResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     403: ApiErrorResponse;
     404: ApiErrorResponse;
     409: ApiErrorResponse;
@@ -1695,6 +2250,14 @@ export type CreateTeamNoteErrors = {
      * Validation failed
      */
     422: ApiValidationError;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type CreateTeamNoteError = CreateTeamNoteErrors[keyof CreateTeamNoteErrors];
@@ -1723,10 +2286,18 @@ export type DeleteTeamNoteData = {
 };
 
 export type DeleteTeamNoteErrors = {
-    400: ApiErrorResponse;
+    400: ApiBadRequestResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     403: ApiErrorResponse;
     404: ApiErrorResponse;
-    500: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    500: ApiServerErrorResponse;
 };
 
 export type DeleteTeamNoteError = DeleteTeamNoteErrors[keyof DeleteTeamNoteErrors];
@@ -1742,6 +2313,12 @@ export type DeleteTeamNoteResponse = DeleteTeamNoteResponses[keyof DeleteTeamNot
 
 export type GetTeamNoteData = {
     body?: never;
+    headers?: {
+        /**
+         * Return 304 when this ETag matches the current note.
+         */
+        'If-None-Match'?: string;
+    };
     path: {
         /**
          * The path identifier for the team.
@@ -1757,8 +2334,24 @@ export type GetTeamNoteData = {
 };
 
 export type GetTeamNoteErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     403: ApiErrorResponse;
     404: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type GetTeamNoteError = GetTeamNoteErrors[keyof GetTeamNoteErrors];
@@ -1799,6 +2392,10 @@ export type UpdateTeamNoteData = {
 
 export type UpdateTeamNoteErrors = {
     400: ApiBadRequestResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     403: ApiErrorResponse;
     404: ApiErrorResponse;
     409: ApiErrorResponse;
@@ -1806,7 +2403,11 @@ export type UpdateTeamNoteErrors = {
      * Validation failed
      */
     422: ApiValidationError;
-    500: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    500: ApiServerErrorResponse;
 };
 
 export type UpdateTeamNoteError = UpdateTeamNoteErrors[keyof UpdateTeamNoteErrors];
@@ -1826,6 +2427,35 @@ export type ListTeamFoldersData = {
     query?: never;
     url: '/teams/{teampath}/folders';
 };
+
+export type ListTeamFoldersErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ApiErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
+};
+
+export type ListTeamFoldersError = ListTeamFoldersErrors[keyof ListTeamFoldersErrors];
 
 export type ListTeamFoldersResponses = {
     /**
@@ -1853,12 +2483,24 @@ export type CreateTeamFolderData = {
 
 export type CreateTeamFolderErrors = {
     400: ApiBadRequestResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ApiErrorResponse;
     404: ApiErrorResponse;
     /**
      * Validation failed
      */
     422: ApiValidationError;
-    500: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    500: ApiServerErrorResponse;
 };
 
 export type CreateTeamFolderError = CreateTeamFolderErrors[keyof CreateTeamFolderErrors];
@@ -1877,6 +2519,35 @@ export type GetTeamFolderOrderData = {
     query?: never;
     url: '/teams/{teampath}/folders/folder-order';
 };
+
+export type GetTeamFolderOrderErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ApiErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
+};
+
+export type GetTeamFolderOrderError = GetTeamFolderOrderErrors[keyof GetTeamFolderOrderErrors];
 
 export type GetTeamFolderOrderResponses = {
     /**
@@ -1899,9 +2570,29 @@ export type UpdateTeamFolderOrderData = {
 export type UpdateTeamFolderOrderErrors = {
     400: ApiBadRequestResponse;
     /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ApiErrorResponse;
+    /**
+     * Not Found
+     */
+    404: ApiErrorResponse;
+    /**
      * Validation failed
      */
     422: ApiValidationError;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type UpdateTeamFolderOrderError = UpdateTeamFolderOrderErrors[keyof UpdateTeamFolderOrderErrors];
@@ -1929,9 +2620,21 @@ export type DeleteTeamFolderData = {
 };
 
 export type DeleteTeamFolderErrors = {
-    400: ApiErrorResponse;
+    400: ApiBadRequestResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ApiErrorResponse;
     404: ApiErrorResponse;
-    500: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    500: ApiServerErrorResponse;
 };
 
 export type DeleteTeamFolderError = DeleteTeamFolderErrors[keyof DeleteTeamFolderErrors];
@@ -1962,8 +2665,24 @@ export type GetTeamFolderData = {
 };
 
 export type GetTeamFolderErrors = {
-    400: ApiErrorResponse;
+    400: ApiBadRequestResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ApiErrorResponse;
     404: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type GetTeamFolderError = GetTeamFolderErrors[keyof GetTeamFolderErrors];
@@ -1995,12 +2714,24 @@ export type UpdateTeamFolderData = {
 
 export type UpdateTeamFolderErrors = {
     400: ApiBadRequestResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ApiErrorResponse;
     404: ApiErrorResponse;
     /**
      * Validation failed
      */
     422: ApiValidationError;
-    500: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    500: ApiServerErrorResponse;
 };
 
 export type UpdateTeamFolderError = UpdateTeamFolderErrors[keyof UpdateTeamFolderErrors];
@@ -2036,7 +2767,11 @@ export type ListVersionsErrors = {
     /**
      * Invalid request
      */
-    400: ApiError;
+    400: ApiError | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     /**
      * Forbidden
      */
@@ -2045,6 +2780,14 @@ export type ListVersionsErrors = {
      * Not found
      */
     404: ApiError;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type ListVersionsError = ListVersionsErrors[keyof ListVersionsErrors];
@@ -2071,7 +2814,11 @@ export type UpdateVersionErrors = {
     /**
      * Invalid request
      */
-    400: ApiError;
+    400: ApiError | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     /**
      * Forbidden
      */
@@ -2084,6 +2831,14 @@ export type UpdateVersionErrors = {
      * Version is not named
      */
     422: VersionNotNamedError;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type UpdateVersionError = UpdateVersionErrors[keyof UpdateVersionErrors];
@@ -2110,7 +2865,11 @@ export type CreateVersionErrors = {
     /**
      * Invalid request
      */
-    400: ApiError;
+    400: ApiError | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     /**
      * Forbidden
      */
@@ -2123,6 +2882,14 @@ export type CreateVersionErrors = {
      * No content change or version already named
      */
     409: CreateNoteVersionConflictError;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type CreateVersionError = CreateVersionErrors[keyof CreateVersionErrors];
@@ -2158,7 +2925,11 @@ export type CompareVersionsErrors = {
     /**
      * Invalid request
      */
-    400: ApiError;
+    400: ApiError | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     /**
      * Forbidden
      */
@@ -2171,6 +2942,14 @@ export type CompareVersionsErrors = {
      * Validation failed or version content unavailable
      */
     422: ApiError | ApiValidationError;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type CompareVersionsError = CompareVersionsErrors[keyof CompareVersionsErrors];
@@ -2196,6 +2975,14 @@ export type GetVersionData = {
 
 export type GetVersionErrors = {
     /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
      * Forbidden
      */
     403: ApiError;
@@ -2203,6 +2990,14 @@ export type GetVersionErrors = {
      * Not found
      */
     404: ApiError;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type GetVersionError = GetVersionErrors[keyof GetVersionErrors];
@@ -2235,11 +3030,11 @@ export type UploadNoteImageErrors = {
     /**
      * Unauthorized
      */
-    401: string;
+    401: ApiErrorResponse;
     /**
      * Forbidden
      */
-    403: ApiRequestErrorResponse;
+    403: ApiErrorResponse | ApiRequestErrorResponse;
     /**
      * Payload Too Large
      */
@@ -2252,7 +3047,11 @@ export type UploadNoteImageErrors = {
     /**
      * Too Many Requests
      */
-    429: ApiRequestErrorResponse;
+    429: ApiRequestErrorResponse | ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type UploadNoteImageError = UploadNoteImageErrors[keyof UploadNoteImageErrors];
@@ -2284,7 +3083,11 @@ export type ListNoteCommentsErrors = {
     /**
      * Invalid request
      */
-    400: ApiCommentError;
+    400: ApiCommentError | ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
     /**
      * Comments not readable
      */
@@ -2293,6 +3096,14 @@ export type ListNoteCommentsErrors = {
      * Note not found
      */
     404: ApiCommentError;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type ListNoteCommentsError = ListNoteCommentsErrors[keyof ListNoteCommentsErrors];
@@ -2318,6 +3129,14 @@ export type GetNoteCommentData = {
 
 export type GetNoteCommentErrors = {
     /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
      * Comments not readable
      */
     403: ApiCommentError;
@@ -2325,6 +3144,14 @@ export type GetNoteCommentErrors = {
      * Not found
      */
     404: ApiCommentError;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type GetNoteCommentError = GetNoteCommentErrors[keyof GetNoteCommentErrors];
@@ -2350,6 +3177,14 @@ export type UnresolveNoteCommentData = {
 
 export type UnresolveNoteCommentErrors = {
     /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
      * Comment resolution forbidden
      */
     403: ApiCommentError;
@@ -2361,6 +3196,14 @@ export type UnresolveNoteCommentErrors = {
      * Comment resolution conflict
      */
     409: ApiCommentResolutionConflictError;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type UnresolveNoteCommentError = UnresolveNoteCommentErrors[keyof UnresolveNoteCommentErrors];
@@ -2386,6 +3229,14 @@ export type ResolveNoteCommentData = {
 
 export type ResolveNoteCommentErrors = {
     /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
      * Comment resolution forbidden
      */
     403: ApiCommentError;
@@ -2397,6 +3248,14 @@ export type ResolveNoteCommentErrors = {
      * Comment resolution conflict
      */
     409: ApiCommentResolutionConflictError;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
 };
 
 export type ResolveNoteCommentError = ResolveNoteCommentErrors[keyof ResolveNoteCommentErrors];
@@ -2416,6 +3275,27 @@ export type GetMeData = {
     query?: never;
     url: '/me';
 };
+
+export type GetMeErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
+};
+
+export type GetMeError = GetMeErrors[keyof GetMeErrors];
 
 export type GetMeResponses = {
     /**
@@ -2437,6 +3317,27 @@ export type GetHistoryData = {
     };
     url: '/history';
 };
+
+export type GetHistoryErrors = {
+    /**
+     * Bad Request
+     */
+    400: ApiRequestErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ApiErrorResponse;
+    /**
+     * Rate limit or workspace quota exceeded
+     */
+    429: ApiRateLimitErrorResponse;
+    /**
+     * Internal Server Error
+     */
+    500: ApiServerErrorResponse;
+};
+
+export type GetHistoryError = GetHistoryErrors[keyof GetHistoryErrors];
 
 export type GetHistoryResponses = {
     /**
