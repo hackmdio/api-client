@@ -9069,7 +9069,8 @@
 	},
 	"servers": [
 		{
-			"url": "/"
+			"url": "/v1",
+			"description": "API Server"
 		}
 	],
 	"tags": [

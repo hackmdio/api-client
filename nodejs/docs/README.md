@@ -24,7 +24,10 @@ Existing applications can keep using `API` and its current method signatures.
 ```ts
 import { createClient, getNote } from '@hackmd/api/raw'
 
-const client = createClient({ auth: 'YOUR_ACCESS_TOKEN' })
+const client = createClient({
+  auth: 'YOUR_ACCESS_TOKEN',
+  baseURL: 'https://api.hackmd.io/v1',
+})
 const response = await getNote({ client, path: { noteId: 'NOTE_ID' }, throwOnError: true })
 console.log(response.data.content)
 ```
