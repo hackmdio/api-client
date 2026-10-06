@@ -1,0 +1,2 @@
+patchedDependencies:
+  '@hey-api/openapi-python@0.0.24': patches/@hey-api__openapi-python@0.0.24.patch
