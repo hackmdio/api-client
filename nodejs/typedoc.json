@@ -1,0 +1,35 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "@hackmd/api",
+  "entryPoints": ["src/index.ts", "src/raw.ts"],
+  "tsconfig": "tsconfig.build.json",
+  "readme": "docs/README.md",
+  "out": ".docs-dist",
+  "intentionallyNotExported": [
+    "Client",
+    "RequestFn",
+    "MethodFn",
+    "BuildUrlFn",
+    "SseFn",
+    "Options",
+    "AuthToken",
+    "BodySerializer",
+    "QuerySerializerOptions",
+    "QuerySerializer",
+    "ClientOptions",
+    "Auth",
+    "TDataShape",
+    "OptionReturnType",
+    "UpdateNoteReturnType",
+    "CreateNoteReturnType",
+    "CreateTeamNoteReturnType",
+    "ClientMeta",
+    "StreamEvent"
+  ],
+  "externalSymbolLinkMappings": {
+    "typescript": {
+      "JSON.stringify": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify"
+    }
+  },
+  "treatWarningsAsErrors": true
+}
