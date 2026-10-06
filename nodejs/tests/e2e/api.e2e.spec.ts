@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs'
+import { setTimeout } from 'timers/promises'
 import type { ApiFolderOrder } from '../../src'
 import { API } from '../../src'
 import { HttpResponseError } from '../../src/error'
@@ -212,11 +213,19 @@ describe('HackMD API (live e2e)', () => {
           expect(folder.description).toBe('e2e parent')
 
           const renamed = `e2e-parent-renamed-${Date.now()}`
-          await client.updateFolder(parentFolderId, {
+          const patch = await client.updateFolder(parentFolderId, {
             name: renamed,
             description: 'renamed',
-          })
-          const updated = await client.getFolder(parentFolderId)
+          }, { unwrapData: false })
+          expect(patch.status).toBe(202)
+
+          // 202 accepts the update; folder persistence may finish asynchronously.
+          const deadline = Date.now() + 15_000
+          let updated = await client.getFolder(parentFolderId)
+          while ((updated.name !== renamed || updated.description !== 'renamed') && Date.now() < deadline) {
+            await setTimeout(500)
+            updated = await client.getFolder(parentFolderId)
+          }
           expect(updated.name).toBe(renamed)
           expect(updated.description).toBe('renamed')
 
