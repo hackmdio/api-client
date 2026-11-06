@@ -2,7 +2,7 @@ import { http, HttpResponse } from 'msw'
 
 import { API, CommentPermissionType, NotePermissionRole, NotePublishType, TeamVisibilityType } from '../src'
 import * as generatedSdk from '../src/generated/sdk.gen'
-import { createClient, getMe, operationRegistry } from '../src/raw'
+import { client, createClient, getMe, operationRegistry } from '../src/raw'
 import * as openApiDocument from '../spec/hackmd-openapi.json'
 import { server } from './mock'
 
@@ -102,17 +102,32 @@ describe('generated raw API', () => {
     }
   })
 
+  test('raw operations default to the public API without an explicit client', async () => {
+    expect(client.buildUrl({ url: '/me' })).toBe('https://api.hackmd.io/v1/me')
+    let authorization: string | null = null
+    server.use(http.get('https://api.hackmd.io/v1/me', ({ request }) => {
+      authorization = request.headers.get('authorization')
+      return HttpResponse.json({ id: 'user-id' })
+    }))
+
+    const response = await getMe({ auth: 'test-token', throwOnError: true })
+
+    expect(response.status).toBe(200)
+    expect(response.data).toEqual({ id: 'user-id' })
+    expect(authorization).toBe('Bearer test-token')
+  })
+
   test('supports an authenticated custom Axios client', async () => {
     let authorization: string | null = null
     server.use(
-      http.get('https://api.hackmd.io/v1/me', ({ request }) => {
+      http.get('https://custom.hackmd.test/custom/v1/me', ({ request }) => {
         authorization = request.headers.get('authorization')
         return HttpResponse.json({ id: 'user-id', name: 'Test User' })
       }),
     )
     const client = createClient({
       auth: 'test-token',
-      baseURL: 'https://api.hackmd.io/v1',
+      baseURL: 'https://custom.hackmd.test/custom/v1',
     })
 
     const response = await getMe({ client, throwOnError: true })

@@ -1,5 +1,5 @@
 /** Type-only playground: these functions are not called and send no requests. */
-import type { API, GetUserNote } from '@hackmd/api'
+import type { API, CreateTeamNote, GetUserNote } from '@hackmd/api'
 import type { SingleNote as RawNote } from '@hackmd/api/raw'
 
 async function exploreClient (client: API): Promise<GetUserNote> {
@@ -116,8 +116,18 @@ async function exploreNoteCreation (client: API): Promise<string> {
   const raw = await client.createNote({ title: 'New note' }, { unwrapData: false })
   const rawId = raw.status === 201 ? raw.data.id : raw.data.note.id
   const team = await client.createTeamNote('TEAM_PATH', { title: 'New note' })
-  const teamId = 'note' in team ? team.note.id : team.id
-  return [personalId, rawId, teamId].join(',')
+  const teamId = team.status === 201 ? team.id : team.note.id
+  const etag: string | undefined = team.etag
+  const legacy: CreateTeamNote = team
+  if (team.status === 207) {
+    // @ts-expect-error A partial success keeps the created note under note.
+    team.id
+  }
+  const rawTeam = await client.createTeamNote('TEAM_PATH', { title: 'New note' }, { unwrapData: false })
+  const rawTeamId = rawTeam.status === 201 ? rawTeam.data.id : rawTeam.data.note.id
+  void etag
+  void legacy
+  return [personalId, rawId, teamId, rawTeamId].join(',')
 }
 
 async function exploreProfileAndTeams (client: API): Promise<number> {

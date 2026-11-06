@@ -22,7 +22,6 @@
     "OptionReturnType",
     "UpdateNoteReturnType",
     "CreateNoteReturnType",
-    "CreateTeamNoteReturnType",
     "ClientMeta",
     "StreamEvent"
   ],

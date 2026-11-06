@@ -92,6 +92,8 @@ The client will automatically retry requests that fail with:
 - 429 Too Many Requests errors
 - Network errors
 
+POST, PATCH, and trash restore operations are never retried automatically.
+
 ### Response Data Handling
 
 By default, the client automatically unwraps the response data from the Axios response object. You can control this behavior using the `unwrapData` option:
@@ -103,6 +105,8 @@ const response = await client.getMe({ unwrapData: false })
 // Get only the data (default behavior)
 const data = await client.getMe({ unwrapData: true })
 ```
+
+`createNote` and `createTeamNote` also include `status` and optional `etag` in the unwrapped result. For `status === 207`, the note was created but folder placement failed; use `result.note` and `result.error` rather than retrying creation.
 
 ### ETag Support
 

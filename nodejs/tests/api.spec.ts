@@ -683,7 +683,7 @@ test.each([
   { scope: 'personal', path: '/notes', status: 207, body: { note: { id: 'note-1', title: 'New note' }, error: 'Failed to add note to folder' } },
   { scope: 'team', path: '/teams/test-team/notes', status: 201, body: { id: 'note-1', title: 'New note' } },
   { scope: 'team', path: '/teams/test-team/notes', status: 207, body: { note: { id: 'note-1', title: 'New note' }, error: 'Failed to add note to folder' } },
-])('createNote $scope $status preserves its request and legacy response wrapper', async ({ scope, path, status, body }) => {
+])('createNote $scope $status preserves its request and includes status/etag metadata', async ({ scope, path, status, body }) => {
   const requests: Array<{ body: unknown; authorization: string | null }> = []
   server.use(
     http.post(`https://api.hackmd.io/v1${path}`, async ({ request }) => {
@@ -699,7 +699,9 @@ test.each([
     ? await client.createNote(payload, { unwrapData: false })
     : await client.createTeamNote('test-team', payload, { unwrapData: false })
 
-  expect(result).toEqual(scope === 'personal' ? { ...body, status, etag: 'W/"created"' } : body)
+  expect(result).toEqual({ ...body, status, etag: 'W/"created"' })
+  const note = 'note' in result ? result.note : result
+  expect(note.id).toBe('note-1')
   expect(raw.status).toBe(status)
   expect(raw.data).toEqual(body)
   expect(requests).toEqual([1, 2].map(() => ({

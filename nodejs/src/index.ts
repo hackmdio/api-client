@@ -74,7 +74,6 @@ import {
   GetUserNote,
   GetUserTeams,
   GetTeamNotes,
-  CreateTeamNote,
   SingleNote,
   UpdateNoteOptions,
   GetFolders,
@@ -130,6 +129,9 @@ const defaultOption: RequestOptions = {
   unwrapData: true,
 }
 
+// Restore operations cannot safely replay after the server has changed trash state.
+const noRetry = { __hackmdSkipRetry: true }
+
 type OptionReturnType<Opt, T> = Opt extends { unwrapData: false } ? AxiosResponse<T> : Opt extends { unwrapData: true } ? T : T
 type UpdateNoteReturnType<Opt extends RequestOptions> = Opt extends { unwrapData: false }
   ? AxiosResponse<void> & { status: 202 }
@@ -137,9 +139,6 @@ type UpdateNoteReturnType<Opt extends RequestOptions> = Opt extends { unwrapData
 type CreateNoteReturnType<Opt extends RequestOptions> = Opt extends { unwrapData: false }
   ? CreateNoteRawResult
   : CreateNoteResult
-type CreateTeamNoteReturnType<Opt extends RequestOptions> = Opt extends { unwrapData: false }
-  ? CreateNoteRawResult
-  : CreateTeamNote
 
 export type UpdateNoteResult = { status: 202; etag?: string }
 export type CreateNoteResult =
@@ -269,9 +268,12 @@ export class API {
     axiosInstance.interceptors.response.use(
       response => response,
       async (error: AxiosError) => {
-        const config = error.config as (InternalAxiosRequestConfig & { __hackmdRetryCount?: number }) | undefined
+        const config = error.config as (InternalAxiosRequestConfig & {
+          __hackmdRetryCount?: number;
+          __hackmdSkipRetry?: boolean;
+        }) | undefined
         const retryCount = config?.__hackmdRetryCount ?? 0
-        if (config && retryCount < maxRetries && this.isRetryableError(error)) {
+        if (config && !config.__hackmdSkipRetry && retryCount < maxRetries && this.isRetryableError(error)) {
           const remainingCredits = parseInt(error.response?.headers['x-ratelimit-userremaining'], 10)
 
           if (isNaN(remainingCredits) || remainingCredits > 0) {
@@ -412,13 +414,14 @@ export class API {
     return this.listTeamNotes(teamPath, options)
   }
 
-  async createTeamNote<Opt extends RequestOptions> (teamPath: string, payload: CreateNoteOptions, options = defaultOption as Opt): Promise<CreateTeamNoteReturnType<Opt>> {
+  /** Returns status/etag metadata like createNote; status 207 means the note was created but folder placement failed. */
+  async createTeamNote<Opt extends RequestOptions> (teamPath: string, payload: CreateNoteOptions, options = defaultOption as Opt): Promise<CreateNoteReturnType<Opt>> {
     return this.unwrapData(generatedCreateTeamNote({
       client: this.generatedClient,
       path: { teampath: teamPath },
       body: payload,
       throwOnError: true,
-    }), options.unwrapData) as unknown as CreateTeamNoteReturnType<Opt>
+    }), options.unwrapData, true) as unknown as CreateNoteReturnType<Opt>
   }
 
   async updateTeamNoteContent (teamPath: string, noteId: string, content?: string): Promise<AxiosResponse<unknown> & { status: 202 }> {
@@ -710,6 +713,7 @@ export class API {
 
   async batchRestore<Opt extends RequestOptions> (body: BatchRestoreTrashBody, options = defaultOption as Opt): Promise<OptionReturnType<Opt, TrashBatchOperationResponse>> {
     return this.unwrapData(generatedBatchRestore({
+      ...noRetry,
       client: this.generatedClient,
       body,
       throwOnError: true,
@@ -718,6 +722,7 @@ export class API {
 
   async restoreNote<Opt extends RequestOptions> (noteId: string, options = defaultOption as Opt): Promise<OptionReturnType<Opt, void>> {
     return this.unwrapData(generatedRestoreNote({
+      ...noRetry,
       client: this.generatedClient,
       path: { noteId },
       throwOnError: true,

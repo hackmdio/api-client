@@ -8,7 +8,7 @@ export default defineConfig({
     postProcess: [{ command: 'node', args: ['scripts/generate-operation-registry.mjs'] }],
   },
   plugins: [
-    '@hey-api/client-axios',
+    { name: '@hey-api/client-axios', baseUrl: 'https://api.hackmd.io/v1' },
     '@hey-api/typescript',
     '@hey-api/sdk',
   ],

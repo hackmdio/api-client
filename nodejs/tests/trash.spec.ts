@@ -1,7 +1,8 @@
 import { http, HttpResponse } from 'msw'
+import { AxiosError } from 'axios'
 
 import { API } from '../src'
-import { HttpResponseError } from '../src/error'
+import { HttpResponseError, InternalServerError, TooManyRequestsError } from '../src/error'
 import { server } from './mock'
 
 const trashNote = {
@@ -83,4 +84,45 @@ test('restoreNote uses a custom base URL and authorization', async () => {
   const response = await api.restoreNote('note-1', { unwrapData: false })
   expect(response.status).toBe(204)
   expect(authorization).toBe('Bearer custom-token')
+})
+
+test.each([
+  { name: 'batchRestore', path: '/trash/batch-restore', run: (api: API) => api.batchRestore({ noteIds: ['note-1'] }) },
+  { name: 'restoreNote', path: '/trash/note-1/restore', run: (api: API) => api.restoreNote('note-1') },
+].flatMap(operation => [
+  { ...operation, failure: '503', response: () => HttpResponse.json({}, { status: 503 }), error: InternalServerError },
+  { ...operation, failure: '429', response: () => HttpResponse.json({}, { status: 429 }), error: TooManyRequestsError },
+  { ...operation, failure: 'network', response: () => HttpResponse.error(), error: AxiosError },
+]))('$name does not retry after a $failure failure', async ({ path, run, response, error }) => {
+  let attempts = 0
+  server.use(http.put(`https://custom.hackmd.test/v1${path}`, () => {
+    attempts++
+    // The first request may have restored the notes before its response failed.
+    return attempts === 1 ? response() : HttpResponse.json({ error: 'Note not found' }, { status: 404 })
+  }))
+  const api = new API('test-token', 'https://custom.hackmd.test/v1/', {
+    wrapResponseErrors: true,
+    retryConfig: { maxRetries: 1, baseDelay: 0 },
+  })
+
+  await expect(run(api)).rejects.toBeInstanceOf(error)
+  expect(attempts).toBe(1)
+})
+
+test.each([
+  { name: 'updateFolderOrder', path: '/folders/folder-order', run: (api: API) => api.updateFolderOrder({ order: { root: [] } }) },
+  { name: 'updateTeamFolderOrder', path: '/teams/my-team/folders/folder-order', run: (api: API) => api.updateTeamFolderOrder('my-team', { order: { root: [] } }) },
+])('$name still retries a transient failure', async ({ path, run }) => {
+  let attempts = 0
+  server.use(http.put(`https://api.hackmd.io/v1${path}`, () => {
+    attempts++
+    return attempts === 1 ? HttpResponse.json({}, { status: 503 }) : new HttpResponse(null, { status: 204 })
+  }))
+  const api = new API('test-token', undefined, {
+    wrapResponseErrors: true,
+    retryConfig: { maxRetries: 1, baseDelay: 0 },
+  })
+
+  await run(api)
+  expect(attempts).toBe(2)
 })
