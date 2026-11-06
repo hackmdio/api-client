@@ -27,7 +27,8 @@ export const server = setupServer(
       email: faker.internet.email(),
       userPath: faker.internet.userName(),
       photo: faker.image.avatar(),
-      teams: []
+      teams: [],
+      upgraded: false,
     })
   }),
 )

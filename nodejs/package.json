@@ -17,6 +17,11 @@
       "require": "./dist/index.cjs",
       "types": "./dist/index.d.ts"
     },
+    "./raw": {
+      "import": "./dist/raw.js",
+      "require": "./dist/raw.cjs",
+      "types": "./dist/raw.d.ts"
+    },
     "./dist": {
       "import": "./dist/index.js",
       "require": "./dist/index.cjs",
@@ -26,7 +31,14 @@
   },
   "scripts": {
     "clean": "rimraf dist",
-    "build": "pnpm run clean && rollup -c",
+    "build": "pnpm run clean && rollup -c && pnpm check:node-types",
+    "codegen": "openapi-ts",
+    "check:generated": "node scripts/check-generated.mjs",
+    "check:node-types": "tsc -p tests/types/tsconfig.json",
+    "docs:build": "typedoc",
+    "docs:dev": "pnpm docs:build && serve .docs-dist --listen tcp://127.0.0.1:3000",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "spec:pull": "curl -fsSL https://api.hackmd.io/v1/docs/swagger.json -o spec/hackmd-openapi.json",
     "watch": "pnpm run clean && rollup -c -w",
     "prepublishOnly": "pnpm run build",
     "lint": "eslint src --fix --ext .ts",
@@ -54,12 +66,13 @@
   "packageManager": "pnpm@10.33.2",
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
+    "@hey-api/openapi-ts": "0.98.2",
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-typescript": "^12.1.2",
     "@types/eslint": "^8.21.0",
     "@types/jest": "^29.4.0",
-    "@types/node": "^13.11.1",
+    "@types/node": "^22.15.30",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "dotenv": "^16.0.3",
@@ -68,9 +81,11 @@
     "msw": "^2.7.3",
     "rimraf": "^4.1.2",
     "rollup": "^4.41.1",
-    "ts-jest": "^29.0.5",
+    "serve": "14.2.6",
+    "ts-jest": "^29.4.12",
     "ts-node": "^8.8.2",
-    "typescript": "^4.9.5"
+    "typedoc": "0.28.20",
+    "typescript": "^5.9.2"
   },
   "dependencies": {
     "axios": "^1.8.4",
