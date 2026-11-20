@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs'
+import { setTimeout } from 'timers/promises'
 import type { ApiFolderOrder } from '../../src'
 import { API } from '../../src'
 import { HttpResponseError } from '../../src/error'
@@ -110,6 +111,10 @@ describe('HackMD API (live e2e)', () => {
           tags: ['e2e'],
         })
 
+        if (created.status === 207) {
+          noteId = created.note.id
+          throw new Error(`Note created, but folder placement failed: ${created.error}`)
+        }
         expect(created.id).toEqual(expect.any(String))
         expect(created.title).toBe(title)
         expect(created.tags).toContain('e2e')
@@ -131,11 +136,7 @@ describe('HackMD API (live e2e)', () => {
           tags: ['e2e', 'updated'],
         }, { unwrapData: false })
 
-        expect([200, 202]).toContain(patch.status)
-        const patchedBody = patch.data as { content?: string }
-        if (typeof patchedBody.content === 'string' && patchedBody.content.length > 0) {
-          expect(patchedBody.content).toContain('patched')
-        }
+        expect(patch.status).toBe(202)
 
         const n = await client.getNote(noteId)
         expect(n.title).toBe(title)
@@ -212,11 +213,19 @@ describe('HackMD API (live e2e)', () => {
           expect(folder.description).toBe('e2e parent')
 
           const renamed = `e2e-parent-renamed-${Date.now()}`
-          await client.updateFolder(parentFolderId, {
+          const patch = await client.updateFolder(parentFolderId, {
             name: renamed,
             description: 'renamed',
-          })
-          const updated = await client.getFolder(parentFolderId)
+          }, { unwrapData: false })
+          expect(patch.status).toBe(202)
+
+          // 202 accepts the update; folder persistence may finish asynchronously.
+          const deadline = Date.now() + 15_000
+          let updated = await client.getFolder(parentFolderId)
+          while ((updated.name !== renamed || updated.description !== 'renamed') && Date.now() < deadline) {
+            await setTimeout(500)
+            updated = await client.getFolder(parentFolderId)
+          }
           expect(updated.name).toBe(renamed)
           expect(updated.description).toBe('renamed')
 
