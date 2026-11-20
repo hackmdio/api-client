@@ -1,0 +1,62 @@
+name: Python CI
+
+on:
+  push:
+    branches: [master, develop]
+    paths:
+      - 'python/**'
+      - 'nodejs/spec/hackmd-openapi.json'
+      - '.github/workflows/python-ci.yml'
+  pull_request:
+    paths:
+      - 'python/**'
+      - 'nodejs/spec/hackmd-openapi.json'
+      - '.github/workflows/python-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: python
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.33.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: python/pnpm-lock.yaml
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          version: '0.12.18'
+          python-version: '3.13'
+          working-directory: python
+          cache-dependency-glob: python/uv.lock
+
+      - name: Install generator dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Python dependencies
+        run: uv sync --frozen
+
+      - name: Check generated client
+        run: pnpm check:generated
+
+      - name: Compile Python sources
+        run: uv run --frozen pnpm check
+
+      - name: Run offline tests
+        run: pnpm test

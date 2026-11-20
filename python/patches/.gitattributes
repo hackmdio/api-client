@@ -1,0 +1,2 @@
+# Unified diff context prefixes are significant, including on blank lines.
+*.patch -whitespace
