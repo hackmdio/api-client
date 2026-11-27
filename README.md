@@ -1,8 +1,14 @@
 # HackMD API Clients
 
-This repository contains a set of packages for interacting with the [HackMD API](https://hackmd.io/).
+This repository contains client packages for the [HackMD API](https://hackmd.io/@docs/developer-portal).
 
-## Node.JS
+## Documentation
+
+- [HackMD Developer Portal](https://hackmd.io/@docs/developer-portal): getting started and creating an API token
+- [HackMD API reference](https://api.hackmd.io/v1/docs) (OpenAPI): every endpoint, its parameters and responses. Raw spec: [swagger.json](https://api.hackmd.io/v1/docs/swagger.json)
+- [Node.js client reference](https://hackmdio.github.io/api-client/): methods and types of `@hackmd/api`
+
+## Node.js
 
 See [README](./nodejs)
 
