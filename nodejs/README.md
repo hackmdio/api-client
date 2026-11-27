@@ -1,6 +1,10 @@
 # HackMD Node.js API Client
 
-![npm](https://img.shields.io/npm/v/@hackmd/api)
+[![Version](https://img.shields.io/npm/v/@hackmd/api.svg)](https://www.npmjs.com/package/@hackmd/api)
+[![Downloads/week](https://img.shields.io/npm/dw/@hackmd/api.svg)](https://www.npmjs.com/package/@hackmd/api)
+[![License](https://img.shields.io/npm/l/@hackmd/api.svg)](https://github.com/hackmdio/api-client/blob/develop/LICENSE)
+
+See the [API reference](https://hackmdio.github.io/api-client/) for every method and type.
 
 ## About
 
