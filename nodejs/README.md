@@ -252,6 +252,10 @@ The OpenAPI document is committed at `spec/hackmd-openapi.json`, and generated
 sources are committed under `src/generated` so package builds remain offline and
 deterministic.
 
+The `OpenAPI sync` workflow (`.github/workflows/openapi-sync.yml`) runs these
+steps daily and opens a `chore: sync OpenAPI spec` PR against `develop` when the
+live spec changes. See `AGENTS.md` for how to review it.
+
 ## E2E tests (live API)
 
 Integration tests call a real HackMD API (staging or production). They are **not** run by `pnpm test` or the default CI job.

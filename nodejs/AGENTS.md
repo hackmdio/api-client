@@ -27,3 +27,17 @@ Steps (shown for a minor release, `X.Y.0`):
 7. Ask the maintainer to write release notes for the draft GitHub release and publish it. The workflow leaves it empty.
 
 For a patch or major release, use the same steps with the matching version number.
+
+## OpenAPI spec sync
+
+`.github/workflows/openapi-sync.yml` pulls `https://api.hackmd.io/v1/docs/swagger.json` daily (also on `workflow_dispatch` and `repository_dispatch` type `openapi-updated`). If the spec changed, it regenerates `src/generated`, runs typecheck and build, and opens or updates a `chore: sync OpenAPI spec` PR on branch `chore/openapi-sync` against `develop`. The PR body lists added and removed operations and the `oasdiff breaking` report; the `breaking-api` label marks breaking changes.
+
+Opening the PR uses a GitHub App (variable `OPENAPI_SYNC_APP_ID`, secret `OPENAPI_SYNC_APP_PRIVATE_KEY`) so CI runs on it. Without them the workflow only fails on drift, and the refresh is done by hand with `pnpm spec:pull && pnpm codegen`.
+
+Reviewing a sync PR:
+
+1. `tests/coverage.spec.ts` fails for every new operation until it is wrapped in `src/index.ts` (imported as `generated<OperationId>`) or added to `RAW_ONLY` in that test. Push that change to the sync branch.
+2. Update the README if the high-level `API` changed.
+3. Merge into `develop` (this publishes a beta). For the stable release, added operations are a minor bump and `breaking-api` is a major bump.
+
+Merging a stable release also updates `hackmd-cli`: its Dependabot opens a PR to bump `@hackmd/api`, and its `api` commands read operations from `operationRegistry`.
