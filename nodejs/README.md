@@ -8,9 +8,9 @@ See the [API reference](https://hackmdio.github.io/api-client/) for every method
 
 ## About
 
-This is a Node.js client for the [HackMD API](https://hackmd.io/).
+This is a Node.js client for the [HackMD API](https://hackmd.io/@docs/developer-portal).
 
-You can sign up for an account at [hackmd.io](https://hackmd.io/), and then create access tokens for your projects by following the [HackMD API documentation](https://hackmd.io/@hackmd-api/developer-portal).
+You can sign up for an account at [hackmd.io](https://hackmd.io/), and then create access tokens for your projects by following the [HackMD API documentation](https://hackmd.io/@docs/developer-portal).
 
 For bugs and feature requests, please open an issue or pull request on [GitHub](https://github.com/hackmdio/api-client).
 
