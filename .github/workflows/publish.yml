@@ -18,6 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # tags, to find the previous release
 
       - name: Install pnpm
         uses: pnpm/action-setup@v6
@@ -50,13 +52,18 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "Extracted version: $VERSION"
 
-      - name: Create draft release
+      - name: Create release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # Previous stable tag, skipping beta tags such as v2.8.0-beta.<timestamp>.<sha>
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 --match 'v*' --exclude '*-*' "${GITHUB_REF_NAME}^")
+          echo "Release notes since $PREVIOUS_TAG"
           gh release create "$GITHUB_REF_NAME" \
             --title "Release v${VERSION}" \
-            --draft
+            --generate-notes \
+            --notes-start-tag "$PREVIOUS_TAG" \
+            --latest
 
   publish-prerelease:
     name: Pre-release (develop)
