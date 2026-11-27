@@ -1,0 +1,158 @@
+name: OpenAPI sync
+
+# Pulls the live HackMD v1 OpenAPI spec, regenerates the raw client and opens
+# (or updates) a PR against develop when anything changed.
+#
+# Opening the PR needs a GitHub App so CI runs on it (PRs opened with
+# GITHUB_TOKEN do not trigger other workflows). Configure:
+#   - variable OPENAPI_SYNC_APP_ID
+#   - secret   OPENAPI_SYNC_APP_PRIVATE_KEY
+# Without them the workflow runs in detect-only mode: it fails when the spec has
+# drifted, and a maintainer runs `pnpm spec:pull && pnpm codegen` by hand.
+
+on:
+  schedule:
+    - cron: '0 1 * * *'
+  workflow_dispatch:
+  repository_dispatch:
+    types: [openapi-updated]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: openapi-sync
+  cancel-in-progress: false
+
+env:
+  OASDIFF_VERSION: 1.34.0
+  OASDIFF_SHA256: 7c88e09fd500b231af2819eb21f6fdfc7bcdfe2741d2c1937c59e7b72c8a575a
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: nodejs
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 10.33.2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: nodejs/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Pull live spec
+        id: pull
+        run: |
+          cp spec/hackmd-openapi.json "$RUNNER_TEMP/old.json"
+          pnpm spec:pull
+          if git diff --quiet -- spec; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Spec is up to date."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Regenerate client
+        if: steps.pull.outputs.changed == 'true'
+        run: |
+          pnpm codegen
+          pnpm typecheck
+          pnpm build
+
+      - name: Install oasdiff
+        if: steps.pull.outputs.changed == 'true'
+        working-directory: ${{ runner.temp }}
+        run: |
+          archive="oasdiff_${OASDIFF_VERSION}_linux_amd64.tar.gz"
+          curl -fsSLO "https://github.com/oasdiff/oasdiff/releases/download/v${OASDIFF_VERSION}/${archive}"
+          echo "${OASDIFF_SHA256}  ${archive}" | sha256sum -c -
+          tar -xzf "${archive}" oasdiff
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+
+      - name: Summarize changes
+        if: steps.pull.outputs.changed == 'true'
+        id: summary
+        run: |
+          ops='[.paths[] | to_entries[] | select(.key | IN("get","post","put","patch","delete")) | .value.operationId] | sort | .[]'
+          jq -r "$ops" "$RUNNER_TEMP/old.json" > "$RUNNER_TEMP/old-ops.txt"
+          jq -r "$ops" spec/hackmd-openapi.json > "$RUNNER_TEMP/new-ops.txt"
+          added=$(comm -13 "$RUNNER_TEMP/old-ops.txt" "$RUNNER_TEMP/new-ops.txt" | sed 's/^/- `/; s/$/`/')
+          removed=$(comm -23 "$RUNNER_TEMP/old-ops.txt" "$RUNNER_TEMP/new-ops.txt" | sed 's/^/- `/; s/$/`/')
+          breaking_count=$(oasdiff breaking "$RUNNER_TEMP/old.json" spec/hackmd-openapi.json --format json | jq 'length')
+          breaking=""
+          if [ "$breaking_count" -gt 0 ]; then
+            breaking=$(oasdiff breaking "$RUNNER_TEMP/old.json" spec/hackmd-openapi.json)
+          fi
+
+          if [ -n "$breaking" ]; then
+            echo "labels=openapi-sync,breaking-api" >> "$GITHUB_OUTPUT"
+          else
+            echo "labels=openapi-sync" >> "$GITHUB_OUTPUT"
+          fi
+
+          {
+            echo "Automated sync of \`nodejs/spec/hackmd-openapi.json\` with https://api.hackmd.io/v1/docs/swagger.json, and the regenerated raw client."
+            echo
+            echo "### Added operations"
+            echo "${added:-None}"
+            echo
+            echo "### Removed operations"
+            echo "${removed:-None}"
+            echo
+            echo "### Breaking changes (oasdiff)"
+            if [ -n "$breaking" ]; then
+              echo '```'
+              echo "$breaking"
+              echo '```'
+            else
+              echo "None detected."
+            fi
+            echo
+            echo "### Before merging"
+            echo "- If \`tests/coverage.spec.ts\` fails, wrap each new operation in \`src/index.ts\` or add it to \`RAW_ONLY\`."
+            echo "- Update the README if the high-level \`API\` changed."
+            echo "- Added operations mean a minor release; \`breaking-api\` means a major release."
+          } > "$RUNNER_TEMP/pr-body.md"
+          cat "$RUNNER_TEMP/pr-body.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Create GitHub App token
+        if: steps.pull.outputs.changed == 'true' && vars.OPENAPI_SYNC_APP_ID != ''
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.OPENAPI_SYNC_APP_ID }}
+          private-key: ${{ secrets.OPENAPI_SYNC_APP_PRIVATE_KEY }}
+
+      - name: Open or update sync PR
+        if: steps.app-token.outcome == 'success'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          base: develop
+          branch: chore/openapi-sync
+          delete-branch: true
+          add-paths: |
+            nodejs/spec/hackmd-openapi.json
+            nodejs/src/generated
+          commit-message: 'chore: sync OpenAPI spec'
+          title: 'chore: sync OpenAPI spec'
+          body-path: ${{ runner.temp }}/pr-body.md
+          labels: ${{ steps.summary.outputs.labels }}
+
+      - name: Fail on drift (detect-only mode)
+        if: steps.pull.outputs.changed == 'true' && vars.OPENAPI_SYNC_APP_ID == ''
+        run: |
+          echo "::error::The live OpenAPI spec differs from nodejs/spec/hackmd-openapi.json. Run 'pnpm spec:pull && pnpm codegen' and open a PR, or configure OPENAPI_SYNC_APP_ID to let this workflow open it."
+          exit 1
