@@ -4,7 +4,7 @@
 
 Branches: `develop` is the integration branch, and `master` holds released code. Publishing is done by `.github/workflows/publish.yml`:
 
-- Pushing a `v*` tag builds the package, runs `pnpm publish` to npm `latest` (OIDC trusted publishing) and creates a **draft** GitHub release.
+- Pushing a `v*` tag builds the package, runs `pnpm publish` to npm `latest` (OIDC trusted publishing) and publishes a GitHub release marked latest, with notes generated from the PRs merged since the previous `vX.Y.Z` tag.
 - Every push to `develop` publishes `<version>-beta.<timestamp>.<sha>` to the npm `beta` tag. Nothing needs to be done by hand for this.
 
 Steps (shown for a minor release, `X.Y.0`):
@@ -24,6 +24,6 @@ Steps (shown for a minor release, `X.Y.0`):
    ```
 5. Merge `master` back into `develop` and push, so the bump is on `develop`.
 6. Confirm the "Publish to NPM" run for the tag passed, and that `npm view @hackmd/api dist-tags.latest` shows `X.Y.0`. The registry can take a minute or two to update.
-7. Ask the maintainer to write release notes for the draft GitHub release and publish it. The workflow leaves it empty.
+7. Check the GitHub release for `vX.Y.0`. Its notes are generated automatically; edit them if the release needs highlights or upgrade notes.
 
 For a patch or major release, use the same steps with the matching version number.
